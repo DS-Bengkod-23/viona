@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "skills": {
+    "clean-architecture": {
+      "source": "smithery.ai",
+      "sourceType": "well-known",
+      "computedHash": "b51ca685afe7a5dc98ca5c9665c9c3b3849c727dd2343dff76efa86dc2fa226c"
+    },
+    "livekit-agents": {
+      "source": "livekit/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/livekit-agents/SKILL.md",
+      "computedHash": "373669b9a938ced840f301173e838a0046408acd0397c02c03420cc9b6a8cb42"
+    }
+  }
+}

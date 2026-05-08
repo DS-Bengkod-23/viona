@@ -1,0 +1,208 @@
+version: "3.9"
+
+x-common-env: &common-env
+  LIVEKIT_URL: ${LIVEKIT_URL}
+  LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
+  LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
+  CARTESIA_API_KEY: ${CARTESIA_API_KEY}
+  CARTESIA_VOICE_ID: ${CARTESIA_VOICE_ID:-a167e0f3-df7e-4d52-a9c3-f949145efdab}
+  CARTESIA_MODEL: ${CARTESIA_MODEL:-sonic-multilingual}
+  OLLAMA_BASE_URL: http://ollama:11434/v1
+  OLLAMA_MODEL: ${OLLAMA_MODEL:-gpt-oss:120b-cloud}
+  OLLAMA_API_KEY: ollama
+  QDRANT_URL: http://qdrant:6333
+  QDRANT_COLLECTION: ${QDRANT_COLLECTION:-viona_faq}
+  REDIS_URL: redis://redis:6379/0
+  REDIS_SESSION_TTL: "3600"
+  TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+  TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+  TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-}
+  TWILIO_SIP_TRUNK_SID: ${TWILIO_SIP_TRUNK_SID:-}
+  WHISPER_MODEL_SIZE: ${WHISPER_MODEL_SIZE:-large-v3}
+  WHISPER_LANGUAGE: "id"
+  WHISPER_DEVICE: ${WHISPER_DEVICE:-auto}
+  WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-float16}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  ENVIRONMENT: ${ENVIRONMENT:-production}
+
+services:
+
+  # ── Nginx reverse proxy ─────────────────────────────────────────────────────
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: viona-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      api:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    networks:
+      - viona-net
+    logging:
+      driver: "json-file"
+      options: { max-size: "10m", max-file: "3" }
+
+  # ── Next.js frontend ────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: docker/Dockerfile
+    container_name: viona-frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ""   # empty = same-origin via nginx proxy
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - viona-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options: { max-size: "20m", max-file: "3" }
+
+  # ── FastAPI backend ─────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: docker/Dockerfile
+    container_name: viona-api
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      VIONA_MODE: api
+      API_HOST: "0.0.0.0"
+      API_PORT: "8000"
+      API_SECRET_KEY: ${API_SECRET_KEY:-change-me-in-production}
+    depends_on:
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    networks:
+      - viona-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options: { max-size: "20m", max-file: "5" }
+
+  # ── LiveKit Agent Worker ────────────────────────────────────────────────────
+  livekit-agent:
+    build:
+      context: ./backend
+      dockerfile: docker/Dockerfile
+    container_name: viona-agent
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      VIONA_MODE: agent
+    volumes:
+      - whisper-cache:/app/.cache/whisper
+      - fastembed-cache:/root/.cache/fastembed
+    depends_on:
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    networks:
+      - viona-net
+    logging:
+      driver: "json-file"
+      options: { max-size: "50m", max-file: "5" }
+
+  # ── Ollama LLM inference ────────────────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:0.13.1-rc0
+    container_name: viona-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama-models:/root/.ollama
+    networks:
+      - viona-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    logging:
+      driver: "json-file"
+      options: { max-size: "20m", max-file: "3" }
+
+  # ── Qdrant vector database ──────────────────────────────────────────────────
+  qdrant:
+    image: qdrant/qdrant:v1.15.5
+    container_name: viona-qdrant
+    restart: unless-stopped
+    volumes:
+      - qdrant-data:/qdrant/storage
+    environment:
+      QDRANT__SERVICE__GRPC_PORT: "6334"
+    networks:
+      - viona-net
+    healthcheck:
+      # Qdrant image doesn't ship curl/wget; use bash TCP check instead.
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/6333'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options: { max-size: "10m", max-file: "3" }
+
+  # ── Redis session cache ─────────────────────────────────────────────────────
+  redis:
+    image: redis:7.4-alpine
+    container_name: viona-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --save 60 1000
+    volumes:
+      - redis-data:/data
+    networks:
+      - viona-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options: { max-size: "10m", max-file: "3" }
+
+networks:
+  viona-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+volumes:
+  ollama-models:
+  qdrant-data:
+  redis-data:
+  whisper-cache:
+  fastembed-cache:
