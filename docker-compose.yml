@@ -57,13 +57,19 @@ services:
     restart: unless-stopped
     environment:
       NEXT_PUBLIC_API_URL: ""   # empty = same-origin via nginx proxy
+      # Next.js standalone server binds to $HOSTNAME by default.
+      # In Docker this is the container hostname (e.g. ad2929...), which does NOT
+      # listen on 127.0.0.1 and makes our healthcheck fail with "connection refused".
+      HOSTNAME: "0.0.0.0"
     depends_on:
       api:
         condition: service_healthy
     networks:
       - viona-net
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      # BusyBox wget resolves "localhost" to ::1 first on some images, but the
+      # server may only listen on IPv4. Use 127.0.0.1 to avoid IPv6 mismatch.
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/"]
       interval: 20s
       timeout: 5s
       retries: 5
