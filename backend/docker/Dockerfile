@@ -36,6 +36,9 @@ COPY --from=builder /app /app
 
 RUN chmod +x scripts/start.sh
 
+# Pre-download LiveKit plugin model files (e.g. turn-detector ONNX)
+RUN viona-agent download-files || true
+
 EXPOSE 8000
 
 # VIONA_MODE=api   → FastAPI server

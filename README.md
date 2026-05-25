@@ -1,250 +1,142 @@
-# Viona — Indonesian Voice AI Customer Support
+# Viona — Indonesian Voice AI Customer Support & Voice Assistant
 
-Viona adalah sistem layanan pelanggan berbasis suara yang dibangun di atas [LiveKit Agents](https://docs.livekit.io/agents/) dengan pipeline end-to-end yang sepenuhnya berjalan lokal (self-hosted). AI berbicara Bahasa Indonesia natural layaknya agen call center profesional.
-
----
-
-## Fitur
-
-- **Realtime voice** — latensi rendah via LiveKit WebRTC
-- **STT lokal** — faster-whisper (large-v3) berjalan di GPU/CPU
-- **LLM lokal** — Ollama (`gpt-oss:120b-cloud`) via OpenAI-compatible API
-- **TTS** — Cartesia Sonic Multilingual (suara Indonesia)
-- **VAD** — Silero VAD dengan StreamAdapter
-- **RAG** — Qdrant + bge-m3 (fastembed) untuk knowledge base FAQ
-- **Sesi** — Redis dengan TTL per sesi
-- **Multi-agent** — CustomerSupportAgent → HumanEscalationAgent
-- **Telephony** — Twilio SIP inbound/outbound
-- **Web UI** — Next.js 14 dengan LiveKit React Components
-- **Admin dashboard** — upload FAQ (PDF/teks), statistik sesi
-- **Observability** — Prometheus metrics + structlog JSON
+Viona adalah sistem asisten suara interaktif berbahasa Indonesia yang dirancang untuk kebutuhan call center dan asisten virtual. Viona mendukung **dua mode operasional utama**:
+1. **Mode Offline (Client-Side)**: Berjalan murni di browser menggunakan Web Speech API (tanpa membutuhkan server AI eksternal, sangat cepat dan enteng untuk pengujian UI).
+2. **Mode Online (Server-Side)**: Terhubung ke LiveKit Server dengan pipeline end-to-end (STT Whisper, LLM Ollama, dan TTS Cartesia) untuk produksi dan akurasi tinggi.
 
 ---
 
-## Struktur Proyek
+## 📋 Prasyarat & Persiapan
 
-```
-viona-api/
-├── backend/                        # Python backend (clean architecture)
-│   ├── app/
-│   │   ├── core/                   # Config (pydantic-settings), logging (structlog)
-│   │   ├── domain/                 # Entitas domain: CustomerSessionData, PersonaKey
-│   │   ├── infrastructure/
-│   │   │   ├── metrics/            # Prometheus counters, histograms, gauges
-│   │   │   ├── rag/                # Embeddings (bge-m3), Qdrant retriever, PDF ingester
-│   │   │   ├── session/            # Redis session store (async singleton)
-│   │   │   └── stt/                # FasterWhisperSTT (LiveKit STT plugin)
-│   │   ├── prompts/                # System prompts Bahasa Indonesia
-│   │   ├── telephony/              # SIP transfer handler (Twilio)
-│   │   ├── agents/
-│   │   │   ├── support.py          # CustomerSupportAgent + BaseVionaAgent
-│   │   │   ├── escalation.py       # HumanEscalationAgent
-│   │   │   └── worker.py           # LiveKit worker entrypoint
-│   │   └── api/
-│   │       ├── app.py              # FastAPI app + lifespan
-│   │       ├── deps.py             # FastAPI dependencies
-│   │       └── routes/             # health, token, sessions, ingestion, webhooks
-│   ├── scripts/
-│   │   ├── ingest.py               # CLI bulk ingestion
-│   │   └── start.sh                # Entrypoint (VIONA_MODE=api|agent)
-│   ├── tests/
-│   ├── docker/Dockerfile           # Single image, mode via VIONA_MODE env
-│   └── pyproject.toml
-│
-├── frontend/                       # Next.js 14 frontend
-│   ├── src/
-│   │   ├── app/                    # page.tsx (voice call), admin/page.tsx
-│   │   ├── components/             # VoiceAgent, Transcript, FAQUpload, StatsCard
-│   │   └── lib/api.ts              # API client (token, session, ingest)
-│   └── docker/Dockerfile
-│
-├── docker/
-│   └── nginx/nginx.conf            # Reverse proxy (rate limiting, WebSocket)
-├── docker-compose.yml              # 7 layanan: nginx, frontend, api, agent, ollama, qdrant, redis
-├── Makefile                        # Shortcut commands
-└── .env.example                    # Template environment variables
-```
+Sebelum menjalankan aplikasi, pastikan Anda telah menyiapkan komponen berikut:
+
+1. **Docker & Docker Compose** (Wajib jika ingin menjalankan mode online).
+2. **Node.js v18 atau v20** dan **npm/pnpm** (Wajib untuk menjalankan frontend).
+3. **API Key Cartesia** (Untuk suara TTS Bahasa Indonesia yang natural).
+4. **LiveKit Cloud Credentials** (Atau instalasi LiveKit Server lokal).
+5. **Model Ollama** (Misal `llama3.2:3b` untuk lokal ringan, atau `gpt-oss:120b-cloud` untuk produksi).
 
 ---
 
-## Prasyarat
+## 🛠️ Cara Menjalankan (Running)
 
-- [Docker](https://docs.docker.com/get-docker/) & Docker Compose v2
-- GPU NVIDIA (opsional, direkomendasikan untuk whisper & ollama)
-- Akun [LiveKit Cloud](https://cloud.livekit.io) atau LiveKit self-hosted
-- API key [Cartesia](https://cartesia.ai)
-
----
-
-## Cara Menjalankan
-
-### 1. Salin dan isi konfigurasi
-
+### 1. Konfigurasi Environment
+Salin berkas `.env.example` menjadi `.env` di root direktori proyek:
 ```bash
 cp .env.example .env
 ```
-
-Edit `.env` dan isi nilai berikut:
-
+Buka berkas `.env` dan isi variabel berikut:
 ```env
-# Wajib
-LIVEKIT_URL=wss://your-project.livekit.cloud
-LIVEKIT_API_KEY=APIxxxxxxxx
-LIVEKIT_API_SECRET=xxxxxxxx
-
-CARTESIA_API_KEY=sk_xxxxxxxx
-
-# Opsional (Twilio telephony)
-TWILIO_ACCOUNT_SID=ACxxxxxxxx
-TWILIO_AUTH_TOKEN=xxxxxxxx
-TWILIO_SIP_TRUNK_SID=TKxxxxxxxx
+LIVEKIT_URL=wss://project-anda.livekit.cloud
+LIVEKIT_API_KEY=APIxxxxxxxxx
+LIVEKIT_API_SECRET=xxxxxxxxxxxxxxxxxxxxx
+CARTESIA_API_KEY=sk_xxxxxxxxxxxxxxxxx
 ```
 
-### 2. Jalankan semua layanan
-
+### 2. Menjalankan Semua Layanan (Docker Compose)
+Untuk menjalankan frontend, API, database vektor Qdrant, Redis, Ollama, dan Agent secara bersamaan:
 ```bash
-make up
-# atau
+# Menjalankan kontainer di background
 docker compose up -d
+
+# Memeriksa status kesehatan kontainer
+docker compose ps
 ```
 
-### 3. Pull model Ollama
-
+### 3. Mengunduh Model LLM di Ollama
+Jika Anda menggunakan model Ollama lokal, Anda perlu mengunduhnya setelah container aktif:
 ```bash
-make pull-model
-# atau
-docker compose exec ollama ollama pull gpt-oss:120b-cloud
+docker compose exec ollama ollama pull llama3.2:3b
 ```
 
-### 4. Ingest knowledge base (FAQ)
+### 4. Mengunggah Knowledge Base (RAG Ingestion per Materi & Versi)
+Anda dapat mengunggah file dokumen `.pdf` atau `.txt` yang berisi materi pembelajaran dengan menetapkan parameter `material_id` dan `version` agar AI memberikan jawaban spesifik sesuai materi yang dipilih di UI.
 
-```bash
-# Dari file PDF
-make ingest FILE=docs/faq.pdf
+**Contoh Request via API (POST /ingest/pdf):**
+*   **Endpoint**: `http://localhost/ingest/pdf`
+*   **Body (Form-Data)**:
+    *   `file`: (berkas `.pdf` materi Anda)
+    *   `category`: `lms`
+    *   `material_id`: `matematika` (atau `fisika`, `pemrograman`, `sejarah`)
+    *   `version`: `v1` (atau `v2`, `v3`)
 
-# Dari file teks
-make ingest FILE=docs/faq.txt CATEGORY=faq
-```
-
-### 5. Buka UI
-
-| Layanan | URL |
-|---|---|
-| Web UI (voice call) | http://localhost |
-| Admin dashboard | http://localhost/admin |
-| API docs (dev) | http://localhost/docs |
-| Prometheus metrics | http://localhost/metrics *(internal only)* |
+Dengan memetakan berkas ke materi dan versi tertentu, Viona akan secara dinamis menyaring dokumen yang relevan saat pengguna berinteraksi di browser.
 
 ---
 
-## Perintah Makefile
+## 🗺️ Panduan Modifikasi Komponen Viona
 
-```bash
-make up            # Jalankan semua container
-make down          # Hentikan semua container
-make build         # Build ulang semua image
-make logs          # Lihat log real-time
-make ps            # Status container
+Berikut adalah panduan file mana saja yang perlu Anda edit untuk menyesuaikan STT, TTS, LLM, Pembersihan Kata, dan Prompt.
 
-make shell-api     # Shell ke container API
-make shell-agent   # Shell ke container Agent
+### 🎙️ 1. Mengganti STT (Speech-to-Text)
+Untuk menyesuaikan ukuran model Whisper, akurasi, dan parameter pengenalan suara:
+*   **File Konfigurasi Utama**: `backend/app/agents/worker.py` -> fungsi `_build_stt()`.
+*   **File Implementasi STT**: `backend/app/infrastructure/stt/faster_whisper.py`.
+*   **Konfigurasi di `.env`**:
+    ```env
+    WHISPER_MODEL_SIZE=small  # Ubah ke 'medium' atau 'large-v3' untuk akurasi lebih baik
+    WHISPER_DEVICE=cpu        # Ubah ke 'cuda' jika menggunakan GPU NVIDIA
+    ```
 
-make ingest FILE=path/to/file.pdf [CATEGORY=faq]
-make pull-model [MODEL=gpt-oss:120b-cloud]
-```
+### 🧠 2. Mengganti LLM (Language Model)
+Untuk mengatur kecerdasan, suhu (*temperature*), dan batas token respon:
+*   **File Konfigurasi Utama**: `backend/app/agents/worker.py` -> fungsi `_build_llm()`.
+*   **Konfigurasi di `.env`**:
+    ```env
+    OLLAMA_MODEL=llama3.2:3b  # Model LLM yang digunakan
+    OLLAMA_BASE_URL=http://ollama:11434/v1
+    ```
+*   *Tips*: Naikkan parameter `temperature` ke `0.7` atau `0.8` di fungsi `_build_llm()` untuk respon yang lebih variatif dan alami.
 
----
+### 🔊 3. Mengganti TTS (Text-to-Speech)
+Untuk mengganti jenis suara, kecepatan berbicara, maupun bahasa:
+*   **File Konfigurasi Utama**: `backend/app/agents/worker.py` -> fungsi `_build_tts()`.
+*   **Konfigurasi di `.env`**:
+    ```env
+    CARTESIA_VOICE_ID=a167e0f3-df7e-4d52-a9c3-f949145efdab  # ID Suara Indonesia
+    CARTESIA_MODEL=sonic-multilingual
+    ```
+*   *Tips*: Anda dapat menelusuri suara Indonesia lainnya di [Cartesia Voice Library](https://play.cartesia.ai).
 
-## Variabel Environment
+### 🧹 4. Preprocessing & Pembersihan Kata (Text Cleaner)
+Pembersihan kata sangat penting agar robot tidak mengeja singkatan (seperti *"dgn"* dibaca *"d-g-n"*) dan mengabaikan noise ucapan (seperti *"hmm"* atau *"aaa"*).
 
-Lihat [backend/.env.example](backend/.env.example) untuk daftar lengkap. Variabel utama:
+*   **Mode Offline (Client-Side)**:
+    *   **Lokasi**: `frontend/src/components/voice-assistant/voice-assistant.tsx` -> fungsi `generateResponse()`. Anda dapat menyaring kata kunci teks masukan di sini untuk memetakan jawaban.
+*   **Mode Online (Server-Side/LiveKit)**:
+    *   **Lokasi**: `backend/app/utils/text_cleaner.py` *(silakan buat baru jika belum ada)*.
+    *   Integrasikan pembersihan kata ini di dalam handler event transkrip STT atau sebelum output dikirim ke TTS pada `worker.py` atau `faster_whisper.py`.
 
-| Variabel | Default | Keterangan |
-|---|---|---|
-| `LIVEKIT_URL` | — | WebSocket URL LiveKit server |
-| `LIVEKIT_API_KEY` | — | LiveKit API key |
-| `LIVEKIT_API_SECRET` | — | LiveKit API secret |
-| `CARTESIA_API_KEY` | — | Cartesia TTS API key |
-| `CARTESIA_VOICE_ID` | `a167e0f3-...` | ID suara Indonesia Cartesia |
-| `OLLAMA_MODEL` | `gpt-oss:120b-cloud` | Model LLM Ollama |
-| `OLLAMA_BASE_URL` | `http://ollama:11434/v1` | URL Ollama (internal Docker) |
-| `QDRANT_COLLECTION` | `viona_faq` | Nama koleksi Qdrant |
-| `REDIS_SESSION_TTL` | `3600` | TTL sesi Redis (detik) |
-| `WHISPER_MODEL_SIZE` | `large-v3` | Ukuran model faster-whisper |
-| `WHISPER_DEVICE` | `auto` | `cuda` / `cpu` / `auto` |
-| `ENVIRONMENT` | `production` | `production` menonaktifkan `/docs` |
-| `LOG_LEVEL` | `INFO` | Level log (`DEBUG`, `INFO`, `WARNING`) |
-
----
-
-## Arsitektur
-
-```
-Telepon / Browser
-      │
-      ▼
-  [ Twilio ]          [ Next.js Frontend ]
-      │ SIP                   │ WebRTC (LiveKit JS SDK)
-      ▼                       ▼
-  [ LiveKit Server (Cloud/Self-hosted) ]
-              │
-              ▼ JobContext
-  ┌─────────────────────────────────────┐
-  │         LiveKit Agent Worker        │
-  │                                     │
-  │  VAD (Silero) ──► STT (Whisper)    │
-  │                        │            │
-  │              LLM (Ollama) ◄── RAG  │
-  │                (gpt-oss)    (Qdrant)│
-  │                        │            │
-  │              TTS (Cartesia)         │
-  └─────────────────────────────────────┘
-              │
-              ▼
-      [ Redis Session ]   [ Prometheus ]
-```
-
-**Flow multi-agent:**
-1. `CustomerSupportAgent` menangani percakapan awal
-2. Jika pelanggan perlu bantuan khusus → `escalate_to_human()` → transfer ke `HumanEscalationAgent`
-3. `HumanEscalationAgent` melakukan SIP transfer ke agen manusia via Twilio
+### 💡 5. Prompt Sistem & Persona Viona
+Untuk mengubah gaya bicara, keramahan, dan aturan Call Center Viona:
+*   **Lokasi**: `backend/app/prompts/indonesian.py`.
+*   Ubah variabel `CUSTOMER_SUPPORT_PROMPT` untuk memandu Viona menjawab sebagai agen profesional.
 
 ---
 
-## Development
+## 📂 Struktur Direktori Utama
 
-### Jalankan backend lokal (tanpa Docker)
-
-```bash
-cd backend
-uv sync
-cp .env.example .env  # isi variabel
-
-# API server
-VIONA_MODE=api uv run uvicorn app.api.app:application --reload
-
-# Agent worker (butuh LiveKit + Redis + Qdrant berjalan)
-VIONA_MODE=agent uv run python -m app.agents.worker start
 ```
-
-### Jalankan frontend lokal
-
-```bash
-cd frontend
-npm install
-cp .env.local.example .env.local  # isi NEXT_PUBLIC_API_URL
-npm run dev
-```
-
-### Jalankan tests
-
-```bash
-cd backend
-uv run pytest tests/ -v
+viona/
+├── backend/                        # Kode backend (Python, Clean Architecture)
+│   ├── app/
+│   │   ├── agents/                 # Agent logic (worker.py, support.py)
+│   │   ├── infrastructure/        # STT, TTS, RAG (Qdrant), Session (Redis)
+│   │   ├── prompts/                # System Prompt Bahasa Indonesia
+│   │   └── api/                    # FastAPI endpoints & token generator
+│   └── docker/                     # Dockerfile backend
+│
+├── frontend/                       # Kode frontend Next.js 16
+│   ├── src/
+│   │   ├── app/                    # Entry point aplikasi (page.tsx)
+│   │   ├── components/             # Komponen UI utama & Voice Assistant
+│   │   └── lib/                    # API client helper
+│   └── docker/                     # Dockerfile frontend
+│
+└── docker-compose.yml              # Konfigurasi orkestrasi 7 kontainer utama
 ```
 
 ---
 
-## Lisensi
-
-MIT
+## ⚖️ Lisensi
+Aplikasi ini dilisensikan di bawah [MIT License](LICENSE).

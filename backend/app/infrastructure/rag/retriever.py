@@ -36,13 +36,28 @@ class RAGRetriever:
         self,
         query: str,
         *,
+        material_id: str | None = None,
+        version: str | None = None,
         top_k: int = 4,
         score_threshold: float = 0.60,
     ) -> list[dict]:
+        from qdrant_client.http.models import Filter, FieldCondition, MatchValue
+
         vector = await embed_query(query)
+
+        # Bangun filter pencarian Qdrant
+        conditions = []
+        if material_id:
+            conditions.append(FieldCondition(key="material_id", match=MatchValue(value=material_id)))
+        if version:
+            conditions.append(FieldCondition(key="version", match=MatchValue(value=version)))
+
+        qdrant_filter = Filter(must=conditions) if conditions else None
+
         hits = await self._client.search(
             collection_name=self._collection,
             query_vector=vector,
+            query_filter=qdrant_filter,
             limit=top_k,
             score_threshold=score_threshold,
             with_payload=True,

@@ -1,0 +1,29 @@
+# Jangan kirim folder-folder ini ke Docker build context
+# (mempercepat build dan mencegah build lokal yang lama menimpa hasil build baru di container)
+
+# Build output lokal — WAJIB dikecualikan agar image selalu build ulang dari source
+.next/
+out/
+
+# Dependencies lokal — akan di-install ulang di dalam container
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# Environment files
+.env*.local
+.env.local
+
+# Editor & OS
+.DS_Store
+*.log
+.vscode/
+.idea/
+
+# Testing & coverage
+coverage/
+
+# Docs (tidak dibutuhkan saat build)
+README.md

@@ -55,7 +55,9 @@ class FasterWhisperSTT(STT):
         device: str = "auto",
         compute_type: str = "float16",
         beam_size: int = 5,
-        vad_filter: bool = True,
+        # Silero VAD + StreamAdapter already send speech-only chunks; whisper's
+        # built-in VAD often drops those clips → empty transcripts / no LLM input.
+        vad_filter: bool = False,
         num_workers: int = 1,
     ) -> None:
         super().__init__(capabilities=STTCapabilities(streaming=False, interim_results=False))
@@ -108,25 +110,42 @@ class FasterWhisperSTT(STT):
                 alternatives=[SpeechData(language=lang, text="")],
             )
 
-        t0 = time.perf_counter()
-        loop = asyncio.get_running_loop()
-        segments_gen, info = await loop.run_in_executor(
-            self._executor,
-            lambda: model.transcribe(
+        def _transcribe():
+            segs, res_info = model.transcribe(
                 audio,
                 language=lang,
                 beam_size=self._beam_size,
                 vad_filter=self._vad_filter,
                 word_timestamps=False,
-            ),
-        )
-        segments = list(segments_gen)
+            )
+            # Evaluate generator inside thread to prevent blocking event loop
+            return list(segs), res_info
+
+        t0 = time.perf_counter()
+        loop = asyncio.get_running_loop()
+        segments, info = await loop.run_in_executor(self._executor, _transcribe)
         elapsed = time.perf_counter() - t0
 
         text = " ".join(seg.text for seg in segments).strip()
         confidence = float(np.exp(np.mean([seg.avg_logprob for seg in segments]))) if segments else 0.0
 
-        logger.debug("transcription done", lang=info.language, elapsed=round(elapsed, 3), preview=text[:80])
+        dur_s = float(audio.size / _TARGET_RATE) if audio.size else 0.0
+        if dur_s >= 0.15 and not text:
+            logger.warning(
+                "stt empty transcript on speech-length audio",
+                seconds=round(dur_s, 2),
+                lang=getattr(info, "language", None),
+            )
+        elif text:
+            logger.info(
+                "transcription done",
+                lang=info.language,
+                elapsed=round(elapsed, 3),
+                audio_s=round(dur_s, 2),
+                preview=text[:120],
+            )
+        else:
+            logger.debug("stt no text (short clip)", seconds=round(dur_s, 3))
 
         return SpeechEvent(
             type=SpeechEventType.FINAL_TRANSCRIPT,

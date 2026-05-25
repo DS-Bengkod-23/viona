@@ -1,4 +1,4 @@
-.PHONY: up down build logs ps shell-api shell-agent ingest pull-model
+.PHONY: up down build build-frontend rebuild-frontend logs ps shell-api shell-agent ingest pull-model pull-model-test
 
 # ── Docker Compose shortcuts ───────────────────────────────────────────────────
 up:
@@ -7,11 +7,36 @@ up:
 down:
 	docker compose down
 
+# Build semua service (pakai cache jika tidak ada perubahan)
 build:
+	docker compose build
+
+# Build semua service TANPA cache — paling lambat tapi paling bersih
+build-no-cache:
 	docker compose build --no-cache
+
+# ── Frontend rebuild ───────────────────────────────────────────────────────────
+# Rebuild frontend dengan invalidate cache paksa (gunakan ini jika frontend tidak update)
+rebuild-frontend:
+	docker compose build --build-arg CACHE_BUST=$$(date +%s) frontend
+
+# Rebuild frontend lalu restart container-nya saja
+redeploy-frontend:
+	docker compose build --build-arg CACHE_BUST=$$(date +%s) frontend
+	docker compose up -d --no-deps frontend
 
 logs:
 	docker compose logs -f --tail=100
+
+# Log khusus per service
+logs-agent:
+	docker compose logs -f --tail=100 livekit-agent
+
+logs-api:
+	docker compose logs -f --tail=100 api
+
+logs-frontend:
+	docker compose logs -f --tail=100 frontend
 
 ps:
 	docker compose ps
@@ -29,6 +54,15 @@ ingest:
 	docker compose exec api python -m scripts.ingest $(FILE) --category $(or $(CATEGORY),faq)
 
 # ── Ollama model pull ──────────────────────────────────────────────────────────
-# Usage: make pull-model MODEL=gpt-oss:120b-cloud
+# Pull model ringan untuk testing
+pull-model-test:
+	docker compose exec ollama ollama pull llama3.2:3b
+
+# Pull model produksi
+# Usage: make pull-model [MODEL=gpt-oss:120b-cloud]
 pull-model:
 	docker compose exec ollama ollama pull $(or $(MODEL),gpt-oss:120b-cloud)
+
+# Lihat model Ollama yang sudah terinstall
+list-models:
+	docker compose exec ollama ollama list

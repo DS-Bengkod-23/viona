@@ -1,0 +1,52 @@
+# Node dependencies
+node_modules/
+.npm/
+
+# Next.js build output
+.next/
+out/
+build/
+tsconfig.tsbuildinfo
+
+# Python virtual environment & cache
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment variables (Sensitive API Keys)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+frontend/.env.local
+*.env
+*.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE configurations
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Database & temp media
+*.db
+*.sqlite3
+.tempmediaStorage/
+artifacts/
+Cwd/

@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npx tsc *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(npx shadcn@latest add \"@livekit/agents-ui-agent-audio-visualizer-aura\" --yes)",
+      "Bash(npx shadcn@latest add \"@livekit/agents-ui-agent-audio-visualizer-bar\" --yes)",
+      "Bash(npx shadcn@4.6.0 add \"@livekit/agents-ui-agent-audio-visualizer-aura\" --yes)",
+      "WebFetch(domain:agents-ui.livekit.io)",
+      "WebSearch",
+      "WebFetch(domain:docs.livekit.io)",
+      "WebFetch(domain:github.com)",
+      "Bash(npx shadcn@latest add \"https://livekit.com/ui/r/agents-ui-agent-audio-visualizer-aura.json\" --yes)"
+    ]
+  }
+}

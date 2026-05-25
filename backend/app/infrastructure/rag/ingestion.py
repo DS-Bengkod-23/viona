@@ -49,16 +49,16 @@ class PDFIngester:
     def __init__(self, retriever: RAGRetriever) -> None:
         self._retriever = retriever
 
-    async def ingest_pdf(self, path: Path, *, category: str = "faq") -> int:
+    async def ingest_pdf(self, path: Path, *, category: str = "faq", material_id: str | None = None, version: str | None = None) -> int:
         from pypdf import PdfReader
         reader = PdfReader(str(path))
         text = "\n\n".join(page.extract_text() or "" for page in reader.pages)
-        return await self._ingest(text, source=path.name, category=category)
+        return await self._ingest(text, source=path.name, category=category, material_id=material_id, version=version)
 
-    async def ingest_text(self, text: str, *, source: str = "manual", category: str = "faq") -> int:
-        return await self._ingest(text, source=source, category=category)
+    async def ingest_text(self, text: str, *, source: str = "manual", category: str = "faq", material_id: str | None = None, version: str | None = None) -> int:
+        return await self._ingest(text, source=source, category=category, material_id=material_id, version=version)
 
-    async def _ingest(self, text: str, *, source: str, category: str) -> int:
+    async def _ingest(self, text: str, *, source: str, category: str, material_id: str | None = None, version: str | None = None) -> int:
         chunks = _chunk_text(text)
         if not chunks:
             logger.warning("no chunks extracted", source=source)
@@ -70,10 +70,16 @@ class PDFIngester:
         points: list[dict] = []
         for chunk, vector in zip(chunks, vectors):
             chunk_id = hashlib.sha256(f"{source}:{chunk}".encode()).hexdigest()[:16]
+            payload = {"text": chunk, "source": source, "category": category}
+            if material_id:
+                payload["material_id"] = material_id
+            if version:
+                payload["version"] = version
+
             points.append({
                 "id": str(uuid.UUID(bytes=bytes.fromhex(chunk_id.ljust(32, "0")))),
                 "vector": vector,
-                "payload": {"text": chunk, "source": source, "category": category},
+                "payload": payload,
             })
 
         batch_size = 64
