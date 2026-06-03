@@ -38,9 +38,14 @@ def _chunk_text(text: str, chunk_size: int = _CHUNK_SIZE, overlap: int = _CHUNK_
         chunk = text[start:end].strip()
         if chunk:
             chunks.append(chunk)
-        start = end - overlap
-        if start >= len(text):
+        # Berhenti begitu chunk sudah mencapai akhir teks. (Bug lama: dulu memakai
+        # `start = end - overlap; if start >= len: break` yang TIDAK pernah berhenti
+        # untuk teks pendek—end selalu = len, start selalu < len → infinite loop yang
+        # memblokir event loop.)
+        if end >= len(text):
             break
+        # Jamin maju minimal 1 karakter agar tak pernah macet.
+        start = max(end - overlap, start + 1)
 
     return chunks
 

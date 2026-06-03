@@ -2,35 +2,51 @@ from __future__ import annotations
 
 import asyncio
 
+import httpx
 import structlog
-from qdrant_client import AsyncQdrantClient
-from qdrant_client.http.models import Distance, PointStruct, VectorParams
 
 from app.core.config import settings
-from app.infrastructure.rag.embeddings import EMBEDDING_DIM, embed_query
+from app.infrastructure.rag.embeddings import embed_query, get_embedding_dim
 
 logger = structlog.get_logger(__name__)
 
 
 class RAGRetriever:
-    """Semantic retriever backed by Qdrant + bge-m3 embeddings."""
+    """Semantic retriever backed by Qdrant.
+
+    Memakai REST API Qdrant lewat httpx (bukan library qdrant-client) karena client
+    async qdrant-client tidak stabil di lingkungan ARM/Docker (hang/crash native saat
+    dipakai dari dalam proses uvicorn). REST + httpx sederhana dan andal.
+    """
 
     def __init__(self) -> None:
-        self._client = AsyncQdrantClient(
-            url=settings.qdrant_url,
-            api_key=settings.qdrant_api_key or None,
-            timeout=10,
-        )
+        self._base = settings.qdrant_url.rstrip("/")
         self._collection = settings.qdrant_collection
+        self._headers = {}
+        if settings.qdrant_api_key:
+            self._headers["api-key"] = settings.qdrant_api_key
+        self._timeout = httpx.Timeout(connect=10.0, read=30.0, write=30.0, pool=10.0)
+
+    def _make_client(self) -> httpx.AsyncClient:
+        # Per-panggilan: httpx.AsyncClient terikat ke event loop saat dibuat; reuse
+        # lintas loop (startup vs request uvicorn) menyebabkan hang.
+        return httpx.AsyncClient(base_url=self._base, headers=self._headers, timeout=self._timeout)
 
     async def ensure_collection(self) -> None:
-        if await self._client.collection_exists(self._collection):
-            return
-        await self._client.create_collection(
-            collection_name=self._collection,
-            vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
-        )
-        logger.info("qdrant collection created", collection=self._collection)
+        async with self._make_client() as client:
+            resp = await client.get(f"/collections/{self._collection}")
+            if resp.status_code == 200:
+                return
+            # 404 → belum ada, buat. Status lain → angkat error.
+            if resp.status_code != 404:
+                resp.raise_for_status()
+            dim = await get_embedding_dim()
+            create = await client.put(
+                f"/collections/{self._collection}",
+                json={"vectors": {"size": dim, "distance": "Cosine"}},
+            )
+            create.raise_for_status()
+        logger.info("qdrant collection created", collection=self._collection, dim=dim)
 
     async def search(
         self,
@@ -41,55 +57,62 @@ class RAGRetriever:
         top_k: int = 4,
         score_threshold: float = 0.60,
     ) -> list[dict]:
-        from qdrant_client.http.models import Filter, FieldCondition, MatchValue
-
         vector = await embed_query(query)
 
-        # Bangun filter pencarian Qdrant
         conditions = []
         if material_id:
-            conditions.append(FieldCondition(key="material_id", match=MatchValue(value=material_id)))
+            conditions.append({"key": "material_id", "match": {"value": material_id}})
         if version:
-            conditions.append(FieldCondition(key="version", match=MatchValue(value=version)))
+            conditions.append({"key": "version", "match": {"value": version}})
 
-        qdrant_filter = Filter(must=conditions) if conditions else None
+        body: dict = {
+            "vector": vector,
+            "limit": top_k,
+            "score_threshold": score_threshold,
+            "with_payload": True,
+        }
+        if conditions:
+            body["filter"] = {"must": conditions}
 
-        hits = await self._client.search(
-            collection_name=self._collection,
-            query_vector=vector,
-            query_filter=qdrant_filter,
-            limit=top_k,
-            score_threshold=score_threshold,
-            with_payload=True,
-        )
+        async with self._make_client() as client:
+            resp = await client.post(
+                f"/collections/{self._collection}/points/search", json=body
+            )
+        resp.raise_for_status()
+        hits = resp.json().get("result", [])
 
         results: list[dict] = []
         seen: set[str] = set()
         for hit in hits:
-            text: str = hit.payload.get("text", "")
+            payload = hit.get("payload") or {}
+            text: str = payload.get("text", "")
             if text in seen:
                 continue
             seen.add(text)
             results.append({
-                "id": str(hit.id),
-                "score": round(hit.score, 4),
+                "id": str(hit.get("id")),
+                "score": round(hit.get("score", 0.0), 4),
                 "text": text,
-                "source": hit.payload.get("source", ""),
-                "category": hit.payload.get("category", ""),
+                "source": payload.get("source", ""),
+                "category": payload.get("category", ""),
             })
 
         logger.debug("rag search", query=query[:60], hits=len(results))
         return results
 
     async def upsert(self, points: list[dict]) -> None:
-        structs = [
-            PointStruct(id=p["id"], vector=p["vector"], payload=p["payload"])
-            for p in points
-        ]
-        await self._client.upsert(collection_name=self._collection, points=structs)
+        # points: list of {"id", "vector", "payload"} — format REST Qdrant.
+        async with self._make_client() as client:
+            resp = await client.put(
+                f"/collections/{self._collection}/points",
+                params={"wait": "true"},
+                json={"points": points},
+            )
+        resp.raise_for_status()
 
     async def aclose(self) -> None:
-        await self._client.close()
+        # Tidak ada client persisten — client dibuat & ditutup per-panggilan.
+        return None
 
 
 _retriever: RAGRetriever | None = None

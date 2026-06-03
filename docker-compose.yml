@@ -5,11 +5,14 @@ x-common-env: &common-env
   CARTESIA_API_KEY: ${CARTESIA_API_KEY}
   CARTESIA_VOICE_ID: ${CARTESIA_VOICE_ID:-a167e0f3-df7e-4d52-a9c3-f949145efdab}
   CARTESIA_MODEL: ${CARTESIA_MODEL:-sonic-multilingual}
-  OLLAMA_BASE_URL: http://ollama:11434/v1
+  OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
   OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2:3b}
-  OLLAMA_API_KEY: ollama
+  OLLAMA_API_KEY: ${OLLAMA_API_KEY:-}
   QDRANT_URL: http://qdrant:6333
   QDRANT_COLLECTION: ${QDRANT_COLLECTION:-viona_faq}
+  # Embedding di-offload ke Ollama (lihat embeddings.py). all-minilm = 384-dim,
+  # cocok dengan ukuran vektor collection `viona_faq`.
+  EMBEDDING_MODEL: ${EMBEDDING_MODEL:-all-minilm}
   REDIS_URL: redis://redis:6379/0
   REDIS_SESSION_TTL: "3600"
   TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
@@ -20,7 +23,7 @@ x-common-env: &common-env
   WHISPER_LANGUAGE: "id"
   WHISPER_DEVICE: ${WHISPER_DEVICE:-auto}
   WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-float16}
-  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  LOG_LEVEL: ${LOG_LEVEL:-info}
   ENVIRONMENT: ${ENVIRONMENT:-production}
 
 services:
@@ -99,6 +102,8 @@ services:
         condition: service_healthy
       qdrant:
         condition: service_healthy
+      ollama:
+        condition: service_healthy
     networks:
       - viona-net
     healthcheck:
@@ -106,7 +111,8 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      # Beri waktu lebih: saat boot, model embedding di-pre-load (load dari volume).
+      start_period: 120s
     logging:
       driver: "json-file"
       options: { max-size: "20m", max-file: "5" }
@@ -154,7 +160,9 @@ services:
     networks:
       - viona-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+      # Image ollama/ollama tidak menyertakan curl/wget, jadi pakai binary `ollama`
+      # sendiri. `ollama list` menghubungi server lokal (11434) dan exit 0 bila hidup.
+      test: ["CMD", "ollama", "list"]
       interval: 30s
       timeout: 10s
       retries: 5

@@ -50,3 +50,10 @@ Thumbs.db
 .tempmediaStorage/
 artifacts/
 Cwd/
+
+# Catatan internal / dokumentasi kerja (tidak di-commit)
+misc/
+
+# md
+CLAUDE.md
+CLINE.md

@@ -24,10 +24,22 @@ class Settings(BaseSettings):
     cartesia_voice_id: str = Field(default="a167e0f3-df7e-4d52-a9c3-f949145efdab")
     cartesia_model: str = Field(default="sonic-multilingual")
 
+    # VoxCPM2 TTS (local)
+    voxcpm2_enabled: bool = Field(default=False)
+    voxcpm2_model_name: str = Field(default="suno/bark")
+    voxcpm2_device: str = Field(default="cuda")
+    voxcpm2_voice_preset: str | None = Field(default=None)
+
     # Ollama LLM
-    ollama_base_url: str = Field(default="http://ollama:11434/v1")
-    ollama_model: str = Field(default="gpt-oss:120b-cloud")
+    ollama_base_url: str = Field(default="http://ollama:11434")
+    ollama_model: str = Field(default="llama3.2:3b")
     ollama_api_key: str = Field(default="ollama")
+
+    # Embedding (di-offload ke Ollama; all-minilm = 384-dim, cocok collection Qdrant)
+    embedding_model: str = Field(default="all-minilm")
+    # Dimensi vektor embedding. Biarkan None agar terdeteksi otomatis dari Ollama saat
+    # startup (portabel lintas model). Set angka (mis. 768) untuk override eksplisit.
+    embedding_dim: int | None = Field(default=None)
 
     # Qdrant
     qdrant_url: str = Field(default="http://qdrant:6333")

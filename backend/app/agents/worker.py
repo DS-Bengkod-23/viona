@@ -74,13 +74,26 @@ def _build_llm() -> lk_openai.LLM:
     )
 
 
-def _build_tts() -> cartesia.TTS:
-    """Bangun Cartesia TTS.
+def _build_tts():
+    """Bangun TTS (Text-to-Speech).
 
-    Voice ID default: a167e0f3-df7e-4d52-a9c3-f949145efdab (suara wanita Indonesia).
-    Ganti CARTESIA_VOICE_ID di .env untuk suara berbeda.
-    Lihat katalog: https://play.cartesia.ai
+    Jika VOXCPM2_ENABLED=true, gunakan VoxCPM2 local TTS.
+    Jika tidak, fallback ke Cartesia cloud TTS.
+
+    VoxCPM2: Model TTS open-source yang berjalan secara lokal.
+    Cartesia: Cloud TTS dengan suara Indonesia yang sudah dioptimalkan.
     """
+    from app.infrastructure.tts.voxcpml2 import VoxCPML2TTS
+
+    if settings.voxcpm2_enabled:
+        logger.info("using VoxCPM2 TTS", model=settings.voxcpm2_model_name, device=settings.voxcpm2_device)
+        return VoxCPML2TTS(
+            model_name=settings.voxcpm2_model_name,
+            device=settings.voxcpm2_device,
+            voice_preset=settings.voxcpm2_voice_preset,
+        )
+
+    logger.info("using Cartesia TTS", voice_id=settings.cartesia_voice_id)
     return cartesia.TTS(
         model=settings.cartesia_model,
         voice=settings.cartesia_voice_id,

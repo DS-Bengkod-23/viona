@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
@@ -20,8 +21,27 @@ logger = structlog.get_logger(__name__)
 
 @asynccontextmanager
 async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
+    logger.info("initializing services...")
     await get_session_store()
-    await get_rag_retriever()
+
+    # Embedding di-offload ke Ollama (HTTP). Warm-up ringan: satu panggilan embed
+    # untuk memastikan model `all-minilm` di Ollama responsif. Tidak memblokir/OOM
+    # karena inferensi terjadi di container Ollama, bukan in-process.
+    try:
+        from app.infrastructure.rag.embeddings import embed_query, init_embedding_model
+        init_embedding_model()
+        await asyncio.wait_for(embed_query("warmup"), timeout=30)
+        logger.info("embedding backend ready")
+    except Exception as e:
+        logger.warning("embedding warm-up failed", error=str(e))
+
+    # Inisialisasi retriever (memastikan koleksi Qdrant ada) sekali saat startup.
+    try:
+        await asyncio.wait_for(get_rag_retriever(), timeout=30)
+        logger.info("retriever ready")
+    except Exception as e:
+        logger.warning("retriever init failed", error=str(e))
+
     logger.info("api started", host=settings.api_host, port=settings.api_port)
     yield
     await shutdown_session_store()
