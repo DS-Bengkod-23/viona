@@ -25,8 +25,8 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
     await get_session_store()
 
     # Embedding di-offload ke Ollama (HTTP). Warm-up ringan: satu panggilan embed
-    # untuk memastikan model `all-minilm` di Ollama responsif. Tidak memblokir/OOM
-    # karena inferensi terjadi di container Ollama, bukan in-process.
+    # untuk memastikan model embedding (default: qwen3-embedding:0.6b) di Ollama
+    # responsif. Tidak memblokir/OOM karena inferensi terjadi di container Ollama.
     try:
         from app.infrastructure.rag.embeddings import embed_query, init_embedding_model
         init_embedding_model()

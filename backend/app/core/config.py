@@ -8,7 +8,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(".env", "../.env", "../../.env"),
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
@@ -19,26 +19,23 @@ class Settings(BaseSettings):
     livekit_api_key: str = Field(...)
     livekit_api_secret: str = Field(...)
 
-    # Cartesia TTS
-    cartesia_api_key: str = Field(...)
-    cartesia_voice_id: str = Field(default="a167e0f3-df7e-4d52-a9c3-f949145efdab")
-    cartesia_model: str = Field(default="sonic-multilingual")
-
-    # VoxCPM2 TTS (local)
-    voxcpm2_enabled: bool = Field(default=False)
-    voxcpm2_model_name: str = Field(default="suno/bark")
+    # VoxCPM2 TTS (local, with voice cloning)
+    voxcpm2_enabled: bool = Field(default=True)
+    voxcpm2_model_name: str = Field(default="openbmb/VoxCPM2")
     voxcpm2_device: str = Field(default="cuda")
     voxcpm2_voice_preset: str | None = Field(default=None)
+    voxcpm2_reference_audio: str | None = Field(default=None)
+    voxcpm2_reference_transcript: str | None = Field(default=None)
 
     # Ollama LLM
     ollama_base_url: str = Field(default="http://ollama:11434")
-    ollama_model: str = Field(default="llama3.2:3b")
+    ollama_model: str = Field(default="qwen3.5:cloud")
     ollama_api_key: str = Field(default="ollama")
 
-    # Embedding (di-offload ke Ollama; all-minilm = 384-dim, cocok collection Qdrant)
-    embedding_model: str = Field(default="all-minilm")
+    # Embedding (di-offload ke Ollama; qwen3-embedding:0.6b = 1024-dim)
+    embedding_model: str = Field(default="qwen3-embedding:0.6b")
     # Dimensi vektor embedding. Biarkan None agar terdeteksi otomatis dari Ollama saat
-    # startup (portabel lintas model). Set angka (mis. 768) untuk override eksplisit.
+    # startup (portabel lintas model). Set angka (mis. 1024) untuk override eksplisit.
     embedding_dim: int | None = Field(default=None)
 
     # Qdrant

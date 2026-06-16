@@ -17,8 +17,8 @@ _EMBED_URL = f"{settings.ollama_base_url.rstrip('/')}/api/embed"
 _TIMEOUT = httpx.Timeout(connect=10.0, read=120.0, write=30.0, pool=10.0)
 
 # Fallback dimensi bila override config kosong DAN deteksi runtime gagal.
-# (all-minilm = sentence-transformers/all-MiniLM-L6-v2 = 384-dim.)
-_FALLBACK_EMBEDDING_DIM = 384
+# (qwen3-embedding:0.6b = 1024-dim.)
+_FALLBACK_EMBEDDING_DIM = 1024
 
 # Cache hasil deteksi dimensi (diisi sekali saat pemanggilan pertama).
 _embedding_dim: int | None = None
@@ -56,11 +56,14 @@ def init_embedding_model() -> None:
 async def embed_texts(texts: Sequence[str]) -> list[list[float]]:
     """Embed satu atau banyak teks via Ollama /api/embed."""
     payload = {"model": settings.embedding_model, "input": list(texts)}
+    headers = {}
+    if settings.ollama_api_key:
+        headers["Authorization"] = f"Bearer {settings.ollama_api_key}"
     # Client dibuat per-panggilan (bukan modul-level): httpx.AsyncClient terikat ke
     # event loop saat dibuat; reuse lintas loop (startup vs request uvicorn) bikin hang.
     try:
         async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-            resp = await client.post(_EMBED_URL, json=payload)
+            resp = await client.post(_EMBED_URL, json=payload, headers=headers)
         resp.raise_for_status()
     except httpx.HTTPStatusError as e:
         logger.error("ollama embed http error", status=e.response.status_code, body=e.response.text[:300])

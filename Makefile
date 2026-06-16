@@ -1,4 +1,4 @@
-.PHONY: up down build build-frontend rebuild-frontend logs ps shell-api shell-agent ingest pull-model pull-model-test
+.PHONY: up down build build-frontend rebuild-frontend logs ps shell-api shell-agent ingest pull-model pull-model-test pull-embedding
 
 # ── Docker Compose shortcuts ───────────────────────────────────────────────────
 up:
@@ -58,10 +58,19 @@ ingest:
 pull-model-test:
 	docker compose exec ollama ollama pull llama3.2:3b
 
-# Pull model produksi
-# Usage: make pull-model [MODEL=gpt-oss:120b-cloud]
+# Pull model produksi (default: qwen3.5-cloud)
+# Usage: make pull-model [MODEL=qwen3.5-cloud]
 pull-model:
-	docker compose exec ollama ollama pull $(or $(MODEL),gpt-oss:120b-cloud)
+	docker compose exec ollama ollama pull $(or $(MODEL),qwen3.5-cloud)
+
+# Pull embedding model (qwen3-embedding:0.6b)
+pull-embedding:
+	docker compose exec ollama ollama pull qwen3-embedding:0.6b
+
+# Pull semua model yang dibutuhkan (LLM + embedding) sekaligus
+pull-all:
+	docker compose exec ollama ollama pull $(or $(MODEL),qwen3.5-cloud)
+	docker compose exec ollama ollama pull qwen3-embedding:0.6b
 
 # Lihat model Ollama yang sudah terinstall
 list-models:

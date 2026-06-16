@@ -1,0 +1,9 @@
+{
+  "input_path": "D:\\viona\\backend\\assets\\cloning voxcpm2.wav",
+  "output_path": "D:\\viona\\backend\\assets\\voice_reference_processed.wav",
+  "transcript": "",
+  "duration_s": 6.88,
+  "sample_rate": 24000,
+  "channels": 1,
+  "cloning_mode": "controllable"
+}

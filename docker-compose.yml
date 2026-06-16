@@ -2,17 +2,17 @@ x-common-env: &common-env
   LIVEKIT_URL: ${LIVEKIT_URL}
   LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
   LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
-  CARTESIA_API_KEY: ${CARTESIA_API_KEY}
-  CARTESIA_VOICE_ID: ${CARTESIA_VOICE_ID:-a167e0f3-df7e-4d52-a9c3-f949145efdab}
-  CARTESIA_MODEL: ${CARTESIA_MODEL:-sonic-multilingual}
+  VOXCPM2_ENABLED: ${VOXCPM2_ENABLED:-true}
+  VOXCPM2_MODEL_NAME: ${VOXCPM2_MODEL_NAME:-openbmb/VoxCPM2}
+  VOXCPM2_DEVICE: ${VOXCPM2_DEVICE:-cuda}
+  VOXCPM2_REFERENCE_AUDIO: ${VOXCPM2_REFERENCE_AUDIO:-/app/assets/voice_reference_processed.wav}
   OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
-  OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2:3b}
+  OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3.5-cloud}
   OLLAMA_API_KEY: ${OLLAMA_API_KEY:-}
   QDRANT_URL: http://qdrant:6333
   QDRANT_COLLECTION: ${QDRANT_COLLECTION:-viona_faq}
-  # Embedding di-offload ke Ollama (lihat embeddings.py). all-minilm = 384-dim,
-  # cocok dengan ukuran vektor collection `viona_faq`.
-  EMBEDDING_MODEL: ${EMBEDDING_MODEL:-all-minilm}
+  # Embedding di-offload ke Ollama (lihat embeddings.py). qwen3-embedding:0.6b = 1024-dim.
+  EMBEDDING_MODEL: ${EMBEDDING_MODEL:-qwen3-embedding:0.6b}
   REDIS_URL: redis://redis:6379/0
   REDIS_SESSION_TTL: "3600"
   TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
@@ -155,6 +155,10 @@ services:
     image: ollama/ollama:0.13.1-rc0
     container_name: viona-ollama
     restart: unless-stopped
+    environment:
+      # Inject token ke dalam container ollama agar bisa merutekan ke Ollama Cloud
+      OLLAMA_TOKEN: ${OLLAMA_TOKEN:-${OLLAMA_API_KEY:-}}
+      OLLAMA_API_KEY: ${OLLAMA_API_KEY:-}
     volumes:
       - ollama-models:/root/.ollama
     networks:

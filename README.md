@@ -3,7 +3,7 @@
 Viona adalah platform asisten suara interaktif cerdas berbahasa Indonesia yang dirancang khusus untuk asistensi virtual LMS (Learning Management System) serta layanan bantuan pengguna (customer support). Platform ini memiliki **dua mode operasional utama**:
 
 1. **Mode Offline (Client-Side Fallback)**: Berjalan secara lokal di browser menggunakan Web Speech API bawaan (tanpa membutuhkan server AI backend, berlatensi 0ms, sangat optimal untuk demonstrasi cepat).
-2. **Mode Online (Server-Side RAG + LLM)**: Terhubung ke LiveKit Server dengan pipeline end-to-end yang memproses suara (STT Whisper), kecerdasan (LLM Ollama + RAG Qdrant), dan sintesis ucapan (TTS Cartesia).
+2. **Mode Online (Server-Side RAG + LLM)**: Terhubung ke LiveKit Server dengan pipeline end-to-end yang memproses suara (STT Whisper), kecerdasan (LLM Ollama + RAG Qdrant), dan sintesis ucapan (TTS VoxCPM2 dengan voice cloning).
 
 ---
 
@@ -58,9 +58,10 @@ Berkas `.env` digunakan untuk menghubungkan modul-modul AI, database, server kom
 | **LIVEKIT_URL** | Alamat WebSocket server komunikasi LiveKit. | `wss://your-project.livekit.cloud` |
 | **LIVEKIT_API_KEY** | Kunci API otentikasi LiveKit Cloud. | `APIxxxxxxxxxxxxxxxx` |
 | **LIVEKIT_API_SECRET** | Token rahasia otentikasi LiveKit Cloud. | `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` |
-| **CARTESIA_API_KEY** | Kunci API Cartesia untuk Text-to-Speech (TTS). | `sk_xxxxxxxxxxxxxxxxxxxxxxxxxxxx` |
-| **CARTESIA_VOICE_ID** | ID Karakter Suara Bahasa Indonesia Cartesia. | `a167e0f3-df7e-4d52-a9c3-f949145efdab` |
-| **CARTESIA_MODEL** | Model sintesis suara Cartesia. | `sonic-multilingual` |
+| **VOXCPM2_ENABLED** | Aktifkan TTS VoxCPM2 lokal dengan voice cloning. | `true` |
+| **VOXCPM2_MODEL_NAME** | Nama model VoxCPM2 (HuggingFace / lokal). | `openbmb/VoxCPM2` |
+| **VOXCPM2_DEVICE** | Perangkat komputasi VoxCPM2 (`cpu` / `cuda`). | `cuda` |
+| **VOXCPM2_REFERENCE_AUDIO** | Path audio referensi untuk voice cloning. | `assets/voice_reference_processed.wav` |
 | **OLLAMA_BASE_URL** | Endpoint API LLM Ollama lokal/server. | `http://ollama:11434/v1` |
 | **OLLAMA_MODEL** | Model bahasa besar (LLM) yang digunakan. | `gpt-oss:120b-cloud` / `llama3.2:3b` |
 | **QDRANT_URL** | Alamat database vektor Qdrant. | `http://qdrant:6333` |
@@ -95,16 +96,19 @@ Ia secara otomatis menangani interupsi suara (ketika user memotong pembicaraan b
    ```
 
 2. **Inisialisasi Services bawaan Pipecat**:
-   Pipecat memiliki kelas adaptor bawaan untuk Cartesia, Ollama, dan Whisper. Anda bisa langsung mengimpor dan menggantikan inisialisasi manual:
+   Pipecat memiliki kelas adaptor bawaan untuk Ollama dan Whisper. Untuk TTS, gunakan VoxCPM2 dengan voice cloning:
    ```python
-   from pipecat.services.cartesia import CartesiaTTSService
    from pipecat.services.ollama import OllamaLLMService
    from pipecat.services.whisper import WhisperSTTService
+   from app.infrastructure.tts.voxcpml2 import create_voxcpml2_tts
 
    # Buat instance service langsung
    stt = WhisperSTTService(model="large-v3", language="id")
    llm = OllamaLLMService(model="llama3.2:3b", base_url="http://ollama:11434")
-   tts = CartesiaTTSService(api_key=settings.cartesia_api_key, voice_id="a167e0f3...")
+   tts = create_voxcpml2_tts(
+       model_name="openbmb/VoxCPM2",
+       reference_audio_path="assets/voice_reference_processed.wav",
+   )
    ```
 
 3. **Manajemen Interupsi & VAD**:

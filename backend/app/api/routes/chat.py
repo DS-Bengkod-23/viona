@@ -47,41 +47,55 @@ async def chat_with_viona(body: ChatRequest) -> dict:
 
     context = await _retrieve_context(body.message, body.material_id, body.version)
 
-    system_prompt = (
-        "Anda adalah Viona, asisten virtual LMS yang membantu, ramah, dan berbicara "
-        "dengan bahasa Indonesia yang natural.\n"
-        "Gunakan informasi pada bagian KONTEKS untuk menjawab bila relevan. "
-        "Jika konteks tidak memuat jawabannya, jawab sejujurnya dan sopan tanpa mengarang."
-    )
+    if not context:
+        system_prompt = (
+            "Anda adalah Viona, asisten virtual yang ramah dan berbahasa Indonesia.\n"
+            "Konteks dari database kosong. Silakan jawab pertanyaan pengguna menggunakan "
+            "pengetahuan umum Anda secara ringkas, jujur, dan edukatif."
+        )
+    else:
+        system_prompt = (
+            "Anda adalah Viona, asisten virtual LMS yang membantu, ramah, dan berbicara "
+            "dengan bahasa Indonesia yang natural.\n"
+            "Gunakan informasi pada bagian KONTEKS untuk menjawab bila relevan. "
+            "Jika konteks tidak memuat jawabannya, Anda DIPERBOLEHKAN menggunakan pengetahuan umum Anda "
+            "sendiri untuk menjawab pertanyaan dengan jujur, edukatif, dan sopan."
+        )
 
     context_block = (
         f"KONTEKS:\n{context}\n\n"
         if context
-        else "KONTEKS: (tidak ada dokumen panduan spesifik yang ditemukan)\n\n"
+        else ""
     )
 
-    # Use Ollama native API endpoint. Base URL: http://ollama:11434 (from .env)
-    ollama_url = f"{settings.ollama_base_url}/api/generate"
+    # Gunakan native Ollama API (/api/chat)
+    ollama_url = f"{settings.ollama_base_url.rstrip('/')}/api/chat"
 
     payload = {
         "model": settings.ollama_model,
-        "prompt": f"System: {system_prompt}\n\n{context_block}User: {body.message}\n",
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"{context_block}{body.message}"},
+        ],
         "stream": False,
+        "think": False,
         "options": {
             "temperature": 0.7,
         },
     }
 
-    try:
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            response = await client.post(ollama_url, json=payload)
-            if response.status_code != 200:
-                logger.error("ollama error response", status=response.status_code, body=response.text)
-                raise HTTPException(status_code=502, detail="Error communicating with LLM service")
+    headers = {}
+    if settings.ollama_api_key:
+        headers["Authorization"] = f"Bearer {settings.ollama_api_key}"
 
-            data = response.json()
-            reply = data.get("response", "").strip()
-            return {"response": reply, "status": "ok"}
-    except httpx.RequestError as e:
-        logger.error("ollama request failed", error=str(e))
-        raise HTTPException(status_code=502, detail="LLM service is unreachable")
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        # Tanpa try-except pelindung agar error asli (misal timeout/connection refused)
+        # meledak ke terminal (HTTP 500) dan log dapat terlihat jelas untuk debugging!
+        response = await client.post(ollama_url, json=payload, headers=headers)
+        response.raise_for_status()
+
+        data = response.json()
+        # /api/chat returns {"message": {"role": "assistant", "content": "..."}}
+        msg = data.get("message", {})
+        reply = msg.get("content", "").strip() if isinstance(msg, dict) else ""
+        return {"response": reply, "status": "ok"}

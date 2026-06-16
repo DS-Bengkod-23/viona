@@ -2,17 +2,19 @@
 
 This module provides TTS implementations for voice synthesis.
 Currently supported:
-- Cartesia: Cloud TTS with Indonesian voices
-- VoxCPM2: Local open-source TTS model
+- VoxCPM2: Local open-source TTS model with zero-shot voice cloning
 
 Usage:
-    # Cartesia (cloud)
-    from app.infrastructure.tts.cartesia import create_cartesia_tts
-    tts = create_cartesia_tts(voice_id="...")
-
-    # VoxCPM2 (local)
+    # VoxCPM2 with voice cloning (recommended)
     from app.infrastructure.tts.voxcpml2 import create_voxcpml2_tts
-    tts = create_voxcpml2_tts(model_name="suno/bark")
+    tts = create_voxcpml2_tts(
+        model_name="openbmb/VoxCPM2",
+        reference_audio_path="assets/voice_reference_processed.wav",
+    )
+
+    # VoxCPM2 standard (tanpa cloning)
+    from app.infrastructure.tts.voxcpml2 import create_voxcpml2_tts
+    tts = create_voxcpml2_tts(model_name="openbmb/VoxCPM2")
 """
 from __future__ import annotations
 

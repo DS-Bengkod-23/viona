@@ -7,7 +7,7 @@ import httpx
 import structlog
 from livekit.agents import JobContext, RoomInputOptions, TurnHandlingOptions, WorkerOptions, cli
 from livekit.agents.voice import AgentSession
-from livekit.plugins import cartesia, noise_cancellation
+from livekit.plugins import noise_cancellation
 from livekit.plugins import openai as lk_openai
 from livekit.plugins import silero
 
@@ -29,9 +29,9 @@ def _build_vad() -> silero.VAD:
     # silence yang lebih singkat → perpindahan ke STT lebih cepat setelah bicara.
     return silero.VAD.load(
         min_speech_duration=0.05,
-        min_silence_duration=0.35,
+        min_silence_duration=0.2,
         prefix_padding_duration=0.4,
-        activation_threshold=0.35,
+        activation_threshold=0.1,
     )
 
 
@@ -49,8 +49,8 @@ def _build_stt() -> FasterWhisperSTT:
         language=settings.whisper_language,
         device=settings.whisper_device,
         compute_type=settings.whisper_compute_type,
-        vad_filter=False,
-        beam_size=1,  # naikkan ke 3–5 untuk produksi
+        vad_filter=True,
+        beam_size=1,  # turunkan ke 1 untuk streaming real-time yang lebih responsif
     )
 
 
@@ -61,46 +61,48 @@ def _build_llm() -> lk_openai.LLM:
       OLLAMA_MODEL=llama3.2:3b   (pull: docker compose exec ollama ollama pull llama3.2:3b)
 
     Untuk produksi:
-      OLLAMA_MODEL=gpt-oss:120b-cloud
+      OLLAMA_MODEL=qwen3.5-cloud
     """
-    # Timeout lebih panjang untuk model Ollama yang besar / loading pertama kali
+    # lk_openai.LLM wraps OpenAI SDK → membutuhkan /v1 endpoint.
+    # settings.ollama_base_url sengaja TIDAK menyertakan /v1 agar chat.py dan
+    # embeddings.py yang memakai native Ollama API (/api/generate, /api/embed)
+    # tetap benar. Maka /v1 di-append hanya di sini.
+    openai_compat_url = f"{settings.ollama_base_url.rstrip('/')}/v1"
     return lk_openai.LLM(
         model=settings.ollama_model,
-        base_url=settings.ollama_base_url,
+        base_url=openai_compat_url,
         api_key=settings.ollama_api_key,
         temperature=0.7,           # lebih natural dari 0.5
         max_completion_tokens=256,  # pendek agar TTS cepat merespons
         timeout=httpx.Timeout(connect=30.0, read=180.0, write=60.0, pool=30.0),
+        extra_body={"think": False},
     )
 
 
 def _build_tts():
-    """Bangun TTS (Text-to-Speech).
+    """Bangun TTS (Text-to-Speech) menggunakan VoxCPM2 dengan voice cloning.
 
-    Jika VOXCPM2_ENABLED=true, gunakan VoxCPM2 local TTS.
-    Jika tidak, fallback ke Cartesia cloud TTS.
+    VoxCPM2 mendukung zero-shot voice cloning: cukup berikan referensi audio
+    dan model akan meng-clone timbre suara tersebut tanpa perlu training.
 
-    VoxCPM2: Model TTS open-source yang berjalan secara lokal.
-    Cartesia: Cloud TTS dengan suara Indonesia yang sudah dioptimalkan.
+    Mode cloning:
+    - Controllable: referensi audio saja (kualitas baik)
+    - Ultimate: referensi audio + transcript (fidelitas terbaik)
     """
     from app.infrastructure.tts.voxcpml2 import VoxCPML2TTS
 
-    if settings.voxcpm2_enabled:
-        logger.info("using VoxCPM2 TTS", model=settings.voxcpm2_model_name, device=settings.voxcpm2_device)
-        return VoxCPML2TTS(
-            model_name=settings.voxcpm2_model_name,
-            device=settings.voxcpm2_device,
-            voice_preset=settings.voxcpm2_voice_preset,
-        )
-
-    logger.info("using Cartesia TTS", voice_id=settings.cartesia_voice_id)
-    return cartesia.TTS(
-        model=settings.cartesia_model,
-        voice=settings.cartesia_voice_id,
-        language="id",
-        api_key=settings.cartesia_api_key,
-        encoding="pcm_s16le",
-        sample_rate=24000,
+    logger.info(
+        "using VoxCPM2 TTS with voice cloning",
+        model=settings.voxcpm2_model_name,
+        device=settings.voxcpm2_device,
+        reference_audio=settings.voxcpm2_reference_audio,
+    )
+    return VoxCPML2TTS(
+        model_name=settings.voxcpm2_model_name,
+        device=settings.voxcpm2_device,
+        voice_preset=settings.voxcpm2_voice_preset,
+        reference_audio_path=settings.voxcpm2_reference_audio,
+        reference_transcript=settings.voxcpm2_reference_transcript,
     )
 
 
@@ -130,9 +132,9 @@ async def entrypoint(ctx: JobContext) -> None:
         stt=_build_stt(),
         llm=_build_llm(),
         tts=_build_tts(),
-        # TurnHandlingOptions: gunakan dict nested (lihat docstring)
+        # TurnHandlingOptions: dipercepat agar lebih responsif
         turn_handling=TurnHandlingOptions(
-            endpointing={"min_delay": 0.25, "max_delay": 1.25},
+            endpointing={"min_delay": 0.1, "max_delay": 0.8},
             interruption={"enabled": True},
         ),
     )
