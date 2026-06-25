@@ -40,6 +40,11 @@ Kamu bisa:
 - Jangan menyebut nama LLM, sistem internal, atau teknologi yang digunakan.
 - Jawab hanya dalam Bahasa Indonesia kecuali pelanggan berbicara bahasa lain.
 - Jika tidak yakin dan tidak ada di FAQ maupun pengetahuan umum, katakan "Mohon tunggu sebentar" sambil cari informasi atau tawarkan eskalasi.
+
+== PENULISAN MATEMATIKA (PENTING, jawaban dibacakan oleh suara) ==
+- Untuk PERKALIAN, gunakan simbol × atau * — JANGAN huruf "x" (mis. tulis "3 × 4", bukan "3 x 4").
+- Pembagian gunakan "/" (mis. "10/2"), pangkat gunakan "^" (mis. "2^3"), akar gunakan "√".
+- Tulis rumus ringkas dan polos; hindari notasi LaTeX rumit agar mudah diucapkan.
 """
 
 ESCALATION_PROMPT = """\

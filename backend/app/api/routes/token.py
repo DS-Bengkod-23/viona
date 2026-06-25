@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 
 from fastapi import APIRouter, HTTPException, Query
-from livekit.api import AccessToken, RoomAgentDispatch, RoomConfiguration, VideoGrants
+from livekit.api import AccessToken, VideoGrants
 
 from app.core.config import settings
 
@@ -35,11 +35,6 @@ async def get_token(
                     can_publish=True,
                     can_subscribe=True,
                     can_publish_data=True,
-                )
-            )
-            .with_room_config(
-                RoomConfiguration(
-                    agents=[RoomAgentDispatch(agent_name="viona-customer-support")],
                 )
             )
             .to_jwt()

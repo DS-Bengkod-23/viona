@@ -7,8 +7,9 @@ x-common-env: &common-env
   VOXCPM2_DEVICE: ${VOXCPM2_DEVICE:-cuda}
   VOXCPM2_REFERENCE_AUDIO: ${VOXCPM2_REFERENCE_AUDIO:-/app/assets/voice_reference_processed.wav}
   OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
-  OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3.5-cloud}
+  OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma4:31b-cloud}
   OLLAMA_API_KEY: ${OLLAMA_API_KEY:-}
+  OLLAMA_TOKEN: ${OLLAMA_TOKEN:-}
   QDRANT_URL: http://qdrant:6333
   QDRANT_COLLECTION: ${QDRANT_COLLECTION:-viona_faq}
   # Embedding di-offload ke Ollama (lihat embeddings.py). qwen3-embedding:0.6b = 1024-dim.
@@ -19,7 +20,7 @@ x-common-env: &common-env
   TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
   TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-}
   TWILIO_SIP_TRUNK_SID: ${TWILIO_SIP_TRUNK_SID:-}
-  WHISPER_MODEL_SIZE: ${WHISPER_MODEL_SIZE:-small}
+  WHISPER_MODEL_SIZE: ${WHISPER_MODEL_SIZE:-large-v3}
   WHISPER_LANGUAGE: "id"
   WHISPER_DEVICE: ${WHISPER_DEVICE:-auto}
   WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-float16}
@@ -43,6 +44,8 @@ services:
         condition: service_healthy
       frontend:
         condition: service_healthy
+      livekit-agent:
+        condition: service_started
     networks:
       - viona-net
     logging:
@@ -117,7 +120,7 @@ services:
       driver: "json-file"
       options: { max-size: "20m", max-file: "5" }
 
-  # ── LiveKit Agent Worker ────────────────────────────────────────────────────
+  # ── Pipecat dispatch server (receives LiveKit webhooks, spawns bots) ─────────
   livekit-agent:
     build:
       context: ./backend
@@ -129,7 +132,6 @@ services:
       VIONA_MODE: agent
     volumes:
       - whisper-cache:/app/.cache/whisper
-      - fastembed-cache:/root/.cache/fastembed
     depends_on:
       redis:
         condition: service_healthy
@@ -233,4 +235,3 @@ volumes:
   qdrant-data:
   redis-data:
   whisper-cache:
-  fastembed-cache:

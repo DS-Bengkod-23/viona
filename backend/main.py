@@ -6,7 +6,7 @@ import os
 mode = os.getenv("VIONA_MODE", "api")
 
 if mode == "agent":
-    from app.agents.worker import main
+    from app.agents.server import main
 elif mode == "api":
     from app.api.app import main  # type: ignore[assignment]
 else:

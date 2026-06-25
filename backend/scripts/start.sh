@@ -14,7 +14,8 @@ if [[ "$VIONA_MODE" == "api" ]]; then
         --port "${API_PORT:-8000}" \
         --log-level "$_log_level"
 elif [[ "$VIONA_MODE" == "agent" ]]; then
-    exec python -m app.agents.worker start
+    # Pipecat dispatch server: receives LiveKit webhooks and spawns a bot per room.
+    exec python -m app.agents.server
 else
     echo "Unknown VIONA_MODE=$VIONA_MODE" >&2
     exit 1

@@ -5,12 +5,10 @@ description = "Viona – Indonesian Realtime Voice AI Customer Support (backend)
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
 dependencies = [
-    # LiveKit core
-    "livekit-agents>=1.5.8",
-    "livekit-plugins-silero>=1.5.8",
-    "livekit-plugins-openai>=1.5.8",
-    "livekit-plugins-noise-cancellation>=0.2.5",
-    "livekit-plugins-turn-detector>=1.5.8",
+    # Voice pipeline orchestration (Pipecat) + LiveKit transport/token/SIP
+    "pipecat-ai[livekit,silero]>=1.4.0",
+    "pipecat-ai-flows>=1.3.0",
+    "livekit-api>=1.0.0",
     # TTS – VoxCPM2 voice cloning
     "voxcpm>=0.3.0",
     "soundfile>=0.12.0",
@@ -42,7 +40,7 @@ dependencies = [
 ]
 
 [project.scripts]
-viona-agent  = "app.agents.worker:main"
+viona-agent  = "app.agents.server:main"
 viona-api    = "app.api.app:main"
 viona-ingest = "scripts.ingest:main"
 

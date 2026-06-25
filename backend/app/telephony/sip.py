@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import structlog
-from livekit.agents import JobContext
+from livekit import api
 from livekit.protocol import sip as proto_sip
 
 from app.core.config import settings
@@ -16,29 +16,39 @@ _DEPARTMENT_ROUTES: dict[str, str] = {
 }
 
 
-async def transfer_to_human_agent(
+async def transfer_to_human_by_room(
     *,
-    ctx: JobContext,
+    room_name: str,
     department: str = "umum",
     session_id: str = "",
 ) -> bool:
+    """Transfer the call to a human agent using only the room name.
+
+    Pipecat has no LiveKit ``JobContext``, so we create a short-lived
+    ``LiveKitAPI`` client from settings instead of reusing ``ctx.api``.
+    """
     target_number = _DEPARTMENT_ROUTES.get(department, _DEPARTMENT_ROUTES["umum"])
+    lkapi = api.LiveKitAPI(
+        url=settings.livekit_url,
+        api_key=settings.livekit_api_key,
+        api_secret=settings.livekit_api_secret,
+    )
     try:
         request = proto_sip.CreateSIPParticipantRequest(
             sip_trunk_id=settings.twilio_sip_trunk_sid,
             sip_call_to=target_number,
-            room_name=ctx.room.name,
+            room_name=room_name,
             participant_identity=f"human-agent-{department}",
             participant_name=f"Agen {department.capitalize()}",
             dtmf_digits="",
             play_ringtone=True,
         )
-        await ctx.api.sip.create_sip_participant(request)
+        await lkapi.sip.create_sip_participant(request)
         logger.info(
             "sip transfer initiated",
             department=department,
             target=target_number,
-            room=ctx.room.name,
+            room=room_name,
             session=session_id,
         )
         return True
@@ -50,25 +60,5 @@ async def transfer_to_human_agent(
             session=session_id,
         )
         return False
-
-
-async def make_outbound_call(
-    *,
-    ctx: JobContext,
-    phone_number: str,
-) -> bool:
-    try:
-        request = proto_sip.CreateSIPParticipantRequest(
-            sip_trunk_id=settings.twilio_sip_trunk_sid,
-            sip_call_to=phone_number,
-            room_name=ctx.room.name,
-            participant_identity=f"outbound-{phone_number}",
-            participant_name=phone_number,
-            play_ringtone=True,
-        )
-        await ctx.api.sip.create_sip_participant(request)
-        logger.info("outbound call initiated", target=phone_number, room=ctx.room.name)
-        return True
-    except Exception as exc:
-        logger.error("outbound call failed", target=phone_number, error=str(exc))
-        return False
+    finally:
+        await lkapi.aclose()

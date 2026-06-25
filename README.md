@@ -159,5 +159,11 @@ Ia secara otomatis menangani interupsi suara (ketika user memotong pembicaraan b
 
 ---
 
+## 🧪 Pengujian
+
+Panduan uji lengkap (unit test, health check, end-to-end panggilan, uji TTS LaTeX, escalation/SIP, troubleshooting) ada di **[`docs/TESTING.md`](docs/TESTING.md)** — sudah berformat checklist QA dengan *expected result* per langkah.
+
+---
+
 ## ⚖️ Lisensi
 Aplikasi ini dilisensikan di bawah [MIT License](LICENSE).

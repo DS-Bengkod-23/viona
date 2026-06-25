@@ -29,7 +29,7 @@ class Settings(BaseSettings):
 
     # Ollama LLM
     ollama_base_url: str = Field(default="http://ollama:11434")
-    ollama_model: str = Field(default="qwen3.5:cloud")
+    ollama_model: str = Field(default="gemma4:31b-cloud")
     ollama_api_key: str = Field(default="ollama")
 
     # Embedding (di-offload ke Ollama; qwen3-embedding:0.6b = 1024-dim)
