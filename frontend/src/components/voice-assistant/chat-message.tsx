@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
+import { MathText } from "./math-text"
 
 interface ChatMessageProps {
   role: "user" | "assistant"
@@ -41,7 +42,7 @@ export function ChatMessage({ role, content, timestamp }: ChatMessageProps) {
           {isUser ? "Anda" : "Viona"}
         </p>
 
-        <p className="whitespace-pre-wrap">{content}</p>
+        <MathText content={content} />
 
         {formattedTime && (
           <p className={cn("text-[10px] mt-2 opacity-50", isUser ? "text-right" : "text-left")}>

@@ -14,6 +14,17 @@ import { StatusPanel } from "./status-panel"
 import { SessionTimer } from "./session-timer"
 import { FeedbackWidget } from "./feedback-widget"
 import { cn } from "@/lib/utils"
+import { normalizeForSpeech } from "@/lib/tts-text"
+
+// ── Speech endpointing (browser Web Speech API) ─────────────────────────────
+// The browser gives us words but no reliable "user finished" signal, so we
+// detect end-of-turn ourselves: after the last detected speech, wait
+// SILENCE_MS of quiet before submitting the turn.
+//   • Viona cuts you off mid-sentence?  -> raise SILENCE_MS
+//   • Feels sluggish to respond?        -> lower SILENCE_MS
+const SILENCE_MS = 1400
+// Ignore ultra-short blips (a cough, "eh") so background noise never fires a turn.
+const MIN_CHARS = 2
 
 interface Message {
   id: string
@@ -34,6 +45,8 @@ export function VoiceAssistant() {
   const [textInput, setTextInput] = useState("")
   const [hasCompletedSession, setHasCompletedSession] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [interimText, setInterimText] = useState("")
+  const [sttError, setSttError] = useState("")
 
   const vionaStatus: "idle" | "thinking" | "speaking" | "ready" =
     isBotSpeaking ? "speaking" : isProcessing ? "thinking" : isConnected ? "ready" : "idle"
@@ -56,6 +69,12 @@ export function VoiceAssistant() {
   const synthRef = useRef<SpeechSynthesis | null>(null)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
   const micStreamRef = useRef<MediaStream | null>(null)
+
+  // Turn accumulation + silence timer for our own end-of-turn detection
+  const finalTranscriptRef = useRef("")
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Latest processUserInput, reachable from recognition callbacks without stale closure
+  const processUserInputRef = useRef<(text: string) => void>(() => {})
 
   // Ref mirrors for use inside recognition callbacks (avoids stale closure)
   const isBotSpeakingRef = useRef(false)
@@ -83,22 +102,40 @@ export function VoiceAssistant() {
     }
   }, [isConnected])
 
+  // Cancel a pending end-of-turn countdown
+  const clearSilenceTimer = useCallback(() => {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current)
+      silenceTimerRef.current = null
+    }
+  }, [])
+
   // Stop listening
   const stopListening = useCallback(() => {
+    clearSilenceTimer()
     if (recognitionRef.current) {
       recognitionRef.current.stop()
       recognitionRef.current = null
     }
+    finalTranscriptRef.current = ""
+    setInterimText("")
     setIsRecording(false)
-  }, [])
+  }, [clearSilenceTimer])
 
-  // Start continuous listening
+  // Start continuous listening with our own end-of-turn detection
   const startListening = useCallback(() => {
     if (typeof window === "undefined") return
     if (isBotSpeakingRef.current) return   // never listen while Viona is talking
 
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SpeechRecognitionAPI) return
+    console.info("[STT] startListening — SpeechRecognition available:", !!SpeechRecognitionAPI)
+    if (!SpeechRecognitionAPI) {
+      console.warn("[STT] no SpeechRecognition API in this browser")
+      setSttError(
+        "Browser ini tidak mendukung pengenalan suara. Gunakan Google Chrome atau Microsoft Edge.",
+      )
+      return
+    }
 
     if (recognitionRef.current) {
       recognitionRef.current.stop()
@@ -106,31 +143,90 @@ export function VoiceAssistant() {
 
     const recognition = new SpeechRecognitionAPI()
     recognition.lang = "id-ID"
-    recognition.interimResults = false
-    recognition.continuous = false
+    recognition.interimResults = true   // live partials so we can show + time the turn
+    recognition.continuous = true       // keep the stream open; WE decide when a turn ends
 
-    recognition.onstart = () => setIsRecording(true)
+    finalTranscriptRef.current = ""
+
+    // Fires after SILENCE_MS of no new speech = the user finished their turn.
+    const scheduleEndOfTurn = () => {
+      clearSilenceTimer()
+      silenceTimerRef.current = setTimeout(() => {
+        const text = finalTranscriptRef.current.trim()
+        finalTranscriptRef.current = ""
+        setInterimText("")
+        if (text.length >= MIN_CHARS && !isBotSpeakingRef.current && !isProcessingRef.current) {
+          recognition.stop()   // end this session; onend won't restart while processing
+          processUserInputRef.current(text)
+        }
+      }, SILENCE_MS)
+    }
+
+    recognition.onstart = () => {
+      console.info("[STT] onstart — listening")
+      setIsRecording(true)
+      setSttError("")   // recognition actually started — clear any stale error
+    }
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      // Discard result if bot started speaking in the meantime
       if (isBotSpeakingRef.current || isProcessingRef.current) return
-      const transcript = event.results[0][0].transcript
-      if (transcript.trim()) {
-        processUserInput(transcript)
+      const results = event.results as unknown as ArrayLike<{
+        0: { transcript: string }
+        isFinal: boolean
+      }>
+      const startIdx = (event as unknown as { resultIndex?: number }).resultIndex ?? 0
+      let interim = ""
+      for (let i = startIdx; i < results.length; i++) {
+        const res = results[i]
+        if (res.isFinal) finalTranscriptRef.current += res[0].transcript + " "
+        else interim += res[0].transcript
       }
+      const live = (finalTranscriptRef.current + interim).trim()
+      if (live) console.debug("[STT] heard:", live)
+      setInterimText(live)
+      if (live) scheduleEndOfTurn()   // any speech resets the "finished" countdown
     }
 
     recognition.onend = () => {
       setIsRecording(false)
-      // Use refs — not stale closure values
-      if (isConnectedRef.current && !isMutedRef.current && !isBotSpeakingRef.current) {
-        setTimeout(() => startListening(), 500)
+      // Chrome ends continuous sessions periodically; reopen unless we're mid-turn.
+      if (
+        isConnectedRef.current &&
+        !isMutedRef.current &&
+        !isBotSpeakingRef.current &&
+        !isProcessingRef.current
+      ) {
+        setTimeout(() => startListening(), 300)
       }
     }
 
-    recognition.onerror = () => {
+    recognition.onerror = (event: Event) => {
       setIsRecording(false)
-      if (isConnectedRef.current && !isMutedRef.current && !isBotSpeakingRef.current) {
+      clearSilenceTimer()
+      const err = (event as unknown as { error?: string }).error ?? "unknown"
+      console.warn("[STT] onerror:", err)
+      // Fatal errors: surface a clear, actionable message instead of failing silently.
+      if (err === "network" || err === "service-not-allowed") {
+        setSttError(
+          "Layanan pengenalan suara diblokir oleh browser. Brave & Firefox mematikan Web Speech — buka demo di Google Chrome.",
+        )
+      } else if (err === "not-allowed") {
+        setSttError(
+          "Izin mikrofon ditolak. Klik ikon gembok di address bar → izinkan Microphone, lalu Connect ulang.",
+        )
+      } else if (err === "audio-capture") {
+        setSttError("Mikrofon tidak terdeteksi. Pastikan perangkat mic aktif dan dipilih.")
+      }
+      // 'no-speech' / 'aborted' are benign; just let it restart below.
+      if (
+        isConnectedRef.current &&
+        !isMutedRef.current &&
+        !isBotSpeakingRef.current &&
+        !isProcessingRef.current &&
+        err !== "network" &&
+        err !== "service-not-allowed" &&
+        err !== "not-allowed"
+      ) {
         setTimeout(() => startListening(), 1000)
       }
     }
@@ -142,7 +238,7 @@ export function VoiceAssistant() {
     } catch {
       // Already running
     }
-  }, [])
+  }, [clearSilenceTimer])
 
   // Speak text using TTS
   const speak = useCallback((text: string) => {
@@ -152,7 +248,7 @@ export function VoiceAssistant() {
     stopListening()
     synthRef.current.cancel()
 
-    const utterance = new SpeechSynthesisUtterance(text)
+    const utterance = new SpeechSynthesisUtterance(normalizeForSpeech(text))
     utterance.lang = "id-ID"
     utterance.rate = 0.9
     utterance.pitch = 1
@@ -235,6 +331,11 @@ export function VoiceAssistant() {
     },
     [speak, stopListening, selectedMaterial, selectedVersion]
   )
+
+  // Keep the latest processUserInput reachable from recognition callbacks
+  useEffect(() => {
+    processUserInputRef.current = processUserInput
+  }, [processUserInput])
 
   // Handle connect/disconnect
   const handleConnectionToggle = async () => {
@@ -414,6 +515,11 @@ export function VoiceAssistant() {
                   </div>
                 ) : (
                   <div className="pb-4">
+                    {sttError && (
+                      <div className="mb-4 px-4 py-3 rounded-xl border border-red-400/50 bg-red-500/10 text-red-600 dark:text-red-400 text-sm">
+                        ⚠️ {sttError}
+                      </div>
+                    )}
                     {messages.map((message) => (
                       <ChatMessage
                         key={message.id}
@@ -422,6 +528,14 @@ export function VoiceAssistant() {
                         timestamp={message.timestamp}
                       />
                     ))}
+                    {interimText && !isProcessing && (
+                      <div className="flex w-full mb-4 justify-end">
+                        <div className="max-w-[85%] px-4 py-3 rounded-2xl rounded-br-md text-sm italic bg-primary/50 text-primary-foreground shadow-sm">
+                          {interimText}
+                          <span className="ml-1 animate-pulse">…</span>
+                        </div>
+                      </div>
+                    )}
                     {isProcessing && (
                       <div className="flex justify-start mb-4">
                         <div className="bg-white dark:bg-white/10 border border-border px-4 py-3 rounded-2xl rounded-bl-md shadow-sm">
