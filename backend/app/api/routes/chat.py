@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from time import perf_counter
+
 import httpx
 import structlog
 from fastapi import APIRouter, HTTPException
@@ -45,7 +47,9 @@ async def chat_with_viona(body: ChatRequest) -> dict:
     if not body.message.strip():
         raise HTTPException(status_code=400, detail="Message must not be empty")
 
+    t_rag = perf_counter()
     context = await _retrieve_context(body.message, body.material_id, body.version)
+    rag_ms = (perf_counter() - t_rag) * 1000
 
     if not context:
         system_prompt = (
@@ -58,8 +62,9 @@ async def chat_with_viona(body: ChatRequest) -> dict:
             "Anda adalah Viona, asisten virtual LMS yang membantu, ramah, dan berbicara "
             "dengan bahasa Indonesia yang natural.\n"
             "Gunakan informasi pada bagian KONTEKS untuk menjawab bila relevan. "
-            "Jika konteks tidak memuat jawabannya, Anda DIPERBOLEHKAN menggunakan pengetahuan umum Anda "
-            "sendiri untuk menjawab pertanyaan dengan jujur, edukatif, dan sopan."
+            "Jika konteks tidak memuat jawabannya, Anda DIPERBOLEHKAN menggunakan "
+            "pengetahuan umum Anda sendiri untuk menjawab pertanyaan dengan jujur, "
+            "edukatif, dan sopan."
         )
 
     context_block = (
@@ -88,6 +93,7 @@ async def chat_with_viona(body: ChatRequest) -> dict:
     if settings.ollama_api_key:
         headers["Authorization"] = f"Bearer {settings.ollama_api_key}"
 
+    t_llm = perf_counter()
     async with httpx.AsyncClient(timeout=120.0) as client:
         # Tanpa try-except pelindung agar error asli (misal timeout/connection refused)
         # meledak ke terminal (HTTP 500) dan log dapat terlihat jelas untuk debugging!
@@ -98,4 +104,53 @@ async def chat_with_viona(body: ChatRequest) -> dict:
         # /api/chat returns {"message": {"role": "assistant", "content": "..."}}
         msg = data.get("message", {})
         reply = msg.get("content", "").strip() if isinstance(msg, dict) else ""
-        return {"response": reply, "status": "ok"}
+
+    llm_wall_ms = (perf_counter() - t_llm) * 1000
+
+    # Ollama /api/chat mengembalikan field timing dalam NANODETIK. Ini memisahkan
+    # waktu generasi ASLI (eval_duration) dari pemrosesan prompt & overhead jaringan
+    # (llm_wall_ms). eval_count = jumlah token output → tokens/sec. Lihat docs/TIMING.md.
+    def _ms(ns: int | None) -> float | None:
+        return round(ns / 1e6, 1) if ns else None
+
+    gen_ms = _ms(data.get("eval_duration"))
+    prompt_ms = _ms(data.get("prompt_eval_duration"))
+    total_ms = _ms(data.get("total_duration"))
+    out_tokens = data.get("eval_count")
+    tok_per_s = (
+        round(out_tokens / (data["eval_duration"] / 1e9), 1)
+        if out_tokens and data.get("eval_duration")
+        else None
+    )
+    # Cloud-routed models (e.g. *-cloud) return 0 for eval_duration/prompt_eval_duration,
+    # so gen_ms/prompt_ms/tok_per_s are None. Effective throughput from wall-clock stays
+    # meaningful for both cloud and local. See docs/TIMING.md.
+    eff_tok_per_s = (
+        round(out_tokens / (llm_wall_ms / 1000), 1) if out_tokens and llm_wall_ms else None
+    )
+
+    logger.info(
+        "chat timing",
+        rag_ms=round(rag_ms, 1),
+        llm_wall_ms=round(llm_wall_ms, 1),
+        gen_ms=gen_ms,
+        prompt_ms=prompt_ms,
+        tok_per_s=tok_per_s,
+        eff_tok_per_s=eff_tok_per_s,
+        out_tokens=out_tokens,
+        out_chars=len(reply),
+        has_context=bool(context),
+    )
+    return {
+        "response": reply,
+        "status": "ok",
+        "timings_ms": {
+            "rag": round(rag_ms, 1),
+            "llm_wall": round(llm_wall_ms, 1),
+            "llm_generation": gen_ms,
+            "llm_prompt_eval": prompt_ms,
+            "llm_total": total_ms,
+            "tokens_per_sec": tok_per_s,
+            "eff_tokens_per_sec": eff_tok_per_s,
+        },
+    }

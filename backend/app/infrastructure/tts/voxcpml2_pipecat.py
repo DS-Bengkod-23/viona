@@ -15,6 +15,7 @@ import asyncio
 import json
 from collections.abc import AsyncGenerator
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 import structlog
@@ -141,8 +142,21 @@ class VoxCPML2TTSService(TTSService):
             await self._ensure_model()
             await self.start_tts_usage_metrics(text)
 
+            t0 = perf_counter()
             pcm = await asyncio.to_thread(self._synthesize, text)
+            tts_ms = (perf_counter() - t0) * 1000
             await self.stop_ttfb_metrics()
+
+            # Per-stage latency (task E). audio_ms from PCM length (16-bit mono).
+            audio_ms = (len(pcm) / 2 / VOX_NATIVE_RATE) * 1000
+            logger.info(
+                "tts timing",
+                tts_ms=round(tts_ms, 1),
+                audio_ms=round(audio_ms, 1),
+                rtf=round(tts_ms / audio_ms, 2) if audio_ms else None,
+                chars=len(text),
+                device=self._device,
+            )
 
             # sample_rate is 0 until the pipeline sends a StartFrame; treat an
             # unset/native rate as VoxCPM's native 24 kHz (no resample).

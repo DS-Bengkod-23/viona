@@ -79,6 +79,15 @@ def _build_llm() -> OLLamaLLMService:
 
 
 def _build_tts() -> VoxCPML2TTSService:
+    # VOXCPM2_ENABLED gates the local TTS. It is disabled on dev (CPU/Mac) where
+    # VoxCPM2 can't run; fail loudly with an actionable message instead of a cryptic
+    # torchaudio/CUDA crash at first synthesis. See docs/ENV_PROFILES.md.
+    if not settings.voxcpm2_enabled:
+        raise RuntimeError(
+            "VoxCPM2 TTS is disabled (VOXCPM2_ENABLED=false). The Pipecat voice "
+            "pipeline requires a TTS engine — enable it on a GPU host (prod profile) "
+            "or wire an alternative TTS before spawning a bot."
+        )
     return VoxCPML2TTSService(
         model_name=settings.voxcpm2_model_name,
         device=settings.voxcpm2_device,

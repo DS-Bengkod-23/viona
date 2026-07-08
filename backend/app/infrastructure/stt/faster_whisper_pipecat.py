@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import AsyncGenerator
+from time import perf_counter
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -106,10 +107,22 @@ class FasterWhisperSTTService(SegmentedSTTService):
             )
             return " ".join(seg.text for seg in segments).strip()
 
+        t0 = perf_counter()
         text = await asyncio.to_thread(_transcribe)
+        stt_ms = (perf_counter() - t0) * 1000
 
         await self.stop_processing_metrics()
 
+        # Per-stage latency (task E). Audio segment duration lets us compute RTF.
+        audio_ms = (samples.size / WHISPER_SAMPLE_RATE) * 1000
+        logger.info(
+            "stt timing",
+            stt_ms=round(stt_ms, 1),
+            audio_ms=round(audio_ms, 1),
+            rtf=round(stt_ms / audio_ms, 2) if audio_ms else None,
+            model=self._model_size,
+            chars=len(text),
+        )
         if text:
             logger.info("transcription done", preview=text[:120])
             yield TranscriptionFrame(

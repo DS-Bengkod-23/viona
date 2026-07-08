@@ -20,9 +20,12 @@ class Settings(BaseSettings):
     livekit_api_secret: str = Field(...)
 
     # VoxCPM2 TTS (local, with voice cloning)
+    # NOTE: defaults are DEV-SAFE (CPU). The prod profile opts into GPU explicitly
+    # (voxcpm2_device=cuda). See docs/ENV_PROFILES.md. VoxCPM2 is heavy and needs a
+    # GPU to be usable; dev typically sets voxcpm2_enabled=false.
     voxcpm2_enabled: bool = Field(default=True)
     voxcpm2_model_name: str = Field(default="openbmb/VoxCPM2")
-    voxcpm2_device: str = Field(default="cuda")
+    voxcpm2_device: str = Field(default="cpu")
     voxcpm2_voice_preset: str | None = Field(default=None)
     voxcpm2_reference_audio: str | None = Field(default=None)
     voxcpm2_reference_transcript: str | None = Field(default=None)
@@ -59,10 +62,13 @@ class Settings(BaseSettings):
     twilio_sip_trunk_sid: str = Field(default="")
 
     # Faster-Whisper STT
+    # DEV-SAFE defaults: device=auto (picks CPU when no CUDA), compute_type=int8
+    # (float16 is INVALID on CPU and raises). Prod profile sets device=cuda +
+    # compute_type=float16. See docs/ENV_PROFILES.md.
     whisper_model_size: str = Field(default="large-v3")
     whisper_language: str = Field(default="id")
     whisper_device: str = Field(default="auto")
-    whisper_compute_type: str = Field(default="float16")
+    whisper_compute_type: str = Field(default="int8")
 
     # Observability
     log_level: str = Field(default="INFO")

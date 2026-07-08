@@ -2,9 +2,11 @@ x-common-env: &common-env
   LIVEKIT_URL: ${LIVEKIT_URL}
   LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
   LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
-  VOXCPM2_ENABLED: ${VOXCPM2_ENABLED:-true}
+  # DEV-SAFE fallbacks (used only when the var is unset). Prod sets these via
+  # .env.prod: VOXCPM2_ENABLED=true, VOXCPM2_DEVICE=cuda. See docs/ENV_PROFILES.md.
+  VOXCPM2_ENABLED: ${VOXCPM2_ENABLED:-false}
   VOXCPM2_MODEL_NAME: ${VOXCPM2_MODEL_NAME:-openbmb/VoxCPM2}
-  VOXCPM2_DEVICE: ${VOXCPM2_DEVICE:-cuda}
+  VOXCPM2_DEVICE: ${VOXCPM2_DEVICE:-cpu}
   VOXCPM2_REFERENCE_AUDIO: ${VOXCPM2_REFERENCE_AUDIO:-/app/assets/voice_reference_processed.wav}
   OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
   OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma4:31b-cloud}
@@ -22,8 +24,10 @@ x-common-env: &common-env
   TWILIO_SIP_TRUNK_SID: ${TWILIO_SIP_TRUNK_SID:-}
   WHISPER_MODEL_SIZE: ${WHISPER_MODEL_SIZE:-large-v3}
   WHISPER_LANGUAGE: "id"
+  # DEV-SAFE: auto picks CPU when no CUDA; int8 is valid on CPU (float16 is not).
+  # Prod sets WHISPER_DEVICE=cuda, WHISPER_COMPUTE_TYPE=float16 via .env.prod.
   WHISPER_DEVICE: ${WHISPER_DEVICE:-auto}
-  WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-float16}
+  WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
   LOG_LEVEL: ${LOG_LEVEL:-info}
   ENVIRONMENT: ${ENVIRONMENT:-production}
 
@@ -34,6 +38,10 @@ services:
     image: nginx:1.27-alpine
     container_name: viona-nginx
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128M
     ports:
       - "80:80"
       - "443:443"
@@ -64,6 +72,10 @@ services:
         CACHE_BUST: ${CACHE_BUST:-1}
     container_name: viona-frontend
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 384M
     environment:
       NEXT_PUBLIC_API_URL: ""   # empty = same-origin via nginx proxy
       # Next.js standalone server binds to $HOSTNAME by default.
@@ -94,6 +106,10 @@ services:
       dockerfile: docker/Dockerfile
     container_name: viona-api
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
     environment:
       <<: *common-env
       VIONA_MODE: api
@@ -103,10 +119,10 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-      qdrant:
-        condition: service_healthy
       ollama:
         condition: service_healthy
+      # Qdrant/RAG is optional (parked). Retriever init is best-effort and /chat
+      # degrades gracefully when absent. Enable with `--profile rag`.
     networks:
       - viona-net
     healthcheck:
@@ -127,6 +143,10 @@ services:
       dockerfile: docker/Dockerfile
     container_name: viona-agent
     restart: unless-stopped
+    # NO hard memory limit on purpose: footprint is highly variable — idle in dev
+    # (pipeline never spawns), but loads Whisper large-v3 + VoxCPM2 in prod (GPU).
+    # A wrong cap would OOM-kill the core voice service. Set a prod-tuned limit
+    # (e.g. deploy.resources.limits.memory) once real model RSS is measured (task E/G).
     environment:
       <<: *common-env
       VIONA_MODE: agent
@@ -135,10 +155,9 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-      qdrant:
-        condition: service_healthy
       ollama:
         condition: service_started
+      # Qdrant/RAG optional (parked) — enable with `--profile rag`.
     networks:
       - viona-net
     # Agent HTTP server (metrics/health) berjalan di port 8081
@@ -157,6 +176,12 @@ services:
     image: ollama/ollama:0.13.1-rc0
     container_name: viona-ollama
     restart: unless-stopped
+    # LLM is cloud (gemma4:31b-cloud); this container only routes + runs the local
+    # embedding model. 4G is ample. Raise only if you host a local LLM here.
+    deploy:
+      resources:
+        limits:
+          memory: 4096M
     environment:
       # Inject token ke dalam container ollama agar bisa merutekan ke Ollama Cloud
       OLLAMA_TOKEN: ${OLLAMA_TOKEN:-${OLLAMA_API_KEY:-}}
@@ -178,10 +203,17 @@ services:
       options: { max-size: "20m", max-file: "3" }
 
   # ── Qdrant vector database ──────────────────────────────────────────────────
+  # OPTIONAL: RAG is parked (LMS pivot uses context-injection, not vector search).
+  # Off by default; start with `docker compose --profile rag up`.
   qdrant:
     image: qdrant/qdrant:v1.15.5
     container_name: viona-qdrant
     restart: unless-stopped
+    profiles: ["rag"]
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
     volumes:
       - qdrant-data:/qdrant/storage
     environment:
@@ -204,6 +236,10 @@ services:
     image: redis:7.4-alpine
     container_name: viona-redis
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 768M
     command: >
       redis-server
       --appendonly yes
