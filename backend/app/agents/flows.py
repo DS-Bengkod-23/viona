@@ -1,36 +1,22 @@
 """pipecat-flows definition for the Viona voice agent.
 
-Two nodes mirror the old LiveKit multi-agent setup:
+Single node:
 
-- ``support``    — the default customer-support persona + its tools.
-- ``escalation`` — senior/escalation persona reached when ``escalate_to_human``
-  fires; announces the handoff and exposes the human-transfer tools.
+- ``support`` — the assistant persona + its tools.
 
-The handoff (``escalate_to_human``) returns the escalation node as the next
-node, which is how pipecat-flows performs the transition (replacing the old
-``Agent`` swap via ``PersonaKey.PREV``).
+Note: the customer-service escalation node (human handoff via Twilio SIP) was
+removed with the pivot to the LMS learning-companion domain. The flow may later
+be re-designed to distinguish an "explain" mode vs a strict "quiz" mode.
 """
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-import structlog
 from pipecat_flows import FlowsFunctionSchema, NodeConfig
 
 from app.agents import tools
-from app.infrastructure.metrics.prometheus import escalations_total
-from app.infrastructure.session.store import get_session_store
-from app.prompts.indonesian import (
-    ESCALATION_PROMPT,
-    HUMAN_HANDOFF_ANNOUNCEMENT,
-    build_support_prompt,
-)
-
-if TYPE_CHECKING:
-    from pipecat_flows import FlowManager
-
-logger = structlog.get_logger(__name__)
+from app.prompts.indonesian import build_support_prompt
 
 
 def _fn(
@@ -47,20 +33,6 @@ def _fn(
         required=required or [],
         handler=handler,
     )
-
-
-async def escalate_to_human(args: dict, flow_manager: FlowManager):
-    """Transition support -> escalation node (the multi-agent handoff)."""
-    reason = args.get("reason", "permintaan pelanggan")
-    session = flow_manager.state["session"]
-    session.escalated = True
-    escalations_total.labels(reason=reason).inc()
-    store = await get_session_store()
-    await store.update(
-        session.session_id, {"escalated": True, "escalation_reason": reason}
-    )
-    logger.info("escalating to human", reason=reason, session=session.session_id)
-    return {"status": "escalated", "reason": reason}, create_escalation_node()
 
 
 def create_support_node() -> NodeConfig:
@@ -101,63 +73,6 @@ def create_support_node() -> NodeConfig:
                 tools.save_customer_name,
                 {"name": {"type": "string", "description": "Nama pelanggan."}},
                 ["name"],
-            ),
-            _fn(
-                "file_complaint",
-                "Catat keluhan pelanggan ke sistem.",
-                tools.file_complaint,
-                {
-                    "description": {
-                        "type": "string",
-                        "description": "Deskripsi keluhan pelanggan.",
-                    },
-                    "category": {
-                        "type": "string",
-                        "description": "Kategori: tagihan, produk, pengiriman, umum.",
-                    },
-                },
-                ["description"],
-            ),
-            _fn(
-                "escalate_to_human",
-                "Alihkan percakapan ke agen manusia jika masalah tidak dapat "
-                "diselesaikan AI.",
-                escalate_to_human,
-                {"reason": {"type": "string", "description": "Alasan eskalasi."}},
-            ),
-        ],
-    }
-
-
-def create_escalation_node() -> NodeConfig:
-    return {
-        "name": "escalation",
-        "task_messages": [{"role": "system", "content": ESCALATION_PROMPT}],
-        "pre_actions": [{"type": "tts_say", "text": HUMAN_HANDOFF_ANNOUNCEMENT}],
-        "functions": [
-            _fn(
-                "connect_human_agent",
-                "Sambungkan pelanggan ke agen manusia di departemen yang diminta.",
-                tools.connect_human_agent,
-                {
-                    "department": {
-                        "type": "string",
-                        "description": "umum, teknis, billing, atau senior.",
-                    }
-                },
-            ),
-            _fn(
-                "take_callback_number",
-                "Catat nomor telepon untuk dihubungi kembali jika agen manusia "
-                "tidak tersedia.",
-                tools.take_callback_number,
-                {
-                    "phone_number": {
-                        "type": "string",
-                        "description": "Nomor telepon format internasional.",
-                    }
-                },
-                ["phone_number"],
             ),
         ],
     }

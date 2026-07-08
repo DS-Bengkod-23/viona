@@ -1,4 +1,4 @@
-"""Tests for the Pipecat migration: TTS LaTeX cleaning, RAG tool, handoff."""
+"""Tests for the Pipecat migration: TTS LaTeX cleaning, RAG tool, support node."""
 from __future__ import annotations
 
 import pytest
@@ -15,15 +15,6 @@ class _FakeFlowManager:
 class _FakeRetriever:
     async def search(self, query: str, **_kwargs):
         return [{"text": "Refund diproses dalam 14 hari kerja.", "source": "faq.pdf"}]
-
-
-class _FakeStore:
-    def __init__(self) -> None:
-        self.updates: dict = {}
-
-    async def update(self, session_id: str, updates: dict) -> dict:
-        self.updates.update(updates)
-        return self.updates
 
 
 @pytest.mark.asyncio
@@ -77,31 +68,6 @@ async def test_search_faq_without_retriever():
     assert "tidak tersedia" in result.lower()
 
 
-@pytest.mark.asyncio
-async def test_escalate_transitions_to_escalation_node(monkeypatch):
-    store = _FakeStore()
-
-    async def _fake_get_store():
-        return store
-
-    monkeypatch.setattr(flows, "get_session_store", _fake_get_store)
-
-    session = VionaSession(room_name="room-1")
-    fm = _FakeFlowManager(session)
-
-    result, next_node = await flows.escalate_to_human({"reason": "marah"}, fm)
-
-    assert session.escalated is True
-    assert store.updates.get("escalated") is True
-    assert next_node is not None
-    assert next_node["name"] == "escalation"
-    # The escalation node announces the handoff and exposes transfer tools.
-    assert any(a["type"] == "tts_say" for a in next_node["pre_actions"])
-    fn_names = {f.name for f in next_node["functions"]}
-    assert fn_names == {"connect_human_agent", "take_callback_number"}
-    assert isinstance(result, dict)
-
-
 def test_support_node_has_expected_tools():
     node = flows.create_support_node()
     assert node["name"] == "support"
@@ -110,8 +76,6 @@ def test_support_node_has_expected_tools():
         "search_faq",
         "get_customer_info",
         "save_customer_name",
-        "file_complaint",
-        "escalate_to_human",
     }
 
 
