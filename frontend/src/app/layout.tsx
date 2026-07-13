@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   description: 'Asisten suara virtual untuk layanan pelanggan',
   icons: {
     icon: [
-      { url: '/viona-logo-new.png', type: 'image/png' },
+      { url: '/dashboard/viona-logo-new.png', type: 'image/png' },
     ],
   },
 }
@@ -28,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" suppressHydrationWarning className={`${poppins.variable} ${geistMono.variable}`}>
-      <body className="font-sans antialiased bg-background">
+      <body className="font-sans antialiased bg-transparent">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

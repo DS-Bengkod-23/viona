@@ -1,0 +1,2073 @@
+{
+  "capturedAt": "2026-07-06T04:06:08.621Z",
+  "source": "C:/Users/GF63/Downloads/LMSV3.har",
+  "course": {
+    "id": 5,
+    "title": "Exploratory Data Analysis (EDA)",
+    "platform": "Bengkel Koding"
+  },
+  "sections": [
+    {
+      "id": "welcome",
+      "title": "Welcome!",
+      "items": [
+        {
+          "id": 57
+        },
+        {
+          "id": 65
+        },
+        {
+          "id": 67,
+          "children": [
+            49
+          ]
+        },
+        {
+          "id": 69
+        },
+        {
+          "id": 70
+        }
+      ]
+    },
+    {
+      "id": "what-is-eda",
+      "title": "Apa itu EDA?",
+      "items": [
+        {
+          "id": 202
+        },
+        {
+          "id": 203,
+          "children": [
+            100,
+            102
+          ]
+        },
+        {
+          "id": 204
+        },
+        {
+          "id": 205
+        },
+        {
+          "id": 206,
+          "children": [
+            104,
+            105
+          ]
+        },
+        {
+          "id": 207
+        },
+        {
+          "id": 209
+        }
+      ]
+    },
+    {
+      "id": "univariate",
+      "title": "Analisa Univariate",
+      "items": [
+        {
+          "id": 183
+        },
+        {
+          "id": 184,
+          "children": [
+            75,
+            76,
+            77
+          ]
+        },
+        {
+          "id": 185,
+          "children": [
+            78,
+            79
+          ]
+        },
+        {
+          "id": 186,
+          "children": [
+            80,
+            81,
+            82
+          ]
+        },
+        {
+          "id": 187,
+          "children": [
+            83,
+            84,
+            85
+          ]
+        },
+        {
+          "id": 188
+        },
+        {
+          "id": 189
+        }
+      ]
+    },
+    {
+      "id": "bivariate",
+      "title": "Analisa Bivariat",
+      "items": [
+        {
+          "id": 190
+        },
+        {
+          "id": 191,
+          "children": [
+            86,
+            87,
+            88
+          ]
+        },
+        {
+          "id": 193,
+          "children": [
+            89,
+            90,
+            91
+          ]
+        },
+        {
+          "id": 194,
+          "children": [
+            92,
+            93,
+            94
+          ]
+        },
+        {
+          "id": 195,
+          "children": [
+            95,
+            96,
+            97,
+            98
+          ]
+        },
+        {
+          "id": 196
+        }
+      ]
+    },
+    {
+      "id": "data-quality",
+      "title": "Deteksi Masalah Data",
+      "items": [
+        {
+          "id": 210
+        },
+        {
+          "id": 211,
+          "children": [
+            106,
+            107
+          ]
+        },
+        {
+          "id": 212,
+          "children": [
+            108,
+            109
+          ]
+        },
+        {
+          "id": 213,
+          "children": [
+            110,
+            111
+          ]
+        },
+        {
+          "id": 214,
+          "children": [
+            112,
+            113
+          ]
+        },
+        {
+          "id": 215
+        },
+        {
+          "id": 216,
+          "title": "Kuis",
+          "item_type": "QUIZ",
+          "unavailable": true
+        }
+      ]
+    }
+  ],
+  "items": {
+    "49": {
+      "id": 49,
+      "type": "sub-sub-section",
+      "title": "Assignment",
+      "item_type": "ASSIGNMENT",
+      "sort_order": 1,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "57": {
+      "id": 57,
+      "type": "sub-section",
+      "title": "Pengantar Kursus EDA",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 131,
+          "type": "richtext",
+          "content": "Reading\n\n#### Overview\n\nHalo teman-teman, selamat datang di modul pertama! Pada materi ini, kita akan menyamakan persepsi mengenai apa itu *Exploratory Data Analysis* (EDA). Sebelum masuk ke deretan kode yang rumit, mari pahami terlebih dahulu konsep dasarnya agar proses belajar menjadi lebih terarah. Tujuan kita adalah mencapai pemahaman yang sederhana dan intuitif, namun tetap mengutamakan kedalaman teknis yang esensial.\n\n#### Tujuan Pembelajaran\n\nSetelah mempelajari materi ini, teman-teman diharapkan mampu:\n\n* Menjelaskan definisi umum dari Exploratory Data Analysis (EDA).\n* Mengidentifikasi mengapa eksplorasi data adalah langkah krusial dalam data science.\n\n#### Penjelasan\n\n**Exploratory Data Analysis (EDA)** adalah proses investigasi awal pada sebuah dataset untuk menemukan pola, anomali, menguji hipotesis, dan memeriksa asumsi menggunakan statistik ringkas dan representasi grafis (visualisasi).\n\nSeringkali, data mentah yang kita dapatkan berantakan, memiliki nilai yang kosong (*missing values*), atau format yang tidak konsisten. Jika kita langsung memasukkan data ini ke dalam model algoritma, hasilnya pasti tidak akurat.\n\n##### Perbandingan Kondisi Data\n\n| Aspek | Tanpa Melakukan EDA | Setelah Melakukan EDA |\n| --- | --- | --- |\n| **Kondisi Data** | Penuh *noise*, *missing values*, anomali. | Bersih, terstruktur, siap digunakan. |\n| **Pemahaman** | Menebak-nebak isi dan pola data. Tahu pasti distribusi dan korelasi antarvariabel. |\n| **Hasil Akhir** | Model prediksi berisiko tinggi gagal (*bias/error* tinggi). | Model prediksi lebih stabil dan akurat. |\n\n> **Catatan:** Prinsip utama dari EDA adalah *jangan pernah mempercayai data mentah Anda*. Teman-teman harus memverifikasi setiap kolom dan baris untuk memastikan integritas data.",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "65": {
+      "id": 65,
+      "type": "sub-section",
+      "title": "Kompetensi yang Akan Dipelajari",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [
+        {
+          "id": 137,
+          "type": "richtext",
+          "content": "#### Overview\n\nTeman-teman, belajar tanpa mengetahui peta jalannya bisa membuat kita mudah tersesat. Di sub-section ini, kita akan melihat apa saja kompetensi teknis dan *tools* yang akan teman-teman kuasai di akhir kursus.\n\n#### Tujuan Pembelajaran\n\nSetelah mempelajari materi ini, teman-teman diharapkan mampu:\n\n* Memetakan tahapan belajar dalam kursus ini.\n* Mengetahui *library* Python yang akan diimplementasikan.\n\n#### Penjelasan\n\nKita akan menggunakan pendekatan *hands-on*. Artinya, setiap konsep akan langsung kita buktikan melalui kode Python. Berikut adalah kompetensi utama yang akan kita kejar:\n\n##### Daftar Kompetensi Utama\n\n1. **Data Wrangling & Cleaning:** Kemampuan membersihkan data kotor, menangani *missing values*, dan mendeteksi data duplikat.\n2. **Univariate Analysis:** Menganalisis satu variabel pada satu waktu untuk melihat distribusi (misalnya: mencari rata-rata umur pasien).\n3. **Bivariate & Multivariate Analysis:** Menganalisis hubungan antar dua atau lebih variabel (misalnya: apakah ada korelasi antara kebiasaan merokok dengan risiko gagal jantung).\n4. **Data Visualization:** Mengubah angka-angka yang membosankan menjadi grafik interaktif yang bercerita.\n\n##### *Library* Python yang Digunakan\n\n| Library | Fungsi Utama | Contoh Penggunaan |\n| --- | --- | --- |\n| **Pandas** | Manipulasi dan analisis data *tabular*. | Membaca file CSV, *filtering* data, agregasi. |\n| **Matplotlib** | Membuat plot dan grafik dasar. | Membuat grafik garis (*line chart*) sederhana. |\n| **Seaborn** | Visualisasi data statistik tingkat lanjut. | Membuat *heatmap* korelasi antar variabel. |\n\n#### Informasi Penting\n\n* Jangan khawatir jika teman-teman belum pernah menggunakan *library* di atas. Kita akan memulainya dari sintaks yang paling dasar.",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "67": {
+      "id": 67,
+      "type": "sub-section",
+      "title": "Target Praktik pada Dataset Heart Failure",
+      "item_type": "ARTICLE",
+      "sort_order": 3,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "69": {
+      "id": 69,
+      "type": "sub-section",
+      "title": "Summary",
+      "item_type": "ARTICLE",
+      "sort_order": 5,
+      "builder_fields": [
+        {
+          "id": 157,
+          "type": "richtext",
+          "content": "### Ringkasan\n\nPada *section* selamat datang ini, kita telah menyamakan frekuensi mengenai pentingnya Exploratory Data Analysis (EDA). EDA adalah fondasi dari setiap proyek berbasis data. Kita juga telah melihat gambaran dataset klinis *Heart Failure* yang akan kita bedah menggunakan Pandas. Pada akhirnya, sekuat apa pun arsitektur model *machine learning* kita, performanya dibatasi oleh kualitas data yang kita pahami dari tahap EDA.\n\n### Poin yang Harus Diingat\n\n* EDA bertugas mendiagnosis data mentah sebelum masuk ke tahapan pemodelan.\n* \"Garbage In, Garbage Out\" — Kualitas model sangat bergantung pada kualitas data.\n* Pandas, Matplotlib, dan Seaborn adalah senjata utama kita dalam mengeksplorasi data di Python.\n\n### Kesalahan Umum\n\n* **Langsung Melompat ke Model:** Kesalahan terbesar pemula adalah mengabaikan EDA dan langsung mencari algoritma prediksi demi melihat akurasi palsu.\n* **Takut pada Data Kotor:** Data berantakan adalah wajar. Tugas kita bukanlah menghindarinya, melainkan membersihkannya melalui kode yang sistematis.",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "70": {
+      "id": 70,
+      "type": "sub-section",
+      "title": "Quiz",
+      "item_type": "QUIZ",
+      "sort_order": 6,
+      "builder_fields": [
+        {
+          "id": 163,
+          "type": "single",
+          "content": "Apa tujuan utama dilakukannya proses Exploratory Data Analysis (EDA)?",
+          "points": 25,
+          "sort_order": 1,
+          "is_required": true,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": [
+            {
+              "id": 59,
+              "label": "Menulis algoritma Machine Learning yang rumit untuk memprediksi masa depan.",
+              "is_correct": true,
+              "sort_order": 1
+            },
+            {
+              "id": 60,
+              "label": "Menyelidiki data mentah untuk menemukan pola, anomali, dan memverifikasi asumsi sebelum tahap modeling.",
+              "is_correct": false,
+              "sort_order": 2
+            },
+            {
+              "id": 61,
+              "label": "Menyimpan dataset yang berukuran besar ke dalam basis data (database).",
+              "is_correct": false,
+              "sort_order": 3
+            },
+            {
+              "id": 62,
+              "label": "Mengubah dataset tabular menjadi format gambar dan video.",
+              "is_correct": false,
+              "sort_order": 4
+            }
+          ]
+        },
+        {
+          "id": 164,
+          "type": "single",
+          "content": "Jika seorang *Data Scientist* mengabaikan proses EDA dan langsung melatih model menggunakan data yang mengandung banyak *missing values* dan data yang salah ukuran, prinsip apa yang paling menggambarkan situasi ini?",
+          "points": 25,
+          "sort_order": 2,
+          "is_required": true,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": [
+            {
+              "id": 63,
+              "label": "Simple but Not Simpler",
+              "is_correct": false,
+              "sort_order": 1
+            },
+            {
+              "id": 64,
+              "label": "Feature Engineering",
+              "is_correct": false,
+              "sort_order": 2
+            },
+            {
+              "id": 65,
+              "label": "Garbage In, Garbage Out",
+              "is_correct": true,
+              "sort_order": 3
+            },
+            {
+              "id": 66,
+              "label": "Unsupervised Learning",
+              "is_correct": false,
+              "sort_order": 4
+            }
+          ]
+        },
+        {
+          "id": 165,
+          "type": "multiple",
+          "content": "Pilih *library* Python di bawah ini yang akan sering kita gunakan untuk memanipulasi dan memvisualisasikan data selama kursus berlangsung! (Pilih lebih dari satu)",
+          "points": 50,
+          "sort_order": 3,
+          "is_required": true,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": [
+            {
+              "id": 67,
+              "label": "Pandas",
+              "is_correct": true,
+              "sort_order": 1
+            },
+            {
+              "id": 68,
+              "label": "Matplotlib",
+              "is_correct": true,
+              "sort_order": 2
+            },
+            {
+              "id": 69,
+              "label": "Flask",
+              "is_correct": false,
+              "sort_order": 3
+            },
+            {
+              "id": 70,
+              "label": "Seaborn",
+              "is_correct": true,
+              "sort_order": 4
+            }
+          ]
+        }
+      ],
+      "configuration": null
+    },
+    "75": {
+      "id": 75,
+      "type": "sub-sub-section",
+      "title": "2..1. Konsep Dasar Analisa Univariate",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 631,
+          "type": "richtext",
+          "content": "## Konsep Dasar Analisa Univariate\n\nDi section sebelumnya, kita sudah mengenal struktur dasar dataset kita: berapa baris, berapa kolom, dan tipe datanya apa. Tapi kita belum benar-benar membedah isi tiap kolom satu per satu. Sekarang giliran kita melakukannya, dengan prinsip yang mendasar: amati satu per satu.\n\nPendekatan ini disebut analisis univariat (uni = satu, variat = variabel). Ini adalah bentuk investigasi data paling sederhana karena kita hanya memeriksa satu kolom pada satu waktu. Pada tahap ini, kita tidak mencari tahu apakah \"Age\" memengaruhi \"HeartDisease\". Kita hanya bertanya satu hal spesifik: \"Bagaimana sebaran Age pada dataset ini?\"\n\nBayangkan teman-teman sedang mempelajari ekosistem sebuah hutan. Sebelum menganalisis hubungan rantai makanan antara harimau, rusa, dan rumput, teman-teman harus tahu dulu ada berapa rusa di hutan tersebut. Itulah esensi dari Univariate Analysis.",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "76": {
+      "id": 76,
+      "type": "sub-sub-section",
+      "title": "2.2 Univariate vs Bivariate vs Multivariate",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [
+        {
+          "id": 632,
+          "type": "richtext",
+          "content": "## Univariate vs Bivariate vs Multivariate\n\nAgar lebih jelas di mana letak Analisa Univariate dalam alur berpikir kita, mari kita bandingkan dengan teknik analisis tingkat lanjut.\n\n| Jenis Analisis | Jumlah Kolom | Fokus Analisis | Contoh Pertanyaan Bisnis |\n|---|---|---|---|\n| Univariate | 1 (Fokus mandiri) | Distribusi, Pemusatan | Berapa rentang usia mayoritas pasien kita? |\n| Bivariate | 2 (Mencari korelasi) | Hubungan Sebab-Akibat | Apakah usia memengaruhi risiko penyakit jantung? |\n| Multivariate | > 2 (Interaksi kompleks) | Dinamika multifaktor | Apakah interaksi antara usia, tekanan darah, dan jenis kelamin memengaruhi risiko penyakit jantung pasien? |\n\nInsight Penting: Jangan pernah melompat ke analisis bivariat sebelum teman-teman benar-benar memahami profil dasar setiap variabel lewat univariate analysis.",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "77": {
+      "id": 77,
+      "type": "sub-sub-section",
+      "title": "2.3 Visualisasi Pola Pikir Univariate",
+      "item_type": "ARTICLE",
+      "sort_order": 3,
+      "builder_fields": [
+        {
+          "id": 635,
+          "type": "richtext",
+          "content": "## Visualisasi Pola Pikir Univariate",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        },
+        {
+          "id": 636,
+          "type": "image",
+          "content": "https://api-lms.jong.my.id/storage/image_assets/2026/07/01/2m5xy3VcectyEkBrsN3r.png",
+          "points": 0,
+          "sort_order": 2,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "78": {
+      "id": 78,
+      "type": "sub-sub-section",
+      "title": "3.1 Memahami Karakteristik Numerik",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 662,
+          "type": "richtext",
+          "content": "## Memahami Karakteristik Numerik\n\nMari kita mulai eksplorasi univariate pada fitur numerik, kolom yang isinya angka dan punya makna matematis sah jika ditambah, dikurang, atau dirata-ratakan.\nMenginvestigasi satu fitur numerik mengharuskan teman-teman mencari tiga informasi kunci:\n- Pusat Data (Central Tendency): di mana rata-rata (mean) atau nilai tengahnya (median)?\n- Sebaran (Dispersion): seberapa jauh jarak nilai terkecil (min) dan terbesar (max)-nya? Seberapa bervariasi (standard deviation)?\nPencilan (Outliers): Apakah ada angka aneh yang sangat ekstrem di ujung bawah atau atas?\nDua Jenis Numerik:\n- Diskrit (Integer): angka bulat, hasil menghitung (contoh: Age, FastingBS — meski secara konsep diskrit, ingat dari section sebelumnya keduanya tersimpan sebagai float64 karena ada NaN).\n- Kontinyu (Float): angka desimal, hasil mengukur (contoh: Cholesterol, Oldpeak).",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "79": {
+      "id": 79,
+      "type": "sub-sub-section",
+      "title": "3.3 Interpretasi Output Angka",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [
+        {
+          "id": 638,
+          "type": "richtext",
+          "content": "## Interpretasi Output Angka\n\nBerdasarkan output sel kode sebelumnya, mari kita baca datanya layaknya analis profesional:\n\n- count = 1233: hanya 1233 dari 1239 baris yang punya data MaxHR, sisanya kosong (ingat temuan section sebelumnya)\n- mean ≈ 137,6: rata-rata denyut jantung maksimal pasien sekitar 137-138.\n- max = 398: ini patut sangat dicurigai. Denyut jantung manusia secara teori maksimal sekitar 220 bpm. Nilai 398 hampir pasti merupakan kesalahan input atau sensor, bukan kondisi nyata.\n- modus = 120: nilai yang paling sering muncul di kolom ini adalah 120.\n\nHanya dengan describe() dan mode(), kita sudah menemukan satu lagi nilai yang janggal di dataset kita. Catat ini, kita akan kumpulkan semua kejanggalan seperti ini secara sistematis di section Deteksi Masalah Data nanti.",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "80": {
+      "id": 80,
+      "type": "sub-sub-section",
+      "title": "4.1 Apa itu Fitur Kategorikal?",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 639,
+          "type": "richtext",
+          "content": "## Apa itu Fitur Kategorikal?\n\nBagaimana jika kolom yang ingin kita analisis isinya teks, seperti Sex, atau angka yang hanya bertindak sebagai label/simbol (0 = Tidak, 1 = Ya)? Inilah Fitur Kategorikal.\n\nTentu teman-teman tidak bisa menghitung \"rata-rata seks\". Untuk fitur kategorikal, analisisnya bergeser: bukan mencari rata-rata, melainkan berfokus pada frekuensi (jumlah kemunculan) dan proporsi (persentase satu kelompok terhadap kelompok lain).\nTipe Kategori Utama:\n\n- Nominal: tidak ada urutan/hierarki (contoh: ChestPainType — ASY, ATA, NAP, TA).\n- Ordinal: ada tingkatan berurut (contoh: Pendidikan — SD, SMP, SMA, S1).\n-  Biner: hanya dua kemungkinan pasti (contoh: ExerciseAngina — Y/N).",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "81": {
+      "id": 81,
+      "type": "sub-sub-section",
+      "title": "4.2 Praktik: Menghitung Frekuensi & Proporsi",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "82": {
+      "id": 82,
+      "type": "sub-sub-section",
+      "title": "4.3 Membaca Hasil Value Counts",
+      "item_type": "ARTICLE",
+      "sort_order": 3,
+      "builder_fields": [
+        {
+          "id": 640,
+          "type": "richtext",
+          "content": "## Membaca Hasil Value Counts\n\nDari output persentase sebelumnya, ternyata komposisi pasien kita tidak seimbang 50:50, melainkan sekitar 70,7% laki-laki (M) dan 29,1% perempuan (F), sisanya kurang dari 1% adalah kategori menyamar yang perlu dibersihkan nanti.\n\nMengapa proporsi ini penting sebelum Machine Learning? Bayangkan jika data teman-teman isinya 99% sehat dan 1% sakit. Model AI bisa menjadi bias dan selalu menebak \"sehat\", dan tetap benar 99% dari waktu pengujian. Ini disebut Accuracy Paradox akibat imbalanced target. Dengan value_counts(), teman-teman mendeteksi potensi ini sejak dini. Nanti kita akan memformalkan pengecekan ini khusus untuk kolom target HeartDisease di section Deteksi Masalah Data.",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "83": {
+      "id": 83,
+      "type": "sub-sub-section",
+      "title": "5.1 Aturan Emas Visualisasi Univariate",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "84": {
+      "id": 84,
+      "type": "sub-sub-section",
+      "title": "5.2 Praktik: Membuat Histogram",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "85": {
+      "id": 85,
+      "type": "sub-sub-section",
+      "title": "5.3 Praktik: Membuat Countplot",
+      "item_type": "ARTICLE",
+      "sort_order": 3,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "86": {
+      "id": 86,
+      "type": "sub-sub-section",
+      "title": "2.1 Univariate vs Bivariate: Perpindahan Sudut Pandang",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 648,
+          "type": "richtext",
+          "content": "## Judul\n\nKalau pada materi sebelumnya kita bertindak sebagai pengamat yang melihat data secara terisolasi (univariate), kini saatnya kita naik level. Seorang engineer sejati tidak hanya mengukur metrik tunggal, tetapi juga mencari \"hubungan\". Pendekatan ini dinamakan Analisis Bivariate (Bi = Dua, Variate = Variabel).\n\nDalam analisis univariate, pertanyaan kita berpusat pada diri sendiri: \"Berapa rata-rata MaxHR pasien?\" Namun, dalam analisis bivariat, fokus kita meluas menjadi pertanyaan sebab-akibat: \"Apakah pasien dengan tekanan darah yang lebih tinggi memiliki risiko penyakit jantung yang lebih besar?\"\n\nInilah jantung dari Exploratory Data Analysis. Kita mulai mencari tahu apakah perubahan pada satu kolom memengaruhi, atau sejalan dengan, perubahan nilai di kolom lain.",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "87": {
+      "id": 87,
+      "type": "sub-sub-section",
+      "title": "2.2 Filosofi Bivariate: Mencari Petunjuk Hubungan",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [
+        {
+          "id": 650,
+          "type": "richtext",
+          "content": "## Filosofi Bivariate: Mencari Petunjuk Hubungan\n\nMengapa kita harus repot-repot membandingkan dua kolom sebelum melakukan pemodelan? Jawabannya sederhana: algoritma Machine Learning bekerja seperti detektif yang mencari petunjuk.\n\nModel ML akan sangat kebingungan jika kita menyuapinya dengan banyak fitur yang tidak ada hubungannya dengan target. Sebelum melatih model, kita harus mengecek dan membuktikan secara empiris apakah sebuah fitur benar-benar berhubungan dengan target yang ingin diprediksi.\n\n> Catatan: tujuan utama Analisa Bivariate di tahap EDA bukanlah untuk mengambil kesimpulan mutlak, melainkan untuk menemukan \"petunjuk\" kuat. Kita menyeleksi fitur mana saja yang paling menjanjikan untuk dimasukkan ke dalam pemodelan nanti",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "88": {
+      "id": 88,
+      "type": "sub-sub-section",
+      "title": "2.3 Visualisasi Pola Pikir Bivariate",
+      "item_type": "ARTICLE",
+      "sort_order": 3,
+      "builder_fields": [
+        {
+          "id": 651,
+          "type": "richtext",
+          "content": "## Visualisasi Pola Pikir Bivariate",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        },
+        {
+          "id": 652,
+          "type": "image",
+          "content": "https://api-lms.jong.my.id/storage/image_assets/2026/07/01/ay7HuBq62eallOswXsoc.png",
+          "points": 0,
+          "sort_order": 2,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "89": {
+      "id": 89,
+      "type": "sub-sub-section",
+      "title": "3.1 Membandingkan Angka Lintas Kategori",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 653,
+          "type": "richtext",
+          "content": "## Membandingkan Angka Lintas Kategori \n\nMari kita mulai hands-on dengan skenario paling umum dalam masalah klasifikasi: membandingkan fitur numerik dengan kolom target.\n\nBagaimana cara kita mengetahui secara matematis apakah angka di sebuah kolom berhubungan dengan kelompok target? Cara paling logis adalah membelah data berdasarkan kelompok targetnya, lalu menghitung nilai statistiknya secara terpisah.\n\nMisalnya, kita ingin menguji hipotesis: apakah Age memengaruhi HeartDisease? Kita bisa menghitung rata-rata Age dari kelompok pasien yang HeartDisease = 1 (kena penyakit jantung), dan membandingkannya dengan kelompok HeartDisease = 0 (tidak). Di Pandas, kita mengeksekusi operasi pembelahan dan perhitungan ini menggunakan fungsi sakti bernama .groupby().\n\n| Komponen | Penjelasan | Kode Pandas |\n|---|---|---|\n| Group / Pemisah | Kolom dasar yang menjadi pembelah data (Target) | `df.groupby('HeartDisease')` |\n| Target Kolom | Fitur angka yang nilainya ingin kita ukur | `['Age']` |\n| Metrik Agregasi | Rumus perhitungan (Rata-rata, Total, Median) | `.mean()` atau `.median()` |",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "90": {
+      "id": 90,
+      "type": "sub-sub-section",
+      "title": "3.2 Praktik: Membedah Data dengan .groupby()",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "91": {
+      "id": 91,
+      "type": "sub-sub-section",
+      "title": "3.3 Membaca Insight dari Output Agregasi",
+      "item_type": "ARTICLE",
+      "sort_order": 3,
+      "builder_fields": [
+        {
+          "id": 655,
+          "type": "richtext",
+          "content": "## Membaca Insight dari Output Agregasi\n\nBerdasarkan output kode di atas, kita disuguhkan insight nyata. Rata-ratanya kira-kira:\n\n- Pasien dengan HeartDisease = 0 (tidak kena) memiliki rata-rata Age sekitar 49,4 tahun.\n- Pasien dengan HeartDisease = 1 (kena) memiliki rata-rata Age sekitar 53,8 tahun.\n\nGap sekitar 4 tahun ini jadi bukti awal bahwa Age punya kecenderungan berhubungan dengan HeartDisease: makin tua, makin besar kecenderungan terdiagnosis.\n\nCoba juga jalankan eksperimen mandiri untuk Cholesterol. Kamu mungkin akan terkejut: rata-rata Cholesterol pada kelompok HeartDisease = 1 justru lebih RENDAH dibanding kelompok 0, berlawanan dengan intuisi medis umum. Jangan langsung percaya begitu saja. Ingat, dataset kita masih kotor, ada 172 baris dengan Cholesterol = 0 yang secara medis mustahil, dan itu bisa menyeret rata-rata ke arah yang menyesatkan. Ini alasan kuat lain mengapa preprocessing (membersihkan data) penting sebelum kita benar-benar percaya pada sebuah insight.\n\n> Catatan: kamu mungkin juga melihat ada kelompok ketiga, HeartDisease = 2, dengan hanya 1 baris data. Ini bukan kelas ketiga yang valid, target seharusnya cuma biner (0/1). Simpan temuan ini, kita akan menanganinya di section Deteksi Masalah Data.",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "92": {
+      "id": 92,
+      "type": "sub-sub-section",
+      "title": "4.1 Aturan Emas Visualisasi Dua Variabel",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 656,
+          "type": "richtext",
+          "content": "## Aturan Emas Visualisasi Dua Variabel\n\nMembaca barisan angka hasil .groupby() memang mudah jika kategori targetnya cuma dua. Tapi visualisasi adalah bahasa yang lebih cepat dipahami. Untuk analisis bivariat, kita memanggil dua jagoan visualisasi dari Seaborn: Scatterplot dan Boxplot.\n\n| Kombinasi Tipe Data | Visualisasi Terbaik | Fungsi Seaborn | Tujuan Visual |\n|---|---|---|---|\n| Numerik vs Numerik | Scatterplot (Titik Sebar) | `sns.scatterplot()` | Mengamati garis tren linier (saat X naik, apakah Y ikut naik atau turun) |\n| Kategorikal vs Numerik | Boxplot (Diagram Kotak) | `sns.boxplot()` | Membandingkan rentang sebaran angka secara komparatif antar kategori |\n\nDalam ekosistem klasifikasi, boxplot adalah instrumen paling efektif untuk membuktikan apakah sebuah fitur angka mampu membedakan kelas target.",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "93": {
+      "id": 93,
+      "type": "sub-sub-section",
+      "title": "4.2 Praktik: Membuat Titik Sebar (Scatterplot)",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "94": {
+      "id": 94,
+      "type": "sub-sub-section",
+      "title": "4.3 Praktik: Diagram Kotak (Boxplot) untuk Klasifikasi",
+      "item_type": "ARTICLE",
+      "sort_order": 3,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "95": {
+      "id": 95,
+      "type": "sub-sub-section",
+      "title": "5.1 Mengukur Kekuatan Hubungan: Korelasi Pearson",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 657,
+          "type": "richtext",
+          "content": "## Judul\n\nMelihat tren arah pada Scatterplot memang informatif, tapi engineer yang baik butuh bukti angka baku. Di sinilah kita mengakhiri eksplorasi bivariat dengan mengukur nilai korelasi.\n\nSecara default, kita menggunakan metode Korelasi Pearson, skor matematis yang menjabarkan tingkat keselarasan antara dua fitur numerik. Nilai ini selalu berada pada rentang -1 hingga +1.\n\n| Nilai Korelasi | Jenis Hubungan | Interpretasi Logis |\n|---|---|---|\n| Mendekati +1 | Positif Kuat | Bergerak selaras: jika X naik, Y juga ikut naik |\n| Mendekati 0 | Acak / Tidak Ada | Tidak terhubung: perubahan pada X tidak berdampak pada Y |\n| Mendekati -1 | Negatif Kuat | Bergerak berlawanan: jika X naik, Y justru turun |\n\n> Hukum Data Science yang wajib diingat: \"Correlation does NOT imply Causation\" (korelasi tidak memastikan hubungan sebab-akibat langsung). Tingkat pembelian es krim berkorelasi tinggi dengan jumlah kasus serangan hiu, bukan karena es krim mengundang hiu, tapi keduanya sama-sama melambung karena satu faktor tersembunyi: liburan musim panas.",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "96": {
+      "id": 96,
+      "type": "sub-sub-section",
+      "title": "5.2 Praktik: Menghitung Matriks Korelasi",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "97": {
+      "id": 97,
+      "type": "sub-sub-section",
+      "title": "5.3 Praktik: Membaca Pola Warna dengan Heatmap",
+      "item_type": "ARTICLE",
+      "sort_order": 3,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "98": {
+      "id": 98,
+      "type": "sub-sub-section",
+      "title": "6. Summary",
+      "item_type": "ARTICLE",
+      "sort_order": 4,
+      "builder_fields": [
+        {
+          "id": 658,
+          "type": "richtext",
+          "content": "## Ringkasan\n\nPada section Analisa Bivariate ini, teman-teman mulai menghubungkan teka-teki antarkolom, terutama terhadap kolom target HeartDisease. Kita memulai observasi lintas-kelompok dengan .groupby(), menemukan gap rata-rata Age yang masuk akal antara pasien sehat dan sakit, sekaligus belajar untuk tidak mudah percaya pada insight dari data yang masih kotor (kasus kolesterol). Secara visual, kita menegaskan prinsip emas: Scatterplot untuk Numerik vs Numerik (Age vs MaxHR), dan Boxplot untuk Kategorikal vs Numerik (HeartDisease vs MaxHR). Di puncaknya, kita menyuling semua hubungan itu menjadi satu matriks koefisien Pearson lewat .corr(), dan menampilkannya sebagai Heatmap, menemukan bahwa MaxHR dan Oldpeak adalah dua fitur dengan hubungan paling kentara ke target.\n\n##  Poin yang Harus Diingat\n\n- Jika Univariate membedah karakteristik individu, Bivariate berburu interaksi \"Sebab-Akibat\" antar fitur.\n- Boxplot adalah senjata default untuk membandingkan kolom Target (Sumbu X) dan Fitur Prediktor (Sumbu Y).\n- Koefisien Korelasi terkunci di antara -1 (berlawanan arah kuat) sampai +1 (selaras kuat). Nilai mendekati 0 berarti nihilnya hubungan matematis.\n- Insight dari data yang belum dibersihkan bisa menyesatkan, Selalu pertimbangkan kondisi data sebelum menyimpulkan terlalu cepat.\n\n## Kesalahan Umum\n\n- Korelasi palsu (Spurious Correlation): memutuskan secara prematur bahwa A menyebabkan B hanya karena korelasinya tinggi di Heatmap.\n- Memaksa mengukur korelasi data teks: .corr() akan bermasalah jika dijejali kolom object/str. Selalu saring ke kolom numerik dulu.",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "100": {
+      "id": 100,
+      "type": "sub-sub-section",
+      "title": "Konsep kenapa EDA diperlukan",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 725,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Sebagai pemula, pertanyaan ini pasti sering muncul di benakmu: “Kenapa kita tidak langsung memasukkan data mentah ke komputer agar komputer langsung belajar sendiri? Bukankah itu lebih cepat?”\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Jawabannya sederhana yaitu <strong>Komputer tidak bisa memperbaiki data yang rusak secara otomatis</strong>. Memaksa komputer belajar dari data mentah yang belum dicek itu ibarat langsung memasak semua bahan yang baru dibeli dari pasar tanpa dicuci, dikupas, atau dipilah terlebih dahulu. Hasil masakanmu pasti akan berantakan, atau bahkan tidak bisa dimakan sama sekali.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px;\">\n  Komputer dan algoritma pintar itu pada dasarnya bekerja menggunakan perhitungan angka yang sangat rapi. Mereka sangat \"anti\" dengan dua hal:\n</p>\n\n<ul style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px; padding-left: 24px;\">\n  <li style=\"margin-bottom: 8px;\"><strong>Kotak Kosong:</strong> Data yang hilang atau tidak ada isinya.</li>\n  <li style=\"margin-bottom: 0;\"><strong>Tulisan yang Membingungkan:</strong> Informasi berbentuk teks yang belum dirapikan agar komputer paham artinya.</li>\n</ul>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  Jika kita langsung memaksa sistem bekerja tanpa mengecek datanya terlebih dahulu, sistem tersebut akan bingung (*error*) atau menghasilkan prediksi yang kacau. Kitalah yang harus membimbingnya.\n</p>\n\n<!-- Judul Tabel -->\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px;\">\n  <strong>Perbandingan: Langsung Membuat Model vs Mengecek Data Dulu</strong>\n</p>\n\n<!-- Komponen Tabel -->\n<table style=\"width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 15px; margin-bottom: 24px; color: #2d3748;\">\n  <thead>\n    <tr style=\"background-color: #f7fafc; border-bottom: 2px solid #e2e8f0;\">\n      <th style=\"padding: 12px; text-align: left; font-weight: bold; width: 25%;\">Cara Kerja</th>\n      <th style=\"padding: 12px; text-align: left; font-weight: bold; width: 35%;\">Dampak pada Hasil</th>\n      <th style=\"padding: 12px; text-align: left; font-weight: bold; width: 40%;\">Mengapa Hal Itu Terjadi?</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\">\n      <td style=\"padding: 12px; font-weight: bold; color: #e53e3e;\">Langsung Proses Tanpa Dicek</td>\n      <td style=\"padding: 12px;\">Sistem langsung mogok (Error / Crash)</td>\n      <td style=\"padding: 12px; color: #4a5568;\">Komputer bingung karena mencoba menghitung data yang kosong atau teks yang tidak dipahami.</td>\n    </tr>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\">\n      <td style=\"padding: 12px; font-weight: bold; color: #dd6b20;\">Langsung Proses (Jika Berhasil Jalan)</td>\n      <td style=\"padding: 12px;\">Hasil tebakan komputer sangat tidak akurat dan berat sebelah</td>\n      <td style=\"padding: 12px; color: #4a5568;\">Komputer ikut mempelajari \"data palsu\" atau data aneh yang tidak sengaja masuk.</td>\n    </tr>\n    <tr style=\"border-bottom: 1px solid #e2e8f0; background-color: #f0fff4;\">\n      <td style=\"padding: 12px; font-weight: bold; color: #38a169;\">Mengecek Data Dulu (EDA)</td>\n      <td style=\"padding: 12px; font-weight: bold;\">Proses belajar mulus dan hasilnya akurat</td>\n      <td style=\"padding: 12px; color: #4a5568;\">Data yang kosong sudah diatasi, dan semua informasi sudah dirapikan agar siap dibaca komputer.</td>\n    </tr>\n  </tbody>\n</table>\n\n<div style=\"background-color: #fffbeb; border-left: 4px solid #d69e2e; padding: 16px; margin-bottom: 0; border-radius: 0 4px 4px 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 0;\">\n    Seringkali, orang yang baru belajar menyalahkan sistem atau rumusnya saat hasil tebakan komputernya salah besar. Padahal, <strong>masalah aslinya bukan pada sistemnya</strong>, melainkan pada data mentah yang belum kita periksa dan bersihkan lewat proses pengecekan (EDA) ini.\n  </p>\n</div>",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "102": {
+      "id": 102,
+      "type": "sub-sub-section",
+      "title": "Praktik kenapa EDA diperlukan",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [
+        {
+          "id": 732,
+          "type": "video",
+          "content": "https://youtu.be/GIkAPn5D-OA",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        },
+        {
+          "id": 733,
+          "type": "richtext",
+          "content": "<!-- Bagian Unduhan Dataset -->\n<div style=\"background-color: #ebf8ff; border-left: 4px solid #3182ce; padding: 16px; margin-bottom: 24px; border-radius: 0 4px 4px 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #2b6cb0; font-family: Arial, sans-serif; margin: 0;\">\n    <strong>Unduh Dataset Terlebih Dahulu:</strong> Sebelum kita mulai, silakan unduh dataset kursus melalui tautan berikut: \n    <a href=\"[https://drive.google.com/drive/folders/125sx_weTdC-4LUBPX8g_ZRR-WtTDqEMY?usp=sharing](https://drive.google.com/drive/folders/125sx_weTdC-4LUBPX8g_ZRR-WtTDqEMY?usp=sharing)\" target=\"_blank\" style=\"color: #2b6cb0; font-weight: bold; text-decoration: underline;\">Folder Heart Failure Dataset</a>.\n  </p>\n</div>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Sepanjang kursus ini, kita akan menggunakan satu kumpulan data (dataset) yang sama, yaitu <strong>Heart Failure Dataset (Data Gagal Jantung)</strong>. Di sini, kita akan membuktikan sendiri apa yang terjadi jika kita langsung memaksa komputer belajar (melatih model) menggunakan data mentah tersebut tanpa mengecek dan merapikannya terlebih dahulu.\n</p>\n\n<!-- Pembatas Instruksi Awal -->\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px;\">\n  <strong>Instruksi Awal:</strong>\n</p>\n\n<ol style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px; padding-left: 24px;\">\n  <li style=\"margin-bottom: 12px;\">Unduh file <code style=\"background-color: #edf2f7; padding: 2px 6px; border-radius: 4px; font-family: monospace;\">heart_failure.csv</code> dari tautan yang sudah dibagikan di atas.</li>\n  <li style=\"margin-bottom: 12px;\">Unggah file tersebut ke Google Colab melalui panel <strong>File</strong> (ikon folder) di sebelah kiri layarmu.</li>\n  <li style=\"margin-bottom: 0;\">Jalankan <strong>Kotak Kode 1</strong>, lalu perhatikan baik-baik pesan peringatan (error) yang muncul saat kamu menjalankan <strong>Kotak Kode 2</strong>.</li>\n</ol>\n\n<!-- Kotak Kode 1 -->\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 8px;\">\n  <strong>Kotak Kode 1: Mengintip Data Pertama Kali</strong>\n</p>\n<pre style=\"background-color: #f7fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; color: #4a5568; margin-bottom: 20px; overflow-x: auto;\">import pandas as pd\nfrom sklearn.linear_model import LinearRegression\n\n<span style=\"color: #718096; font-style: italic;\"># Membaca data yang sudah kamu unggah</span>\ndf = pd.read_csv('heart_failure.csv')\n\nprint(f\"Dataset ini memiliki {df.shape[0]} baris dan {df.shape[1]} kolom.\")\nprint(df[['Age', 'HeartDisease']].head())</pre>\n\n<div style=\"background-color: #f7fafc; border-left: 4px solid #4a5568; padding: 16px; margin-bottom: 24px; border-radius: 0 4px 4px 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #4a5568; font-family: Arial, sans-serif; margin: 0;\">\n    <strong>Catatan Pandangan Pertama:</strong><br>\n    Kalau kamu lihat sekilas, 5 baris pertama data di layar tampak rapi dan aman-aman saja, bukan? Tapi jangan langsung percaya! Kita akan buktikan lewat kode berikutnya apakah seluruh isi data ini benar-benar bersih atau menyimpan \"jebakan\".\n  </p>\n</div>\n\n<!-- Kotak Kode 2 -->\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 8px;\">\n  <strong>Kotak Kode 2: Membuktikan Sistem Mogok karena Ada \"Kotak Kosong\" (NaN)</strong>\n</p>\n<pre style=\"background-color: #f7fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; color: #4a5568; margin-bottom: 20px; overflow-x: auto;\"><span style=\"color: #718096; font-style: italic;\"># Menyiapkan robot rumus (model) kita</span>\nmodel = LinearRegression()\n\nX = df[['Age']]   <span style=\"color: #718096; font-style: italic;\"># Informasi yang dipakai untuk menebak (Umur)</span>\ny = df['HeartDisease']   <span style=\"color: #718096; font-style: italic;\"># Target yang ingin ditebak</span>\n\nprint(\"Mulai proses training...\")\ntry:\n    model.fit(X, y)\nexcept Exception as e:\n    print(f\"SISTEM MOGOK (ERROR): {e}\")</pre>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  <strong>Apa yang Terjadi?</strong><br>\n  Muncul pesan error: <span style=\"color: #e53e3e; font-family: monospace;\">\"Input contains NaN\"</span>. Ini adalah bukti nyata! Kolom <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">Age</code> (Umur) di dalam data kita ternyata memiliki beberapa baris yang kosong dari sananya. Komputer langsung menolak dan mogok kerja karena tidak bisa menghitung kotak yang tidak ada angkanya.\n</p>\n\n<div style=\"background-color: #fffbeb; border-left: 4px solid #d69e2e; padding: 16px; margin-bottom: 24px; border-radius: 0 4px 4px 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 0;\">\n    <strong>Pojok Pengetahuan: Kenapa Ada Kurung Siku Ganda [[ ]]?</strong><br>\n    Mungkin kamu menyadari kalau X menggunakan kurung siku ganda <code style=\"font-family: monospace;\">df[['Age']]</code>, sedangkan y menggunakan kurung siku tunggal <code style=\"font-family: monospace;\">df['HeartDisease']</code>. Ini bukan salah ketik, ya!<br><br>\n    Anggap saja kurung siku ganda <code style=\"font-family: monospace;\">[[ ]]</code> itu seperti keranjang besar (bisa muat banyak kolom sekaligus), sedangkan kurung siku tunggal <code style=\"font-family: monospace;\">[ ]</code> itu seperti kantong kecil (khusus untuk satu kolom saja). Sistem yang kita pakai mewajibkan data pencari pola (X) ditaruh di dalam keranjang besar, meskipun isinya baru satu kolom. Kamu akan sering melihat pola ini ke depannya!\n  </p>\n</div>\n\n<!-- Kotak Kode 3 -->\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px;\">\n  <strong>Kotak Kode 3: Membuktikan Sistem Mogok karena Data Berbentuk Tulisan (Teks)</strong>\n</p>\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px;\">\n  Tadi kita sudah membahas bahwa komputer juga tidak suka dengan tulisan yang belum dirapikan menjadi angka. Mari kita buktikan! Biar",
+          "points": 0,
+          "sort_order": 2,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "104": {
+      "id": 104,
+      "type": "sub-sub-section",
+      "title": "Penjelasan Alur EDA dalam Machine Learning",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 739,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Kita sudah tahu bahwa data harus diperiksa terlebih dahulu. Namun, bagaimana urutan langkah yang pasti?\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  Alur pemeriksaan data (EDA) di dalam proses kerja Machine Learning sebenarnya sangat terstruktur. Kamu bisa membayangkannya seperti tahapan pemeriksaan kesehatan di rumah sakit. Sebelum dokter spesialis memberikan diagnosis mendalam, kamu harus melewati bagian pendaftaran, pengecekan berat badan, hingga tensi darah terlebih dahulu. Semua dilakukan bertahap dari yang paling umum ke yang paling detail.\n</p>\n\n<p style=\"font-size: 18px; font-weight: bold; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 16px; border-left: 4px solid #3182ce; padding-left: 8px;\">\n  Tahapan Terstruktur dalam EDA\n</p>\n\n<ol style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px; padding-left: 24px;\">\n  <li style=\"margin-bottom: 16px;\">\n    <strong>Memasukkan Data (Data Loading):</strong><br>\n    <span style=\"color: #4a5568;\">Proses memasukkan file data mentah dari komputer atau internet ke dalam sistem analisis kita.</span><br>\n    <span style=\"font-size: 14px; color: #2b6cb0; font-family: Arial, sans-serif;\">Perintah Python:</span> <code style=\"background-color: #edf2f7; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 14px;\">pd.read_csv()</code>\n  </li>\n  <li style=\"margin-bottom: 16px;\">\n    <strong>Melihat Gambaran Besar (High-level Overview):</strong><br>\n    <span style=\"color: #4a5568;\">Proses mengintip format data secara keseluruhan, seperti mengetahui berapa jumlah total baris dan kolom yang tersedia.</span><br>\n    <span style=\"font-size: 14px; color: #2b6cb0; font-family: Arial, sans-serif;\">Perintah Python:</span> <code style=\"background-color: #edf2f7; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 14px;\">df.info()</code>\n  </li>\n  <li style=\"margin-bottom: 16px;\">\n    <strong>Melihat Ringkasan Angka (Statistical Summary):</strong><br>\n    <span style=\"color: #4a5568;\">Mengintip kondisi data numerik kita secara sekilas, seperti berapa nilai rata-rata atau nilai tertinggi di setiap kolom.</span><br>\n    <span style=\"font-size: 14px; color: #2b6cb0; font-family: Arial, sans-serif;\">Perintah Python:</span> <code style=\"background-color: #edf2f7; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 14px;\">df.describe()</code>\n  </li>\n  <li style=\"margin-bottom: 16px;\">\n    <strong>Pengecekan Kualitas Data (Quality Check):</strong><br>\n    <span style=\"color: #4a5568;\">Mulai berburu masalah, seperti mencari apakah ada data yang kembar (duplikat) atau kotak yang kosong.</span><br>\n    <span style=\"font-size: 14px; color: #2b6cb0; font-family: Arial, sans-serif;\">Perintah Python:</span> <code style=\"background-color: #edf2f7; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 14px;\">df.isnull().sum()</code>\n  </li>\n  <li style=\"margin-bottom: 0;\">\n    <strong>Eksplorasi Mendalam (Deep Exploration):</strong><br>\n    <span style=\"color: #4a5568;\">Melakukan analisis mendalam antarkolom dan membuat grafik (seperti grafik sebaran data atau grafik hubungan) untuk menemukan pola rahasia.</span>\n  </li>\n</ol>\n\n<div style=\"background-color: #fffbeb; border-left: 4px solid #d69e2e; padding: 16px; margin-bottom: 0; border-radius: 0 4px 4px 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 0;\">\n    Urutan ini <strong>tidak boleh dibolak-balik</strong> karena ada logika di baliknya. Kita tidak mungkin bisa mengecek kualitas data (Langkah 4) jika belum tahu apa saja nama kolomnya (Langkah 2). Kita juga tidak bisa langsung membuat grafik rumit (Langkah 5) jika belum memahami ringkasan angkanya (Langkah 3). Setiap langkah menjadi fondasi bagi langkah berikutnya.\n  </p>\n</div>",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "105": {
+      "id": 105,
+      "type": "sub-sub-section",
+      "title": "Praktik Alur EDA",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [
+        {
+          "id": 740,
+          "type": "video",
+          "content": "https://youtu.be/Q84qfAHWFOM",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        },
+        {
+          "id": 741,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Mari kita simulasikan kelima langkah di atas secara cepat di Google Colab. Ini adalah cuplikan singkat, karena setiap langkahnya akan kita bedah lebih dalam pada bab-bab berikutnya.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px; font-style: italic; color: #4a5568;\">\n  (Pastikan kamu melanjutkan dari notebook yang sama dengan praktik sebelumnya, atau unggah kembali file heart_failure.csv kamu).\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 8px;\">\n  <strong>Kotak Kode 1: Membaca Data dan Mengintip Gambaran Besar (Langkah 1 & 2)</strong>\n</p>\n<pre style=\"background-color: #f7fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; color: #4a5568; margin-bottom: 16px; overflow-x: auto;\">import pandas as pd\n\n<span style=\"color: #718096; font-style: italic;\"># Langkah 1: Memasukkan data ke dalam sistem</span>\ndf = pd.read_csv('heart_failure.csv')\n\n<span style=\"color: #718096; font-style: italic;\"># Langkah 2: Melihat gambaran besar struktur data</span>\nprint(\"=== INFO DATASET ===\")\ndf.info()</pre>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  <strong>Penjelasan Hasil:</strong><br>\n  Perintah <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.info()</code> memberikan kita peta keseluruhan dari data kita, seperti nama-nama kolom dan jenis informasinya. Bagian penting yang harus diperhatikan adalah jumlah baris yang terisi. Jika jumlah total baris data kita adalah 1239, namun ada kolom yang jumlah baris terisinya lebih kecil dari itu, berarti itu adalah alarm pertama kita: ada data yang bolong di kolom tersebut.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 8px;\">\n  <strong>Kotak Kode 2: Memeriksa Ringkasan Angka dan Kualitas Data (Langkah 3 & 4)</strong>\n</p>\n<pre style=\"background-color: #f7fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; color: #4a5568; margin-bottom: 16px; overflow-x: auto;\"><span style=\"color: #718096; font-style: italic;\"># Langkah 3: Melihat ringkasan angka secara otomatis</span>\nprint(\"=== RINGKASAN STATISTIK ===\")\ndisplay(df.describe())\n\n<span style=\"color: #718096; font-style: italic;\"># Langkah 4: Menghitung total data yang kosong</span>\nprint(\"=== TOTAL DATA KOSONG ===\")\nprint(df.isnull().sum())</pre>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  <strong>Penjelasan Hasil:</strong><br>\n  Melalui perintah <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.describe()</code>, kita bisa langsung mengetahui rata-rata umur pasien dalam data tanpa perlu menghitungnya secara manual satu per satu. Perhatikan juga nilai tertinggi atau terendah yang muncul; jika ada angka yang tidak masuk akal untuk usia manusia, simpan dulu kecurigaan tersebut untuk kita bereskan nanti. Sementara itu, perintah <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.isnull().sum()</code> akan menjabarkan dengan pasti berapa jumlah kotak kosong di tiap kolom.\n</p>\n\n<div style=\"background-color: #f0fff4; border-left: 4px solid #38a169; padding: 16px; margin-bottom: 20px; border-radius: 0 4px 4px 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #22543d; font-family: Arial, sans-serif; margin: 0 0 12px 0;\">\n    <strong>Kotak Kode 3: Tantangan Mandiri Kamu!</strong>\n  </p>\n  <p style=\"font-size: 16px; line-height: 1.6; color: #22543d; font-family: Arial, sans-serif; margin: 0 0 12px 0;\">\n    Sekarang giliranmu untuk mencoba perintah baru yang sangat berguna untuk mengintip isi data secara langsung.\n  </p>\n  <pre style=\"background-color: #ffffff; border: 1px solid #c6f6d5; padding: 16px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; color: #2f855a; margin: 0; overflow-x: auto;\"><span style=\"color: #718096; font-style: italic;\"># TUGAS KAMU: </span>\n<span style=\"color: #718096; font-style: italic;\"># Perintah di bawah ini digunakan untuk melihat 5 baris pertama data kita.</span>\ndf.head()\n\n<span style=\"color: #718096; font-style: italic;\"># SEKARANG TULIS KODE KAMU DI BAWAH INI:</span>\n<span style=\"color: #718096; font-style: italic;\"># Tuliskan perintah untuk melihat 5 baris TERAKHIR dari data kita (Gunakan .tail() )</span></pre>\n</div>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Jalankan kotak kode di atas setelah kamu menuliskan perintahnya. Perintah <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.head()</code> (kepala) dan <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.tail()</code> (ekor) ini sangat membantu agar kita bisa melihat bentuk asli data kita secara langsung tanpa harus membuka seluruh barisnya yang berjumlah ribuan.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 0;\">\n  Dua masalah data yang sempat kita temukan lewat fungsi tadi bukanlah akhir dari segalanya. Langkah-langkah pemeriksaan terstruktur yang baru saja kita intip ini memiliki metode detailnya masing-masing, dan itulah yang akan kita pelajari pada bagian selanjutnya!\n</p>",
+          "points": 0,
+          "sort_order": 2,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "106": {
+      "id": 106,
+      "type": "sub-sub-section",
+      "title": "Penjelasan Missing Value",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 770,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Saat kamu menerima data dari dunia nyata, jangan pernah berharap datanya akan rapi dan terisi penuh 100%. Menemukan data yang hilang atau kosong adalah makanan sehari-hari seorang data scientist. Data yang bolong-bolong ini bisa terjadi karena banyak hal: mungkin pasien lupa mengisi formulir, sensor alat medisnya sempat rusak, atau ada kesalahan saat memindahkan data ke dalam komputer.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  Di dalam bahasa Python (khususnya pustaka Pandas), kotak kosong ini diwakili dengan istilah <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">NaN</code> (singkatan dari <em>Not a Number</em>).\n</p>\n\n<p style=\"font-size: 18px; font-weight: bold; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px; border-left: 4px solid #3182ce; padding-left: 8px;\">\n  Perdebatan Pemula: isnull() vs isna()\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Banyak orang yang baru belajar data science bingung dan bertanya: <em>\"Apa bedanya perintah <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">isnull()</code> dan <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">isna()</code>? Kapan saya harus pakai yang satu atau yang lainnya?\"</em>\n</p>\n\n<div style=\"background-color: #f0fff4; border-left: 4px solid #38a169; padding: 16px; border-radius: 0 4px 4px 0; margin-bottom: 20px;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #22543d; font-family: Arial, sans-serif; margin: 0;\">\n    Jawabannya sangat sederhana: <strong>Tidak ada bedanya sama sekali.</strong> Kedua perintah itu melakukan hal yang sama persis. Pencipta pustaka Pandas sengaja membuat dua nama tersebut agar orang yang terbiasa menggunakan bahasa pemrograman lain (seperti bahasa R) merasa familier dengan perintah <code style=\"background-color: #e6fffa; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">isna()</code>, sementara pengguna Python biasa bisa menggunakan perintah <code style=\"background-color: #e6fffa; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">isnull()</code>. Jadi, kamu bebas menggunakan yang mana saja sesuai kenyamananmu.\n  </p>\n</div>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Secara teknis, perintah ini akan mengecek setiap kotak di dalam tabel data kita. Jika kotaknya berisi angka atau tulisan normal, sistem akan menandainya sebagai <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">False</code> (artinya tidak kosong). Namun, jika kotaknya bolong atau berupa <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">NaN</code>, sistem akan menandainya sebagai <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">True</code> (artinya kosong).\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 0;\">\n  Namun, bayangkan jika data kita memiliki ribuan baris. Tentu tidak mungkin kita memeriksa tulisan <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">True</code> atau <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">False</code> ini satu per satu dengan mata telanjang. Oleh karena itu, kita selalu menggabungkan perintah tersebut dengan fungsi <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.sum()</code> yang bertugas otomatis menghitung dan menjumlahkan semua kotak yang kosong.\n</p>",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "107": {
+      "id": 107,
+      "type": "sub-sub-section",
+      "title": "Praktik Mendeteksi Missing Value",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [
+        {
+          "id": 747,
+          "type": "video",
+          "content": "https://youtu.be/hNtgnB-7jQg",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        },
+        {
+          "id": 748,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Mari kita buka Google Colab dan buktikan secara formal kolom mana saja di data kita yang masih memiliki kotak kosong.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 8px;\">\n  <strong>Kotak Kode 1: Pembuktian Dua Fungsi Kembar</strong>\n</p>\n<pre style=\"background-color: #f7fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; color: #4a5568; margin-bottom: 16px; overflow-x: auto;\">import pandas as pd\n\n<span style=\"color: #718096; font-style: italic;\"># Membaca data mentah kita</span>\ndf = pd.read_csv('heart_failure.csv')\n\n<span style=\"color: #718096; font-style: italic;\"># Mendeteksi kotak kosong menggunakan isna() digabung dengan sum()</span>\nprint(\"=== Deteksi dengan isna() ===\")\nprint(df.isna().sum())\n\n<span style=\"color: #718096; font-style: italic;\"># Mendeteksi kotak kosong menggunakan isnull() digabung dengan sum()</span>\nprint(\"\\n=== Deteksi dengan isnull() ===\")\nprint(df.isnull().sum())</pre>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  <strong>Penjelasan Hasil:</strong><br>\n  Jika kamu perhatikan jendela hitam hasil cetakannya, kedua perintah tersebut menghasilkan angka yang sama persis. Hampir seluruh kolom di data kita memiliki beberapa baris yang kosong, berkisar antara 3 sampai 10 baris dari total keseluruhan 1239 baris data pasien.\n</p>\n\n<div style=\"background-color: #fff5f5; border-left: 4px solid #e53e3e; padding: 16px; border-radius: 0 4px 4px 0; margin-bottom: 24px;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #9b2c2c; font-family: Arial, sans-serif; margin: 0;\">\n    <strong>Ada Satu Jebakan Penting!</strong><br>\n    Perintah <code style=\"background-color: #fed7d7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.isnull()</code> atau <code style=\"background-color: #fed7d7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.isna()</code> hanya bisa mendeteksi kotak kosong yang sifatnya resmi (NaN resmi). Padahal, kadang ada data kosong yang <strong>\"menyamar\"</strong> dalam bentuk tulisan teks lain. Mari kita lacak seluruh kolom teks secara sekaligus untuk membuktikannya.\n  </p>\n</div>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 8px;\">\n  <strong>Kotak Kode 2: Memindai \"Kategori Menyamar\" di Kolom Teks</strong>\n</p>\n<pre style=\"background-color: #f7fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; color: #4a5568; margin-bottom: 16px; overflow-x: auto;\"><span style=\"color: #718096; font-style: italic;\"># Kita cari tahu dulu mana saja kolom yang isinya berupa teks, bukan angka</span>\nkolom_teks = df.select_dtypes(exclude='number').columns\nprint(\"Daftar kolom bertipe teks:\", kolom_teks.tolist())\n\n<span style=\"color: #718096; font-style: italic;\"># Kita intip isi unik dari masing-masing kolom teks tersebut</span>\nfor kolom in kolom_teks:\n    print(f\"\\n--- Isi unik kolom {kolom} ---\")\n    print(df[kolom].unique())</pre>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  <strong>Penjelasan Hasil:</strong><br>\n  Ternyata kecurigaan kita terbukti! Masalah tulisan yang menyamar ini tidak hanya terjadi pada kolom jenis kelamin (<code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">Sex</code>). Hampir semua kolom teks di data kita memiliki pola penyamaran yang serupa:\n</p>\n\n<ul style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px; padding-left: 24px;\">\n  <li style=\"margin-bottom: 8px;\"><strong>Kolom Sex:</strong> Selain berisi \"M\" dan \"F\", ada tulisan \"unk\" (tidak diketahui), \"??\", bahkan ada yang diisi satu karakter spasi kosong.</li>\n  <li style=\"margin-bottom: 8px;\"><strong>Kolom ChestPainType:</strong> Ada tulisan \"unk\" dan spasi kosong.</li>\n  <li style=\"margin-bottom: 0;\"><strong>Kolom RestingECG, ExerciseAngina, dan ST_Slope:</strong> Semuanya kompak menyembunyikan tanda tanya \"??\", teks \"XXX\", atau \"unk\".</li>\n</ul>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  Ingat, salah satu penyamaran yang paling menjebak adalah satu karakter spasi (<code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">' '</code>). Sekilas, kotak ini terlihat kosong seperti sel spreadsheet biasa di layarmu. Namun bagi komputer, spasi itu tetap dianggap sebagai sebuah tulisan teks yang sah, sehingga tidak akan terdeteksi oleh perintah <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.isna()</code>. Menggunakan perintah <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.unique()</code> seperti di atas adalah satu-satunya cara terbaik untuk membongkar penyamaran ini.\n</p>\n\n<div style=\"background-color: #f0fff4; border-left: 4px solid #38a169; padding: 16px; margin-bottom: 20px; border-radius: 0 4px 4px 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #22543d; font-family: Arial, sans-serif; margin: 0 0 12px 0;\">\n    <strong>Kotak Kode 3: Tantangan Mandiri Kamu!</strong>\n  </p>\n  <p style=\"font-size: 16px; line-height: 1.6; color: #22543d; font-family: Arial, sans-serif; margin: 0 0 12px 0;\">\n    Jika suatu saat nanti kamu memegang data yang jumlahnya jutaan baris, melihat angka jumlah data kosong yang hanya berupa satuan (seperti angka 3 atau 10) akan sulit dibayangkan skala rasionya. Jalankan kode di bawah ini untuk melihat masalah ini dalam bentuk persentase.\n  </p>\n  <pre style=\"background-color: #ffffff; border: 1px solid #c6f6d5; padding: 16px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; color: #2f855a; margin: 0; overflow-x: auto;\"><span style=\"color: #718096; font-style: italic;\"># TUGAS KAMU:</span>\n<span style=\"color: #718096; font-style: italic;\"># Jalankan kode ini untuk menghitung persentase data yang bolong</span>\npersentase_hilang = (df.isna().sum() / len(df)) * 100\nprint(\"Persentase data yang kosong (%):\")\nprint(persentase_hilang.round(2))</pre>\n</div>\n\n<div style=\"background-color: #fffbeb; border-left: 4px solid #d69e2e; padding: 16px; margin-bottom: 0; border-radius: 0 4px 4px 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 0;\">\n    Menampilkan nilai persentase seperti ini adalah kebiasaan yang sangat disarankan dalam dunia data science.\n  </p>\n</div>",
+          "points": 0,
+          "sort_order": 2,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "108": {
+      "id": 108,
+      "type": "sub-sub-section",
+      "title": "Penjelasan Data Duplikat",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 756,
+          "type": "video",
+          "content": "https://youtu.be/gihpGSmIzMQ",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        },
+        {
+          "id": 757,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Masalah kedua yang sering menyusup ke dalam data mentah kita adalah <strong>data duplikat atau data ganda</strong>. Di tahap ini, kamu harus kembali bertindak sebagai detektif data. Mengapa? Karena membiarkan data yang kembar masuk ke dalam proses belajar komputer bisa membuat hasil tebakannya menjadi berat sebelah (bias) dan tidak jujur.\n</p>\n\n<p style=\"font-size: 18px; font-weight: bold; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px; border-left: 4px solid #3182ce; padding-left: 8px;\">\n  Mengapa Data Duplikat Itu Berbahaya?\n</p>\n\n<div style=\"background-color: #fffbeb; border-left: 4px solid #d69e2e; padding: 16px; border-radius: 0 4px 4px 0; margin-bottom: 20px;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 0 0 12px 0;\">\n    <strong>Analogi Sederhana:</strong><br>\n    Bayangkan kamu sedang menjadi seorang siswa yang ingin menghadapi ujian nasional. Gurumu memberikan 100 soal latihan untuk dipelajari di rumah. Namun, ternyata ada kelalaian: dari 100 soal tersebut, ada 30 soal yang isinya sama persis (duplikat).\n  </p>\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 0;\">\n    Saat hari ujian tiba, ternyata gurumu mengambil soal ujian dari paket latihan tersebut. Karena kamu sudah \"menghafal\" soal-soal kembar yang sering muncul tadi, nilai ujianmu keluar dengan angka 100 sempurna! Apakah kamu benar-benar pintar dan memahami materi? Belum tentu. Kamu bisa mendapatkan nilai sempurna hanya karena kamu menghafal soal yang bocor.\n  </p>\n</div>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Di dalam dunia data science, kejadian ini disebut sebagai <strong>Kebocoran Data (<em>Data Leakage</em>)</strong>. Jika komputer dilatih menggunakan data yang banyak kembarannya, komputer akan terlihat sangat pintar saat diuji, padahal aslinya ia hanya menghafal data kembar tersebut.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 16px;\">\n  Untuk mengatasi ini, Pandas menyediakan fungsi bernama <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.duplicated()</code>. Fungsi ini memiliki sebuah pengaturan penting bernama <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">keep</code> untuk menentukan bagaimana cara kita menandai data kembar tersebut:\n</p>\n\n<ul style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 0; padding-left: 24px;\">\n  <li style=\"margin-bottom: 12px;\">\n    <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">keep='first'</code> <strong>(Pilihan Standar):</strong><br>\n    <span style=\"color: #4a5568;\">Sistem akan menganggap baris kemunculan pertama sebagai data yang asli, sedangkan baris kemunculan kedua, ketiga, dan seterusnya akan ditandai sebagai \"duplikat\" (<code style=\"font-family: monospace;\">True</code>). Ini berguna jika nanti kita ingin membuang sisanya dan menyisakan satu data asli.</span>\n  </li>\n  <li style=\"margin-bottom: 0;\">\n    <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">keep=False</code>:<br>\n    <span style=\"color: #4a5568;\">Semua baris yang memiliki kembaran—termasuk baris pertamanya—akan langsung ditandai sebagai duplikat (<code style=\"font-family: monospace;\">True</code>). Pengaturan ini sangat cocok digunakan jika kita ingin melakukan investigasi dan menampilkan semua baris yang bermasalah untuk diperiksa penjelasannya.</span>\n  </li>\n</ul>",
+          "points": 0,
+          "sort_order": 2,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "109": {
+      "id": 109,
+      "type": "sub-sub-section",
+      "title": "Praktik Mendeteksi Data Duplikat",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [
+        {
+          "id": 752,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Mari kita cek apakah di dalam data gagal jantung kita terdapat baris yang sama persis dari atas sampai bawah.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 8px;\">\n  <strong>Kotak Kode 1: Mendeteksi Jumlah Duplikat</strong>\n</p>\n<pre style=\"background-color: #f7fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; color: #4a5568; margin-bottom: 16px; overflow-x: auto;\"><span style=\"color: #718096; font-style: italic;\"># Menghitung total baris yang sama persis</span>\ntotal_duplikat = df.duplicated().sum()\nprint(f\"Total baris duplikat ditemukan: {total_duplikat} baris\")</pre>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  <strong>Penjelasan Hasil:</strong><br>\n  Hasil cetakannya menunjukkan angka 0. Ini adalah kabar baik! Artinya, data gagal jantung yang kita miliki saat ini bersih dari data yang sama persis. Namun, agar kita tetap bisa berlatih cara mendeteksi dan menginvestigasinya, mari kita buat sebuah skenario latihan dengan sengaja menggandakan baris pertama.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 8px;\">\n  <strong>Kotak Kode 2: Simulasi dan Menampilkan Data Ganda</strong>\n</p>\n<pre style=\"background-color: #f7fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; color: #4a5568; margin-bottom: 16px; overflow-x: auto;\"><span style=\"color: #718096; font-style: italic;\"># Kita sengaja menggandakan baris pertama (indeks 0) dan menaruhnya di paling bawah</span>\ndf_latihan = pd.concat([df, df.iloc[[0]]], ignore_index=True)\n\nprint(f\"Ukuran data sebelum ditambah: {df.shape}\")\nprint(f\"Ukuran data latihan setelah ditambah: {df_latihan.shape}\")\n\n<span style=\"color: #718096; font-style: italic;\"># Mari kita hitung ulang duplikatnya di data latihan</span>\ntotal_duplikat_latihan = df_latihan.duplicated().sum()\nprint(f\"Total duplikat di data latihan: {total_duplikat_latihan} baris\")\n\n<span style=\"color: #718096; font-style: italic;\"># Menampilkan seluruh baris yang terlibat dalam duplikasi</span>\ndata_ganda = df_latihan[df_latihan.duplicated(keep=False)]\nprint(\"Rincian baris yang terindikasi duplikat:\")\ndisplay(data_ganda)</pre>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  <strong>Penjelasan Hasil:</strong><br>\n  Sekarang, data latihan kita sudah bertambah satu baris di paling bawah (menjadi 1240 baris) dan sistem berhasil mendeteksi ada 1 baris duplikat. \n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  Berkat bantuan pengaturan <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">keep=False</code>, Pandas tidak hanya memunculkan baris tiruannya saja, melainkan langsung menampilkan kedua baris yang saling berteman kembar tersebut, yaitu baris paling atas (indeks 0) dan baris paling bawah (indeks 1239). Kamu bisa melihat sendiri bahwa seluruh isi kolomnya sama persis tanpa ada perbedaan satu angka pun.\n</p>\n\n<div style=\"background-color: #f0fff4; border-left: 4px solid #38a169; padding: 16px; margin-bottom: 20px; border-radius: 0 4px 4px 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #22543d; font-family: Arial, sans-serif; margin: 0 0 12px 0;\">\n    <strong>Kotak Kode 3: Tantangan Mandiri Kamu!</strong>\n  </p>\n  <p style=\"font-size: 16px; line-height: 1.6; color: #22543d; font-family: Arial, sans-serif; margin: 0 0 12px 0;\">\n    Sekarang, mari kita uji apa yang terjadi jika pengaturan di dalam kurung tersebut kita ubah kembali ke setelan standarnya.\n  </p>\n  <pre style=\"background-color: #ffffff; border: 1px solid #c6f6d5; padding: 16px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; color: #2f855a; margin: 0; overflow-x: auto;\"><span style=\"color: #718096; font-style: italic;\"># TUGAS KAMU:</span>\n<span style=\"color: #718096; font-style: italic;\"># Hapus tulisan keep=False di dalam fungsi duplicated() pada kode di bawah ini,</span>\n<span style=\"color: #718096; font-style: italic;\"># sehingga kodenya hanya menjadi df_latihan.duplicated() saja.</span>\n<span style=\"color: #718096; font-style: italic;\"># Jalankan dan perhatikan baris indeks ke berapa yang sekarang muncul di layar!</span>\n\ndata_pilihan = df_latihan[df_latihan.duplicated()]\ndisplay(data_pilihan)</pre>\n</div>\n\n<div style=\"background-color: #fffbeb; border-left: 4px solid #d69e2e; padding: 16px; margin-bottom: 0; border-radius: 0 4px 4px 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 0;\">\n    Coba perhatikan hasilnya setelah kamu menjalankan kode di atas. Kamu akan melihat bahwa baris indeks 0 menghilang dari layar, dan hanya menyisakan baris indeks 1239 saja. Mengapa? Karena secara standar, Pandas menyelamatkan baris pertama dan hanya menangkap baris tiruannya saja. Pemahaman ini akan sangat penting saat kamu melakukan pembersihan data nanti!\n  </p>\n</div>",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "110": {
+      "id": 110,
+      "type": "sub-sub-section",
+      "title": "Penjelasan Outlier",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 753,
+          "type": "video",
+          "content": "https://youtu.be/lVWh2-fBae0",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        },
+        {
+          "id": 754,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Bayangkan kamu sedang mendata tinggi badan mahasiswa di kelasmu yang rata-rata berada di rentang 160 cm sampai 175 cm. Tiba-tiba, ada satu lembar formulir yang mencatat tinggi badan seorang mahasiswa bertuliskan 350 cm.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  Angka 350 cm ini adalah contoh nyata dari apa yang disebut sebagai <strong>Outlier atau Pencilan</strong>. Sederhananya, outlier adalah sebuah nilai di dalam data yang letaknya sangat jauh menyimpang dan \"asing\" dari kumpulan nilai lainnya.\n</p>\n\n<p style=\"font-size: 18px; font-weight: bold; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px; border-left: 4px solid #3182ce; padding-left: 8px;\">\n  Dari Mana Datangnya Outlier?\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 16px;\">\n  Munculnya nilai ekstrem seperti ini biasanya disebabkan oleh dua kemungkinan:\n</p>\n\n<ul style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px; padding-left: 24px;\">\n  <li style=\"margin-bottom: 12px;\">\n    <strong>Kesalahan Sistem atau Manusia:</strong> Misalnya, petugas medis salah mengetik suhu tubuh pasien yang harusnya 36 derajat menjadi 360 derajat. Data salah ketik seperti ini wajib kita buang atau perbaiki.\n  </li>\n  <li style=\"margin-bottom: 0;\">\n    <strong>Kondisi Ekstrem yang Memang Nyata:</strong> Misalnya, ada transaksi kartu kredit sebesar 1 Miliar Rupiah di antara rata-rata transaksi harian pengguna lain yang hanya 1 Juta Rupiah. Dalam kasus pendeteksian penipuan (<em>Fraud Detection</em>), data ekstrem inilah yang justru paling dicari dan sangat berharga untuk dipelajari oleh komputer.\n  </li>\n</ul>\n\n<p style=\"font-size: 18px; font-weight: bold; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px; border-left: 4px solid #3182ce; padding-left: 8px;\">\n  Mengenal Senjata Detektif: Boxplot\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 16px;\">\n  Cara paling mudah dan paling sering digunakan untuk berburu outlier secara visual di tahap EDA adalah menggunakan <strong>Boxplot (Diagram Kotak Garis)</strong>.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 16px;\">\n  Agar tidak bingung saat melihat grafiknya nanti, mari kita pahami dulu bagian-bagian penting dari sebuah Boxplot:\n</p>\n\n<ul style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px; padding-left: 24px;\">\n  <li style=\"margin-bottom: 8px;\"><strong>Kotak Utama (Box):</strong> Tempat berkumpulnya 50% data yang kondisinya normal.</li>\n  <li style=\"margin-bottom: 8px;\"><strong>Garis di Tengah Kotak:</strong> Nilai tengah (Median) dari data kita. Ini adalah pusat keseimbangannya.</li>\n  <li style=\"margin-bottom: 8px;\"><strong>Kumis (Whiskers):</strong> Garis yang memanjang ke atas dan ke bawah (atau ke kanan dan ke kiri). Ini melambangkan batas toleransi minimum dan maksimum untuk data yang masih dianggap \"wajar\".</li>\n  <li style=\"margin-bottom: 0;\"><strong>Titik atau Bulatan di Luar Kumis:</strong> Inilah para <strong>Outlier (Pencilan)</strong>. Mereka adalah angka ekstrem yang posisinya sudah melompati batas toleransi kumis tersebut.</li>\n</ul>\n\n<p style=\"font-size: 18px; font-weight: bold; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px; border-left: 4px solid #3182ce; padding-left: 8px;\">\n  Daftar Kecurigaan Angka Ekstrem di Data Kita\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 16px;\">\n  Sepanjang memeriksa data pada bab-bab sebelumnya, kita sudah mencatat beberapa angka yang mencurigakan. Mari kita kumpulkan semuanya ke dalam satu tabel ringkasan di bawah ini:\n</p>\n\n<table style=\"width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 15px; margin-bottom: 24px; color: #2d3748;\">\n  <thead>\n    <tr style=\"background-color: #f7fafc; border-bottom: 2px solid #e2e8f0;\">\n      <th style=\"padding: 12px; text-align: left; font-weight: bold; width: 25%;\">Nama Kolom</th>\n      <th style=\"padding: 12px; text-align: left; font-weight: bold; width: 25%;\">Nilai yang Dicurigai</th>\n      <th style=\"padding: 12px; text-align: left; font-weight: bold; width: 50%;\">Mengapa Kita Curiga?</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\">\n      <td style=\"padding: 12px; font-weight: bold; color: #2b6cb0;\">Age</td>\n      <td style=\"padding: 12px;\">Nilai Tertinggi = 110</td>\n      <td style=\"padding: 12px; color: #4a5568;\">Usia manusia hingga 110 tahun sangat jarang terjadi dan tidak biasa dalam data medis umum.</td>\n    </tr>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\">\n      <td style=\"padding: 12px; font-weight: bold; color: #2b6cb0;\">MaxHR</td>\n      <td style=\"padding: 12px;\">Nilai Tertinggi = 398</td>\n      <td style=\"padding: 12px; color: #4a5568;\">Secara teori medis, detak jantung maksimal manusia saat berolahraga ekstrem sekalipun jarang menembus angka 220 kali per menit.</td>\n    </tr>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\">\n      <td style=\"padding: 12px; font-weight: bold; color: #2b6cb0;\">RestingBP</td>\n      <td style=\"padding: 12px;\">Nilai Terendah = 0</td>\n      <td style=\"padding: 12px; color: #4a5568;\">Manusia yang hidup tidak mungkin memiliki tekanan darah 0 mmHg. Ini pasti kesalahan catat.</td>\n    </tr>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\">\n      <td style=\"padding: 12px; font-weight: bold; color: #2b6cb0;\">Cholesterol</td>\n      <td style=\"padding: 12px;\">Nilai Terendah = 0</td>\n      <td style=\"padding: 12px; color: #4a5568;\">Kadar kolesterol total sebesar 0 juga mustahil untuk manusia yang masih hidup. Ada 172 baris data yang bernilai 0 ini.</td>\n    </tr>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\">\n      <td style=\"padding: 12px; font-weight: bold; color: #2b6cb0;\">Oldpeak</td>\n      <td style=\"padding: 12px;\">Nilai Terendah = -5.0</td>\n      <td style=\"padding: 12px; color: #4a5568;\">Angka ini melompat jauh di bawah rentang normal data lainnya yang biasanya berada di angka -2.6 hingga 7.0.</td>\n    </tr>\n  </tbody>\n</table>\n\n<div style=\"background-color: #fffbeb; border-left: 4px solid #d69e2e; padding: 16px; border-radius: 0 4px 4px 0; margin-bottom: 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 0;\">\n    <strong>Ingat!</strong> Sebagai data scientist, jangan terburu-buru langsung menghapus semua angka aneh ini tanpa berpikir panjang. Angka 0 pada tekanan darah dan kolesterol hampir pasti adalah kesalahan catat, namun kita harus memeriksanya satu per satu secara visual sebelum mengambil tindakan pembersihan nanti.\n  </p>\n</div>",
+          "points": 0,
+          "sort_order": 2,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "111": {
+      "id": 111,
+      "type": "sub-sub-section",
+      "title": "Praktik Deteksi Outlier",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [
+        {
+          "id": 758,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Mari kita buktikan kecurigaan angka-angka di atas menggunakan bantuan grafik Boxplot agar mata dan insting visual kita terlatih.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 8px;\">\n  <strong>Kotak Kode 1: Menampilkan Boxplot untuk Satu Kolom (Umur)</strong>\n</p>\n<pre style=\"background-color: #f7fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; color: #4a5568; margin-bottom: 16px; overflow-x: auto;\">import matplotlib.pyplot as plt\nimport seaborn as sns\n\n<span style=\"color: #718096; font-style: italic;\"># Mengatur ukuran kanvas grafik</span>\nplt.figure(figsize=(5, 4))\n\n<span style=\"color: #718096; font-style: italic;\"># Membuat boxplot untuk kolom Age</span>\nsns.boxplot(y=df['Age'], color='lightblue')\nplt.title('Boxplot untuk Kolom Umur (Age)')\nplt.show()</pre>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  <strong>Penjelasan Hasil:</strong><br>\n  Perhatikan grafik yang muncul di layarmu. Di bagian paling atas, jauh di luar garis kumis, terdapat sebuah titik kecil yang berdiri sendirian. Titik itulah wujud visual dari pasien berumur 110 tahun yang sudah kita curigai sejak awal. Sekarang kamu bisa melihat posisinya secara nyata, bukan sekadar membaca angka di tabel statistik lagi!\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 8px;\">\n  <strong>Kotak Kode 2: Memeriksa Empat Kolom Sekaligus</strong>\n</p>\n<p style=\"font-size: 16px; line-height: 1.6; color: #4a5568; font-family: Arial, sans-serif; margin-bottom: 12px;\">\n  Sekarang, mari kita tampilkan empat kolom lainnya sekaligus secara bersebelahan agar proses pemeriksaan kita menjadi lebih cepat.\n</p>\n<pre style=\"background-color: #f7fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; color: #4a5568; margin-bottom: 16px; overflow-x: auto;\">kolom_dicek = ['RestingBP', 'Cholesterol', 'MaxHR', 'Oldpeak']\n\n<span style=\"color: #718096; font-style: italic;\"># Menyiapkan ruangan untuk 4 grafik berjajar</span>\nfig, axes = plt.subplots(1, 4, figsize=(14, 4))\n\nfor i, kolom in enumerate(kolom_dicek):\n    sns.boxplot(y=df[kolom], ax=axes[i], color='lightcoral')\n    axes[i].set_title(kolom)\n\nplt.tight_layout()\nplt.show()</pre>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 16px;\">\n  <strong>Penjelasan Hasil:</strong><br>\n  Keempat grafik ini mengonfirmasi semua kecurigaan kita dengan sangat jelas:\n</p>\n\n<ul style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px; padding-left: 24px;\">\n  <li style=\"margin-bottom: 8px;\"><strong>RestingBP:</strong> Terlihat ada titik yang jatuh di bagian paling bawah kumis, mendekati angka 0.</li>\n  <li style=\"margin-bottom: 8px;\"><strong>Cholesterol:</strong> Ada gerombolan titik hitam yang menumpuk di angka 0. Ingat, ini bukan cuma satu titik, melainkan ada 172 pasien yang datanya tercatat 0.</li>\n  <li style=\"margin-bottom: 8px;\"><strong>MaxHR:</strong> Ada satu titik yang melambung sangat tinggi sendirian di atas, mendekati angka 400.</li>\n  <li style=\"margin-bottom: 0;\"><strong>Oldpeak:</strong> Ada beberapa titik yang lolos ke bawah hingga menyentuh angka -5.</li>\n</ul>\n\n<div style=\"background-color: #f0fff4; border-left: 4px solid #38a169; padding: 16px; margin-bottom: 20px; border-radius: 0 4px 4px 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #22543d; font-family: Arial, sans-serif; margin: 0 0 12px 0;\">\n    <strong>Kotak Kode 3: Tantangan Mandiri Kamu!</strong>\n  </p>\n  <p style=\"font-size: 16px; line-height: 1.6; color: #22543d; font-family: Arial, sans-serif; margin: 0 0 12px 0;\">\n    Mari kita uji bagaimana bentuk grafik jika kita memasukkan kolom yang isinya bukan angka berkelanjutan, melainkan angka pilihan (kategori).\n  </p>\n  <pre style=\"background-color: #ffffff; border: 1px solid #c6f6d5; padding: 16px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; color: #2f855a; margin: 0; overflow-x: auto;\"><span style=\"color: #718096; font-style: italic;\"># TUGAS KAMU:</span>\n<span style=\"color: #718096; font-style: italic;\"># Ganti daftar kolom_dicek di atas menjadi: ['Age', 'FastingBS']</span>\n<span style=\"color: #718096; font-style: italic;\"># Lalu jalankan ulang kodenya dan perhatikan bentuk boxplot untuk kolom FastingBS.</span>\n<span style=\"color: #718096; font-style: italic;\"># Mengapa bentuk grafiknya terlihat sangat aneh dan gepeng? </span>\n<span style=\"color: #718096; font-style: italic;\"># (Petunjuk: Ingat, kolom FastingBS sebenarnya hanya berisi angka pilihan 0 atau 1 saja).</span></pre>\n</div>\n\n<div style=\"background-color: #fffbeb; border-left: 4px solid #d69e2e; padding: 16px; border-radius: 0 4px 4px 0; margin-bottom: 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 0;\">\n    Jika kamu sudah mencoba memvisualisasikannya, kamu akan tahu bahwa <strong>Boxplot hanya cocok digunakan untuk melihat penyebaran angka yang sifatnya terus-menerus (kontinu)</strong>, seperti umur atau tekanan darah, dan tidak cocok digunakan untuk kolom yang isinya hanya berupa pilihan label (kategori).\n  </p>\n</div>",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "112": {
+      "id": 112,
+      "type": "sub-sub-section",
+      "title": "Penjelasan Data Imbalance",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 759,
+          "type": "video",
+          "content": "https://youtu.be/XbdqdQP8yT0",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        },
+        {
+          "id": 760,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Jika kita sedang membangun sebuah model komputer untuk menebak sebuah kategori atau pilihan (Model Klasifikasi), langkah terakhir yang wajib kita periksa di fase EDA adalah melihat penyebaran nilai pada kolom target tebakan kita. Masalah ini di dunia data science dikenal dengan istilah <strong>Imbalanced Dataset (Data Tidak Seimbang)</strong>.\n</p>\n\n<p style=\"font-size: 18px; font-weight: bold; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px; border-left: 4px solid #3182ce; padding-left: 8px;\">\n  Apa itu Imbalance Target?\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  Kondisi tidak seimbang ini terjadi ketika jumlah contoh data di salah satu kategori pilihan jauh lebih banyak dan mendominasi dibandingkan dengan kategori lainnya.\n</p>\n\n<p style=\"font-size: 18px; font-weight: bold; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px; border-left: 4px solid #3182ce; padding-left: 8px;\">\n  Studi Kasus Menarik: Jebakan Akurasi Palsu\n</p>\n\n<div style=\"background-color: #fffbeb; border-left: 4px solid #d69e2e; padding: 16px; border-radius: 0 4px 4px 0; margin-bottom: 20px;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 0 0 12px 0;\">\n    Bayangkan kamu sedang melatih komputer untuk mendeteksi transaksi kartu kredit yang palsu (penipuan/<em>fraud</em>). Kamu memiliki data sebanyak 10.000 transaksi. Di dalam data tersebut, ternyata ada 9.900 transaksi yang normal, dan hanya ada 100 transaksi yang merupakan penipuan.\n  </p>\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 0;\">\n    Jika data mentah ini langsung kamu masukkan ke komputer tanpa diperiksa atau ditangani, komputer kita bisa menjadi \"malas\" belajar. Komputer tersebut cukup mengambil jalan pintas dengan selalu menebak <em>\"Semua transaksi di dunia ini adalah Normal\"</em>.\n  </p>\n</div>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  Secara matematika, tebakan komputer itu akan menghasilkan nilai akurasi sebesar 99%! Angkanya terlihat sangat luar biasa, bukan? Namun pada kenyataannya, model komputer tersebut sama sekali tidak berguna dan tidak pintar, karena ia gagal total dalam mendeteksi 100 transaksi penipuan yang justru paling penting untuk ditemukan. Di dunia data science, fenomena jebakan ini disebut sebagai <strong>Accuracy Paradox (Paradoks Akurasi)</strong>.\n</p>\n\n<p style=\"font-size: 18px; font-weight: bold; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px; border-left: 4px solid #3182ce; padding-left: 8px;\">\n  Memahami Batas Proporsi Data\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 16px;\">\n  Agar kamu mendapat gambaran kapan sebuah data target dikatakan aman atau berbahaya, mari kita lihat tabel pengelompokan di bawah ini:\n</p>\n\n<table style=\"width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 15px; margin-bottom: 24px; color: #2d3748;\">\n  <thead>\n    <tr style=\"background-color: #f7fafc; border-bottom: 2px solid #e2e8f0;\">\n      <th style=\"padding: 12px; text-align: left; font-weight: bold; width: 25%;\">Kondisi Perbandingan</th>\n      <th style=\"padding: 12px; text-align: left; font-weight: bold; width: 45%;\">Contoh Nyata</th>\n      <th style=\"padding: 12px; text-align: left; font-weight: bold; width: 30%;\">Status Data</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\">\n      <td style=\"padding: 12px; font-weight: bold; color: #4a5568;\">50% : 50%</td>\n      <td style=\"padding: 12px; color: #4a5568;\">500 Pasien Sehat vs 500 Pasien Sakit</td>\n      <td style=\"padding: 12px;\"><span style=\"background-color: #c6f6d5; color: #22543d; padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: bold;\">Ideal (Seimbang)</span></td>\n    </tr>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\">\n      <td style=\"padding: 12px; font-weight: bold; color: #4a5568;\">60% : 40%</td>\n      <td style=\"padding: 12px; color: #4a5568;\">600 Foto Kucing vs 400 Foto Anjing</td>\n      <td style=\"padding: 12px;\"><span style=\"background-color: #feebc8; color: #744210; padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: bold;\">Masih Aman</span></td>\n    </tr>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\">\n      <td style=\"padding: 12px; font-weight: bold; color: #4a5568;\">95% : 5%</td>\n      <td style=\"padding: 12px; color: #4a5568;\">950 Transaksi Asli vs 50 Transaksi Penipuan</td>\n      <td style=\"padding: 12px;\"><span style=\"background-color: #fed7d7; color: #9b2c2c; padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: bold;\">Butuh Penanganan Khusus</span></td>\n    </tr>\n  </tbody>\n</table>\n\n<div style=\"background-color: #ebf8ff; border-left: 4px solid #3182ce; padding: 16px; border-radius: 0 4px 4px 0; margin-bottom: 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #2b6cb0; font-family: Arial, sans-serif; margin: 0;\">\n    Senjata utama kita di Python untuk mendeteksi kondisi ini secara instan adalah sebuah fungsi andalan bernama <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.value_counts()</code>.\n  </p>\n</div>",
+          "points": 0,
+          "sort_order": 2,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "113": {
+      "id": 113,
+      "type": "sub-sub-section",
+      "title": "Praktik deteksi Dataset Imbalance",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [
+        {
+          "id": 761,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Mari kita buka kembali Google Colab untuk mengecek apakah kolom target tebakan kita, yaitu <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">HeartDisease</code> (Penyakit Jantung: 0 untuk sehat, 1 untuk sakit), berada dalam kondisi yang aman atau justru berat sebelah.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 8px;\">\n  <strong>Kotak Kode 1: Menghitung Jumlah dan Persentase Target</strong>\n</p>\n<pre style=\"background-color: #f7fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; color: #4a5568; margin-bottom: 16px; overflow-x: auto;\"><span style=\"color: #718096; font-style: italic;\"># Menghitung jumlah baris asli di setiap pilihan target</span>\nprint(\"Jumlah baris per kelas:\")\nprint(df['HeartDisease'].value_counts())\n\n<span style=\"color: #718096; font-style: italic;\"># Menghitung persentase agar lebih mudah dibayangkan skalanya</span>\nprint(\"\\nPersentase per kelas (%):\")\nprint((df['HeartDisease'].value_counts(normalize=True) * 100).round(2))</pre>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  <strong>Penjelasan Hasil:</strong><br>\n  Kabar baik untuk kita! Hasil cetakan menunjukkan bahwa target <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">HeartDisease</code> di dalam data kita ternyata cukup seimbang dan merata. Sebanyak 53% pasien berada di kelas 1.0 (mengalami masalah jantung) dan 47% berada di kelas 0.0 (sehat). Artinya, kita tidak perlu mengkhawatirkan masalah <em>Accuracy Paradox</em> untuk data ini.\n</p>\n\n<div style=\"background-color: #fff5f5; border-left: 4px solid #e53e3e; padding: 16px; border-radius: 0 4px 4px 0; margin-bottom: 24px;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #9b2c2c; font-family: Arial, sans-serif; margin: 0;\">\n    <strong>Namun coba perhatikan baik-baik hasil cetakannya sekali lagi!</strong><br>\n    Di sana menyelinap sebuah kategori ketiga, yaitu angka <strong>2.0</strong>, yang jumlahnya hanya ada 1 baris saja (0.08%). Ini adalah data yang tidak valid, karena pilihan target kita harusnya hanya berupa pilihan biner (0 atau 1). Temuan hasil EDA ini akan kita catat untuk kita singkirkan pada bab pembersihan data nanti.\n  </p>\n</div>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 8px;\">\n  <strong>Kotak Kode 2: Simulasi Melihat Grafik Data yang Sangat Tidak Seimbang</strong>\n</p>\n<p style=\"font-size: 16px; line-height: 1.6; color: #4a5568; font-family: Arial, sans-serif; margin-bottom: 12px;\">\n  Sebagai perbandingan, mari kita buat sebuah data simulasi buatan untuk melihat bagaimana wujud grafik dari data yang terkena masalah ketidakseimbangan ekstrem.\n</p>\n<pre style=\"background-color: #f7fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; color: #4a5568; margin-bottom: 16px; overflow-x: auto;\"># Membuat data simulasi buatan dengan kondisi 90% berbanding 10%\ndf_simulasi = pd.DataFrame({\n    'Hasil_Diagnosis': [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] * 100\n})\n\nprint(\"Proporsi data simulasi:\")\nprint(df_simulasi['Hasil_Diagnosis'].value_counts(normalize=True) * 100)\n\n<span style=\"color: #718096; font-style: italic;\"># Menampilkan dalam bentuk grafik batang</span>\ndf_simulasi['Hasil_Diagnosis'].value_counts().plot(\n    kind='bar', color=['blue', 'red'], title='Grafik Distribusi Target yang Tidak Seimbang'\n)</pre>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 0;\">\n  <strong>Penjelasan Hasil:</strong><br>\n  Jika di dalam proyek data science lainnya kamu menemukan grafik batang yang tingginya jomplang atau tidak seimbang seperti hasil kode di atas (di mana salah satu batang melesat tinggi dan batang lainnya sangat pendek), itu adalah <strong>alarm kuat</strong> yang menandakan bahwa kamu harus menggunakan teknik penanganan data khusus sebelum melatih komputer tersebut.\n</p>",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "183": {
+      "id": 183,
+      "type": "sub-section",
+      "title": "1. Overview",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 630,
+          "type": "richtext",
+          "content": "##  Overview\n\nSection sebelumnya (Memahami Struktur Data) sudah membekali kita cara melihat dataset secara keseluruhan: jumlah baris, kolom, tipe data, dan ringkasan statistik global lewat describe(). Tapi describe() hanya memberi gambaran permukaan.\n\nSection ini mengajak kita membedah tiap kolom satu per satu secara lebih dalam, pendekatan yang disebut Analisa Univariate, masih di atas data yang sama, yang belum dibersihkan. Nanti, setelah kita cukup mengenal tiap kolom, kita mulai menghubungkan antar kolom di section Analisa Bivariate.",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "184": {
+      "id": 184,
+      "type": "sub-section",
+      "title": "2. Tujuan Analisa Univariate",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "185": {
+      "id": 185,
+      "type": "sub-section",
+      "title": "3. Analisis Fitur Numerik",
+      "item_type": "ARTICLE",
+      "sort_order": 3,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "186": {
+      "id": 186,
+      "type": "sub-section",
+      "title": "4. Analisis Fitur Kategorikal/Biner",
+      "item_type": "ARTICLE",
+      "sort_order": 4,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "187": {
+      "id": 187,
+      "type": "sub-section",
+      "title": "5. Histogram dan Countplot",
+      "item_type": "ARTICLE",
+      "sort_order": 5,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "188": {
+      "id": 188,
+      "type": "sub-section",
+      "title": "6. Summary",
+      "item_type": "ARTICLE",
+      "sort_order": 6,
+      "builder_fields": [
+        {
+          "id": 641,
+          "type": "richtext",
+          "content": "## Ringkasan\n\nPada section Analisa Univariate ini, teman-teman telah mengeksplorasi setiap kolom dataset Heart Failure kita satu per satu, masih dalam kondisi data yang belum dibersihkan. Untuk fitur numerik, kita membedah rata-rata dan penyebarannya menggunakan describe(), dan menemukan kejanggalan baru di MaxHR (nilai 398 yang mustahil secara fisiologis). Untuk fitur kategorikal, kita menghitung frekuensi dan proporsi menggunakan value_counts(), dan langsung membuktikan kategori \"menyamar\" di kolom Sex yang sebelumnya hanya kita curigai. Lewat histogram dan countplot, semua temuan ini menjadi lebih mudah dilihat sekilas dibandingkan dengan cuma membaca angka mentah.\n\n## Poin yang Harus Diingat\n- Univariate artinya fokus menganalisis SATU kolom secara independen.\n- Fitur numerik menggunakan describe() dan visualisasi histogram.\n- Fitur kategorikal menggunakan value_counts() dan visualisasi Countplot.\n- Histogram punya sumbu X kontinu, Countplot punya sumbu X dengan label terpisah.\n\n## Kesalahan Umum\n- Menggunakan visualisasi yang tertukar: memanggil sns.histplot() pada kolom teks akan memicu error.\n- Mengabaikan parameter proporsi: hanya melihat count tanpa normalize=True membuat insight sulit dikomunikasikan.\n- Terlalu cepat menyimpulkan dari describe() saja tanpa cek lewat value_counts()/unique() apakah ada kategori tersembunyi, seperti yang kita temukan di kolom Sex.",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "189": {
+      "id": 189,
+      "type": "sub-section",
+      "title": "7. Practice Quiz",
+      "item_type": "QUIZ",
+      "sort_order": 7,
+      "builder_fields": [
+        {
+          "id": 642,
+          "type": "single",
+          "content": "Pernyataan manakah yang paling tepat mendeskripsikan tujuan utama analisis univariate?",
+          "points": 35,
+          "sort_order": 1,
+          "is_required": true,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": [
+            {
+              "id": 299,
+              "label": "A. Menemukan korelasi statistik antara tekanan darah pasien dengan target.",
+              "is_correct": false,
+              "sort_order": 1
+            },
+            {
+              "id": 300,
+              "label": "B. Memprediksi label target masa depan menggunakan algoritma Machine Learning yang canggih.",
+              "is_correct": false,
+              "sort_order": 2
+            },
+            {
+              "id": 301,
+              "label": "C. Meringkas dan memetakan pola distribusi dari satu variabel saja secara independen untuk memahami karakteristik datanya.",
+              "is_correct": true,
+              "sort_order": 3
+            },
+            {
+              "id": 302,
+              "label": "D. Menggabungkan beberapa dataset terpisah menjadi satu tabel master (Data Merging).",
+              "is_correct": false,
+              "sort_order": 4
+            }
+          ]
+        },
+        {
+          "id": 643,
+          "type": "multiple",
+          "content": "Jika teman-teman menganalisis kolom Usia_Pelanggan yang murni berisi angka, fungsi/metode apa yang paling relevan untuk fase Univariate Analysis?",
+          "points": 35,
+          "sort_order": 2,
+          "is_required": true,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": [
+            {
+              "id": 303,
+              "label": "A. df['Usia_Pelanggan'].describe()",
+              "is_correct": true,
+              "sort_order": 1
+            },
+            {
+              "id": 304,
+              "label": "B. sns.countplot(x='Usia_Pelanggan')",
+              "is_correct": false,
+              "sort_order": 2
+            },
+            {
+              "id": 305,
+              "label": "C. df['Usia_Pelanggan'].isna()",
+              "is_correct": false,
+              "sort_order": 3
+            },
+            {
+              "id": 306,
+              "label": "D. sns.histplot(x='Usia_Pelanggan')",
+              "is_correct": true,
+              "sort_order": 4
+            }
+          ]
+        },
+        {
+          "id": 644,
+          "type": "shorttext",
+          "content": "Library Python mana yang dibangun di atas matplotlib, dan kita gunakan untuk memanggil fungsi seperti histplot() dan countplot()? \n\n(huruf kecil semua)",
+          "points": 30,
+          "sort_order": 3,
+          "is_required": true,
+          "is_locked": false,
+          "correct_answer_text": "seaborn",
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "190": {
+      "id": 190,
+      "type": "sub-section",
+      "title": "1. Overview",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 645,
+          "type": "richtext",
+          "content": "## Overview\n\nSection sebelumnya (Analisa Univariate) sudah membantu kita berkenalan dengan tiap kolom secara individual, lengkap dengan beberapa kejanggalan baru yang kita temukan (MaxHR yang mustahil, kategori menyamar di Sex).\n\nSekarang kita naik level. Bukan lagi mengamati satu kolom sendirian, tapi mencari hubungan ANTAR kolom, terutama hubungan ke kolom target HeartDisease. Pendekatan ini disebut Analisa Bivariat, dan ini akan jadi bekal penting sebelum kita memutuskan fitur mana yang layak dipertahankan di section Preprocessing nanti.",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "191": {
+      "id": 191,
+      "type": "sub-section",
+      "title": "2. Tujuan Analisa Bivariate",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "193": {
+      "id": 193,
+      "type": "sub-section",
+      "title": "3. Hubungan Fitur Numerik dan Target",
+      "item_type": "ARTICLE",
+      "sort_order": 3,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "194": {
+      "id": 194,
+      "type": "sub-section",
+      "title": "4. Scatterplot dan Boxplot",
+      "item_type": "ARTICLE",
+      "sort_order": 4,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "195": {
+      "id": 195,
+      "type": "sub-section",
+      "title": "5. Korelasi dan Heatmap",
+      "item_type": "ARTICLE",
+      "sort_order": 5,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "196": {
+      "id": 196,
+      "type": "sub-section",
+      "title": "Quiz",
+      "item_type": "QUIZ",
+      "sort_order": 6,
+      "builder_fields": [
+        {
+          "id": 659,
+          "type": "multiple",
+          "content": "Jika teman-teman ingin menginvestigasi apakah fitur MaxHR (angka kontinu) memiliki rentang perbedaan nilai yang tajam antara kelompok pasien HeartDisease = 0 dan HeartDisease = 1, alat visual dan fungsi Pandas manakah yang paling pas?",
+          "points": 35,
+          "sort_order": 1,
+          "is_required": true,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": [
+            {
+              "id": 307,
+              "label": "A. sns.boxplot()",
+              "is_correct": true,
+              "sort_order": 1
+            },
+            {
+              "id": 308,
+              "label": "B. sns.scatterplot()",
+              "is_correct": false,
+              "sort_order": 2
+            },
+            {
+              "id": 309,
+              "label": "C. df.groupby('HeartDisease')['MaxHR'].mean()",
+              "is_correct": true,
+              "sort_order": 3
+            },
+            {
+              "id": 310,
+              "label": "D. df.corr()",
+              "is_correct": false,
+              "sort_order": 4
+            }
+          ]
+        },
+        {
+          "id": 660,
+          "type": "single",
+          "content": "Saat mengeksekusi df.corr() pada dataset Heart Failure kita, skor korelasi antara MaxHR dan HeartDisease berada di angka sekitar -0,28. Analisis logis apa yang bisa ditarik?",
+          "points": 35,
+          "sort_order": 2,
+          "is_required": true,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": [
+            {
+              "id": 311,
+              "label": "A. Tidak terbentuk pola yang jelas antara MaxHR dengan HeartDisease.",
+              "is_correct": false,
+              "sort_order": 1
+            },
+            {
+              "id": 312,
+              "label": "B. Makin tinggi MaxHR pasien, makin besar kemungkinan ia terdiagnosis HeartDisease.",
+              "is_correct": false,
+              "sort_order": 2
+            },
+            {
+              "id": 313,
+              "label": "C. Makin rendah MaxHR pasien, makin besar kecenderungan ia terdiagnosis HeartDisease.",
+              "is_correct": true,
+              "sort_order": 3
+            },
+            {
+              "id": 314,
+              "label": "D. Terdapat anomali komputasi karena koefisien korelasi mustahil bernilai negatif.",
+              "is_correct": false,
+              "sort_order": 4
+            }
+          ]
+        },
+        {
+          "id": 661,
+          "type": "shorttext",
+          "content": "Parameter argumen apa pada fungsi sns.heatmap() yang harus diset True agar sistem mencetak angka-angka korelasinya di atas matriks warna? (huruf kecil semua)",
+          "points": 30,
+          "sort_order": 3,
+          "is_required": true,
+          "is_locked": false,
+          "correct_answer_text": "annot",
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "202": {
+      "id": 202,
+      "type": "sub-section",
+      "title": "Overview",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 724,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Di section <strong>Welcome</strong>, kamu sudah dapat gambaran besar perjalanan kursus ini: dari membersihkan data, analisis statistik deskriptif, sampai visualisasi yang jadi dasar keputusan sebelum data masuk ke model Machine Learning.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Sebelum mulai praktik lebih jauh, ada satu pertanyaan dasar yang harus dijawab dulu: <em>kenapa semua proses tadi benar-benar diperlukan?</em> Kenapa kita tidak bisa langsung melempar data mentah ke algoritma dan membiarkannya belajar sendiri?\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Section ini menjawab pertanyaan itu lewat bukti, bukan cuma teori. Kamu akan melihat sendiri apa yang terjadi kalau proses ini dilewati, baru setelah itu kita kenalan dengan nama resminya, yaitu <strong>Exploratory Data Analysis (EDA)</strong>, lihat bagaimana hasilnya berubah jadi keputusan teknis, dan dapat gambaran alur EDA secara utuh, sebelum kita membongkarnya satu per satu di section-section berikutnya.\n</p>\n\n<div style=\"background-color: #fffbeb; border-left: 4px solid #d69e2e; padding: 16px; margin-bottom: 0; border-radius: 0 4px 4px 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 0;\">\n    <strong>Mengapa langsung ke pemodelan berbahaya?</strong> Melempar data mentah tanpa tahu karakteristiknya sering kali membuat model mempelajari pola yang salah (noise) atau gagal mengenali struktur penting dalam data. Di modul ini, kita akan melihat dampaknya secara langsung.\n  </p>\n</div>",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "203": {
+      "id": 203,
+      "type": "sub-section",
+      "title": "Mengapa Kita perlu EDA",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "204": {
+      "id": 204,
+      "type": "sub-section",
+      "title": "Penjelasan EDA",
+      "item_type": "ARTICLE",
+      "sort_order": 3,
+      "builder_fields": [
+        {
+          "id": 736,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Aktivitas yang baru saja kita lakukan—seperti memeriksa isi data, mendeteksi baris yang kosong, hingga menemukan teks yang membuat komputer mogok—sebenarnya adalah bagian dari praktik <strong>EDA</strong> dalam skala kecil.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  <strong>EDA</strong> adalah singkatan dari <strong>Exploratory Data Analysis</strong> (Analisis Eksplorasi Data). Sederhananya, EDA adalah proses menyelidiki, mengenali, dan memahami data kita terlebih dahulu menggunakan ringkasan informasi dan grafik sederhana, sebelum data tersebut digunakan untuk membuat model pintar atau mengambil keputusan.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  Istilah ini pertama kali diperkenalkan oleh seorang pakar statistik bernama <strong>John Tukey</strong> pada tahun 1977. Gagasan utama yang ia tawarkan sangat sederhana namun penting: sebelum kita terburu-buru menguji teori atau melatih komputer, kita harus \"berkenalan\" dulu dengan data tersebut. Kita perlu melihat bentuknya, mencari pola yang menarik, dan mencurigai jika ada keanehan, tanpa penilaian yang kaku di awal.\n</p>\n\n<p style=\"font-size: 18px; font-weight: bold; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px; border-left: 4px solid #3182ce; padding-left: 8px;\">\n  Perbedaan EDA dengan Analisis Konfirmasi\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 16px;\">\n  Untuk memahami EDA, kita bisa membandingkannya dengan analisis konfirmasi (seperti uji rumus statistik yang formal):\n</p>\n\n<ul style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px; padding-left: 24px;\">\n  <li style=\"margin-bottom: 12px;\">\n    <strong>Analisis Konfirmasi</strong> dimulai dari sebuah pertanyaan yang sudah pasti, lalu diuji secara ketat untuk membuktikan apakah teori tersebut benar atau salah.\n  </li>\n  <li style=\"margin-bottom: 0;\">\n    <strong>EDA</strong> justru dimulai dari rasa ingin tahu dan kecurigaan: <em>\"Ada informasi menarik apa saja di dalam data ini?\"</em> Sifatnya sangat terbuka dan fleksibel. Seringkali, hasil dari satu pemeriksaan justru memicu pertanyaan baru yang seru untuk diselidiki lebih dalam.\n  </li>\n</ul>\n\n<p style=\"font-size: 18px; font-weight: bold; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px; border-left: 4px solid #3182ce; padding-left: 8px;\">\n  Tiga Ciri Utama EDA\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px;\">\n  Agar lebih mudah diingat, proses EDA selalu memiliki tiga karakteristik berikut:\n</p>\n\n<ol style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px; padding-left: 24px;\">\n  <li style=\"margin-bottom: 16px;\">\n    <strong>Mencari Pola, Bukan Membuktikan Teori:</strong><br>\n    <span style=\"color: #4a5568;\">Tujuannya adalah menemukan pola tersembunyi atau mendeteksi masalah pada data, bukan untuk membuktikan asumsi yang sudah kita buat sejak awal.</span>\n  </li>\n  <li style=\"margin-bottom: 16px;\">\n    <strong>Mengandalkan Ringkasan Informasi dan Grafik:</strong><br>\n    <span style=\"color: #4a5568;\">Kita menggunakan bantuan angka sederhana (seperti rata-rata) dan grafik untuk \"melihat\" gambaran besar data secara instan, bukan untuk menghafal angka di setiap barisnya satu per satu.</span>\n  </li>\n  <li style=\"margin-bottom: 0;\">\n    <strong>Proses yang Berulang (Iteratif):</strong><br>\n    <span style=\"color: #4a5568;\">Satu temuan biasanya akan memicu pemeriksaan lainnya. Contohnya, setelah kita membuang data yang kosong dengan perintah <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.dropna()</code>, muncul pertanyaan baru: \"Apakah setelah data kosong ini dibuang, jumlah data kita masih cukup untuk dipelajari oleh komputer?\"</span>\n  </li>\n</ol>\n\n<div style=\"background-color: #fffbeb; border-left: 4px solid #d69e2e; padding: 16px; margin-bottom: 0; border-radius: 0 4px 4px 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 0;\">\n    Jadi, setiap kali kamu memeriksa informasi data, menghitung jumlah nilai yang kosong, atau menampilkan grafik untuk melihat penyebaran data, kamu sebenarnya sedang melakukan EDA. <strong>EDA bukanlah satu fungsi kode tunggal yang langsung selesai sekali klik</strong>, melainkan sebuah cara kerja dan pendekatan sistematis yang akan kita gunakan sepanjang kursus data science ini.\n  </p>\n</div>",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "205": {
+      "id": 205,
+      "type": "sub-section",
+      "title": "Output EDA sebagai dasar keputusan",
+      "item_type": "ARTICLE",
+      "sort_order": 4,
+      "builder_fields": [
+        {
+          "id": 737,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Mari kita luruskan sebuah kekeliruan yang sering terjadi. Banyak pemula mengira EDA itu hanya sekadar membuat grafik batang atau diagram lingkaran berwarna-warni agar laporan atau presentasi terlihat keren.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Faktanya, <strong>EDA adalah sebuah alat pemeriksaan atau alat diagnosis</strong>. Setiap informasi baru atau grafik yang kita hasilkan dari proses EDA harus melahirkan sebuah keputusan atau tindakan nyata untuk memperbaiki data tersebut.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  Mari kita lihat bagaimana temuan dari hasil pemeriksaan data (Output EDA) ini langsung memengaruhi tindakan kita selanjutnya dalam menyiapkan data sebelum dipelajari oleh komputer.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px;\">\n  <strong>Perbandingan: Hasil Temuan EDA vs Tindakan yang Diambil</strong>\n</p>\n\n<table style=\"width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 15px; margin-bottom: 24px; color: #2d3748;\">\n  <thead>\n    <tr style=\"background-color: #f7fafc; border-bottom: 2px solid #e2e8f0;\">\n      <th style=\"padding: 12px; text-align: left; font-weight: bold; width: 30%;\">Apa yang Kita Temukan? (Hasil EDA)</th>\n      <th style=\"padding: 12px; text-align: left; font-weight: bold; width: 35%;\">Pertanyaan di Benak Kita</th>\n      <th style=\"padding: 12px; text-align: left; font-weight: bold; width: 35%;\">Tindakan Nyata yang Diambil</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\">\n      <td style=\"padding: 12px; font-weight: bold;\">Ditemukan baris yang kosong di kolom tertentu.</td>\n      <td style=\"padding: 12px; color: #4a5568; font-style: italic;\">\"Apakah data yang kosong ini sebaiknya dibuang atau diisi dengan tebakan yang logis?\"</td>\n      <td style=\"padding: 12px;\">Kita bisa membuangnya, atau mengisinya dengan nilai rata-rata dari baris lain yang lengkap.</td>\n    </tr>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\">\n      <td style=\"padding: 12px; font-weight: bold;\">Angka di suatu kolom penyebarannya tidak seimbang (misal: mayoritas nilai sangat kecil, tapi ada beberapa yang luar biasa besar).</td>\n      <td style=\"padding: 12px; color: #4a5568; font-style: italic;\">\"Apakah komputer akan kesulitan mengenali pola yang tidak seimbang ini?\"</td>\n      <td style=\"padding: 12px;\">Kita merapikan skalanya agar rentang angkanya lebih ramah dan mudah dibaca oleh rumus matematika komputer.</td>\n    </tr>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\">\n      <td style=\"padding: 12px; font-weight: bold;\">Sebuah kolom berisi informasi yang isinya berbeda semua untuk tiap baris (contohnya: Nomor ID Pelanggan atau Nomor Urut).</td>\n      <td style=\"padding: 12px; color: #4a5568; font-style: italic;\">\"Apakah nomor urut seperti ini punya pola yang berguna untuk mesin pencari pola?\"</td>\n      <td style=\"padding: 12px;\">Kita buang kolom tersebut karena nomor urut acak tidak membantu komputer dalam mempelajari tren data.</td>\n    </tr>\n  </tbody>\n</table>\n\n<div style=\"background-color: #fffbeb; border-left: 4px solid #d69e2e; padding: 16px; margin-bottom: 0; border-radius: 0 4px 4px 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 0 0 12px 0;\">\n    <strong>Contoh Kasus Nyata: Menemukan Data \"Mustahil\"</strong>\n  </p>\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 0 0 12px 0;\">\n    Bayangkan kamu sedang memeriksa data rekam medis pasien jantung. Saat membuat grafik, kamu menemukan ada catatan tekanan darah pasien yang tertulis 0 mmHg.\n  </p>\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 0;\">\n    Secara logika, ini mustahil, bukan? Manusia yang hidup tidak mungkin memiliki tekanan darah 0. Lewat proses EDA ini, kamu berhasil mendeteksi bahwa angka 0 tersebut adalah kesalahan ketik atau alat ukur yang rusak (anomali). \n  </p>\n  <p style=\"font-size: 16px; line-height: 1.6; color: #744210; font-family: Arial, sans-serif; margin: 12px 0 0 0;\">\n    Keputusan yang kamu ambil sebagai data scientist adalah: <strong>data aneh ini harus diperbaiki atau disingkirkan dulu</strong> sebelum komputer mulai mempelajarinya. Kamu akan menemukan kasus yang mirip seperti ini langsung di dalam data yang kita gunakan nanti!\n  </p>\n</div>",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "206": {
+      "id": 206,
+      "type": "sub-section",
+      "title": "Alur EDA",
+      "item_type": "ARTICLE",
+      "sort_order": 5,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "207": {
+      "id": 207,
+      "type": "sub-section",
+      "title": "Summary",
+      "item_type": "ARTICLE",
+      "sort_order": 6,
+      "builder_fields": [
+        {
+          "id": 742,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Pada section <strong>Apa itu EDA?</strong> ini, kamu sudah membuktikan langsung lewat error nyata kenapa data tidak bisa dilempar mentah-mentah ke model. Dari bukti itu, kamu berkenalan dengan nama resmi proses pengecekannya, yaitu <strong>Exploratory Data Analysis (EDA)</strong>: eksplorasi data lewat statistik ringkas dan visualisasi sebelum modeling.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  Kamu juga belajar bahwa output EDA bukan sekadar hiasan, melainkan pondasi logis untuk keputusan teknis seperti menghapus kolom, mengisi nilai kosong, atau mengubah tipe data. Terakhir, kamu melihat *preview* alur EDA secara utuh, sebagai pemanasan sebelum dibedah satu per satu di section-section berikutnya.\n</p>\n\n<p style=\"font-size: 18px; font-weight: bold; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px; border-left: 4px solid #3182ce; padding-left: 8px;\">\n  Poin yang Harus Diingat\n</p>\n\n<ul style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px; padding-left: 24px;\">\n  <li style=\"margin-bottom: 12px;\">\n    Algoritma tidak bisa secara otomatis memperbaiki kesalahan struktur data (<code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">NaN</code>, atau teks yang belum diubah ke numerik).\n  </li>\n  <li style=\"margin-bottom: 12px;\">\n    <strong>EDA (Exploratory Data Analysis)</strong> adalah proses eksploratif dan iteratif untuk memahami data sebelum modeling, bukan analisis konfirmatori yang menguji hipotesis tetap.\n  </li>\n  <li style=\"margin-bottom: 12px;\">\n    Semua visualisasi dan angka dari EDA dirancang untuk menghasilkan keputusan nyata (<em>actionable decision</em>), bukan sekadar hiasan.\n  </li>\n  <li style=\"margin-bottom: 0;\">\n    Tiga perintah awal wajib dalam EDA: <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">info()</code>, <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">describe()</code>, dan <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">isnull().sum()</code>.\n  </li>\n</ul>\n\n<div style=\"background-color: #fff5f5; border-left: 4px solid #e53e3e; padding: 16px; border-radius: 0 4px 4px 0; margin-bottom: 0;\">\n  <p style=\"font-size: 18px; font-weight: bold; color: #9b2c2c; font-family: Arial, sans-serif; margin: 0 0 12px 0;\">\n    Kesalahan Umum Pemula\n  </p>\n  <ul style=\"font-size: 16px; line-height: 1.6; color: #9b2c2c; font-family: Arial, sans-serif; padding-left: 20px; margin: 0;\">\n    <li style=\"margin-bottom: 10px;\">\n      Menganggap EDA dan modeling terpisah, padahal EDA adalah <em>checkpoint</em> pertama dalam *pipeline* Machine Learning.\n    </li>\n    <li style=\"margin-bottom: 10px;\">\n      Mengira EDA hanya soal membuat grafik cantik, padahal tujuannya adalah diagnosis dan pengambilan keputusan.\n    </li>\n    <li style=\"margin-bottom: 0;\">\n      Terlalu cepat membuang data tanpa memahami konteksnya lewat eksplorasi lebih dalam.\n    </li>\n  </ul>\n</div>",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "209": {
+      "id": 209,
+      "type": "sub-section",
+      "title": "Kuis",
+      "item_type": "QUIZ",
+      "sort_order": 7,
+      "builder_fields": [
+        {
+          "id": 719,
+          "type": "multiple",
+          "content": "Apa konsekuensi paling logis ketika kamu langsung menjalankan training model Machine Learning menggunakan dataset yang masih berisi banyak missing values (NaN)?",
+          "points": 20,
+          "sort_order": 1,
+          "is_required": true,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": [
+            {
+              "id": 435,
+              "label": "A. Model akan bekerja lambat, tapi lama-kelamaan bisa memahaminya.",
+              "is_correct": false,
+              "sort_order": 1
+            },
+            {
+              "id": 436,
+              "label": "B. Proses training akan crash atau menampilkan error karena algoritma matematis tidak bisa mengkalkulasi NaN.",
+              "is_correct": true,
+              "sort_order": 2
+            },
+            {
+              "id": 437,
+              "label": "C. Model akan memperbaiki nilai NaN tersebut secara otomatis di belakang layar.",
+              "is_correct": false,
+              "sort_order": 3
+            },
+            {
+              "id": 438,
+              "label": "D. Model tetap akan belajar tetapi menghasilkan akurasi yang rendah",
+              "is_correct": false,
+              "sort_order": 4
+            }
+          ]
+        },
+        {
+          "id": 720,
+          "type": "single",
+          "content": "Manakah pernyataan yang paling tepat menjelaskan EDA (Exploratory Data Analysis)?",
+          "points": 20,
+          "sort_order": 2,
+          "is_required": true,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": [
+            {
+              "id": 439,
+              "label": "A. EDA adalah proses membuat grafik presentasi di akhir proyek agar terlihat menarik.",
+              "is_correct": false,
+              "sort_order": 1
+            },
+            {
+              "id": 440,
+              "label": "B. EDA adalah proses konfirmatori yang menguji hipotesis yang sudah ditentukan sejak awal.",
+              "is_correct": false,
+              "sort_order": 2
+            },
+            {
+              "id": 441,
+              "label": "C. EDA adalah proses eksplorasi data menggunakan statistik ringkas dan visualisasi sebelum data dipakai untuk modeling.",
+              "is_correct": true,
+              "sort_order": 3
+            },
+            {
+              "id": 442,
+              "label": "D. EDA adalah nama lain untuk algoritma Machine Learning yang dipakai untuk klasifikasi.",
+              "is_correct": false,
+              "sort_order": 4
+            }
+          ]
+        },
+        {
+          "id": 721,
+          "type": "single",
+          "content": "Saat berada di Langkah ke-2 pipeline EDA (High-level Overview), fungsi mana yang paling cepat dan tepat untuk memeriksa tipe data seluruh kolom serta jumlah memory yang digunakan DataFrame?",
+          "points": 20,
+          "sort_order": 3,
+          "is_required": true,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": [
+            {
+              "id": 443,
+              "label": "A. df.describe()",
+              "is_correct": false,
+              "sort_order": 1
+            },
+            {
+              "id": 444,
+              "label": "B. df.tail()",
+              "is_correct": false,
+              "sort_order": 2
+            },
+            {
+              "id": 445,
+              "label": "C. df.info()",
+              "is_correct": true,
+              "sort_order": 3
+            },
+            {
+              "id": 446,
+              "label": "D. df.shape",
+              "is_correct": false,
+              "sort_order": 4
+            }
+          ]
+        },
+        {
+          "id": 722,
+          "type": "single",
+          "content": "Manakah kombinasi fungsi dari library Pandas yang digunakan untuk menghitung total akumulasi nilai kosong (missing values) untuk masing-masing kolom pada sebuah DataFrame?",
+          "points": 20,
+          "sort_order": 4,
+          "is_required": true,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": [
+            {
+              "id": 447,
+              "label": "A. df.isnull().count()",
+              "is_correct": false,
+              "sort_order": 1
+            },
+            {
+              "id": 448,
+              "label": "B. df.isnull().sum()",
+              "is_correct": true,
+              "sort_order": 2
+            },
+            {
+              "id": 449,
+              "label": "C. df.isna().any()",
+              "is_correct": false,
+              "sort_order": 3
+            },
+            {
+              "id": 450,
+              "label": "D. df.count().sum()",
+              "is_correct": false,
+              "sort_order": 4
+            }
+          ]
+        },
+        {
+          "id": 723,
+          "type": "single",
+          "content": "Mengapa Exploratory Data Analysis (EDA) sangat penting dilakukan sebelum membangun model machine learning atau melakukan pemodelan statistik?",
+          "points": 20,
+          "sort_order": 5,
+          "is_required": true,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": [
+            {
+              "id": 451,
+              "label": "A. Untuk memastikan model machine learning memiliki akurasi 100% tanpa perlu melakukan tuning.",
+              "is_correct": false,
+              "sort_order": 1
+            },
+            {
+              "id": 452,
+              "label": "B. Untuk mempercepat durasi waktu training pada komputer server secara otomatis.",
+              "is_correct": false,
+              "sort_order": 2
+            },
+            {
+              "id": 453,
+              "label": "C. Untuk memahami karakteristik data, mendeteksi outlier, serta mengidentifikasi pola dan hubungan tersembunyi dalam dataset.",
+              "is_correct": true,
+              "sort_order": 3
+            },
+            {
+              "id": 454,
+              "label": "D. Untuk secara otomatis menghapus semua kolom yang memiliki nilai kosong tanpa pengecekan lebih lanjut.",
+              "is_correct": false,
+              "sort_order": 4
+            }
+          ]
+        }
+      ],
+      "configuration": null
+    },
+    "210": {
+      "id": 210,
+      "type": "sub-section",
+      "title": "Overview",
+      "item_type": "ARTICLE",
+      "sort_order": 1,
+      "builder_fields": [
+        {
+          "id": 743,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Pada bab-bab sebelumnya, kita sudah sempat mengintip data kita dari berbagai sudut pandang. Hasilnya? Kita menemukan banyak sekali kejanggalan yang tersebar di sana-sini pada data gagal jantung (<em>Heart Failure</em>) yang kita gunakan. Kita mendeteksi ada kotak yang kosong, tulisan yang mencurigakan pada kolom jenis kelamin, hingga angka-angka yang rasanya terlalu besar dan tidak masuk akal untuk ukuran manusia.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Namun, selama ini kita baru melihat masalah-masalah tersebut secara terpisah.\n</p>\n\n<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 24px;\">\n  Nah, di dalam bab ini, kita akan bertindak seperti seorang detektif yang mulai mengumpulkan semua bukti dan kecurigaan tersebut secara sistematis. Tidak hanya itu, kita juga akan menambahkan dua taktik pemeriksaan baru, yaitu <strong>mendeteksi data yang kembar (duplikat)</strong> dan <strong>memeriksa apakah target tebakan kita sudah seimbang atau belum</strong>.\n</p>\n\n<div style=\"background-color: #ebf8ff; border-left: 4px solid #3182ce; padding: 16px; border-radius: 0 4px 4px 0; margin-bottom: 0;\">\n  <p style=\"font-size: 16px; line-height: 1.6; color: #2b6cb0; font-family: Arial, sans-serif; margin: 0;\">\n    <strong>Target Akhir Bab Ini:</strong><br>\n    Hasil akhir dari bab ini adalah sebuah <strong>Checklist Lengkap Masalah Data</strong>. Checklist inilah yang akan menjadi panduan utama kita saat kita benar-benar membersihkan dan merapikan semuanya pada bab pembersihan data (<em>preprocessing</em>) nanti. Yuk, kita mulai pemeriksaan pertamanya!\n  </p>\n</div>",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    },
+    "211": {
+      "id": 211,
+      "type": "sub-section",
+      "title": "Missing Value",
+      "item_type": "ARTICLE",
+      "sort_order": 2,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "212": {
+      "id": 212,
+      "type": "sub-section",
+      "title": "Data Duplikat",
+      "item_type": "ARTICLE",
+      "sort_order": 3,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "213": {
+      "id": 213,
+      "type": "sub-section",
+      "title": "Outlier",
+      "item_type": "ARTICLE",
+      "sort_order": 4,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "214": {
+      "id": 214,
+      "type": "sub-section",
+      "title": "Deteksi Imbalance Data",
+      "item_type": "ARTICLE",
+      "sort_order": 5,
+      "builder_fields": [],
+      "configuration": null
+    },
+    "215": {
+      "id": 215,
+      "type": "sub-section",
+      "title": "Summary",
+      "item_type": "ARTICLE",
+      "sort_order": 6,
+      "builder_fields": [
+        {
+          "id": 762,
+          "type": "richtext",
+          "content": "<p style=\"font-size: 16px; line-height: 1.6; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 20px;\">\n  Pada bab <strong>Deteksi Masalah Data</strong> ini, kamu sudah melengkapi kemampuan diagnostikmu dengan memeriksa empat \"penyakit\" utama yang paling sering menyerang data mentah. Mari kita rekap seluruh temuan penting kita:\n</p>\n\n<div style=\"background-color: #f7fafc; border: 1px solid #e2e8f0; padding: 18px; border-radius: 6px; margin-bottom: 24px;\">\n  <p style=\"font-size: 16px; font-weight: bold; color: #2d3748; font-family: Arial, sans-serif; margin-top: 0; margin-bottom: 12px;\">\n    Ringkasan Temuan Detektif Data:\n  </p>\n  <ul style=\"font-size: 15px; line-height: 1.6; color: #4a5568; font-family: Arial, sans-serif; margin: 0; padding-left: 20px;\">\n    <li style=\"margin-bottom: 10px;\">\n      <strong>Masalah 1: Kotak Kosong (<em>Missing Value</em>):</strong> Kita sudah membuktikan bahwa perintah <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.isna()</code> dan <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.isnull()</code> melakukan hal yang sama persis tanpa ada perbedaan logika. Selain itu, kita juga berhasil membongkar taktik \"Kategori Menyamar\" di semua kolom teks. Masalah teks asing seperti \"unk\", \"??\", hingga karakter spasi kosong (<code style=\"font-family: monospace;\">' '</code>) tidak akan terdeteksi oleh <code style=\"font-family: monospace;\">.isnull()</code>, sehingga kita wajib menggunakan perintah <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.unique()</code> untuk memindainya secara manual.\n    </li>\n    <li style=\"margin-bottom: 10px;\">\n      <strong>Masalah 2: Data Duplikat (Ganda):</strong> Data asli kita untungnya bersih dari baris yang kembar siam. Namun, kita sudah berlatih menggunakan pengaturan <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">keep=False</code> untuk menampilkan seluruh baris yang terlibat dalam duplikasi agar bisa diinvestigasi dengan mudah.\n    </li>\n    <li style=\"margin-bottom: 10px;\">\n      <strong>Masalah 3: Angka Aneh (<em>Outlier</em>):</strong> Kita sudah melatih insting visual dengan melihat langsung titik-titik ekstrem yang lolos dari batas kumis toleransi grafik Boxplot. Kita berhasil mengonfirmasi secara visual adanya pasien berumur 110 tahun, detak jantung bernilai 398, serta angka 0 yang mustahil pada kolom tekanan darah dan kolesterol.\n    </li>\n    <li style=\"margin-bottom: 0;\">\n      <strong>Masalah 4: Target Tidak Seimbang (<em>Imbalance Target</em>):</strong> Melalui perintah <code style=\"background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.value_counts()</code>, kita mendapati bahwa target tebakan kita (<code style=\"font-family: monospace;\">HeartDisease</code>) berada dalam kondisi yang ideal dan seimbang (53% berbanding 47%). Namun, kita menemukan adanya satu baris penyusup dengan kategori tidak valid yaitu angka 2.0.\n    </li>\n  </ul>\n</div>\n\n<p style=\"font-size: 18px; font-weight: bold; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px; border-left: 4px solid #3182ce; padding-left: 8px;\">\n  Tiga Poin Emas yang Harus Kamu Ingat\n</p>\n\n<div style=\"background-color: #f0fff4; border-left: 4px solid #38a169; padding: 16px; border-radius: 0 4px 4px 0; margin-bottom: 24px;\">\n  <ol style=\"font-size: 16px; line-height: 1.6; color: #22543d; font-family: Arial, sans-serif; margin: 0; padding-left: 20px;\">\n    <li style=\"margin-bottom: 8px;\">Kotak kosong yang menyamar (seperti teks spasi kosong) tetap dianggap sebagai tulisan sah oleh komputer. Jangan hanya mengandalkan fungsi pencari otomatis, intip selalu isinya menggunakan perintah <code style=\"background-color: #e6fffa; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.unique()</code>.</li>\n    <li style=\"margin-bottom: 8px;\">Penggunaan grafik Boxplot adalah cara mendeteksi angka aneh (<em>outlier</em>) yang paling cepat karena menggunakan bantuan batas toleransi matematika yang objektif.</li>\n    <li style=\"margin-bottom: 0;\">Selalu periksa keseimbangan kolom target tebakanmu menggunakan perintah <code style=\"background-color: #e6fffa; padding: 2px 4px; border-radius: 4px; font-family: monospace;\">.value_counts(normalize=True)</code> sebelum mulai membagi data untuk proses latihan komputer.</li>\n  </ol>\n</div>\n\n<p style=\"font-size: 18px; font-weight: bold; color: #2d3748; font-family: Arial, sans-serif; margin-bottom: 12px; border-left: 4px solid #e53e3e; padding-left: 8px;\">\n  Kesalahan Umum Pemula\n</p>\n\n<div style=\"background-color: #fff5f5; border-left: 4px solid #e53e3e; padding: 16px; border-radius: 0 4px 4px 0; margin-bottom: 0;\">\n  <ul style=\"font-size: 16px; line-height: 1.6; color: #9b2c2c; font-family: Arial, sans-serif; margin: 0; padding-left: 20px;\">\n    <li style=\"margin-bottom: 12px;\">\n      <strong>Terjebak Nilai Akurasi Tinggi (<em>Accuracy Paradox</em>):</strong> Terlalu cepat senang melihat nilai akurasi model yang tinggi, padahal data targetnya sangat tidak seimbang sehingga komputer hanya menebak kelas mayoritas saja.\n    </li>\n    <li style=\"margin-bottom: 0;\">\n      <strong>Asal Hapus Angka Aneh:</strong> Terburu-buru langsung menghapus semua data <em>outlier</em> tanpa menyelidiki terlebih dahulu apakah angka tersebut merupakan kesalahan ketik manusia atau memang kejadian langka di dunia nyata yang justru berharga untuk dipelajari.\n    </li>\n  </ul>\n</div>",
+          "points": 0,
+          "sort_order": 1,
+          "is_required": false,
+          "is_locked": false,
+          "correct_answer_text": null,
+          "options": []
+        }
+      ],
+      "configuration": null
+    }
+  },
+  "capturedLinks": [
+    {
+      "type": "sub-sub-section",
+      "id": 49
+    },
+    {
+      "type": "sub-section",
+      "id": 183
+    },
+    {
+      "type": "sub-section",
+      "id": 184
+    },
+    {
+      "type": "sub-section",
+      "id": 185
+    },
+    {
+      "type": "sub-section",
+      "id": 188
+    },
+    {
+      "type": "sub-section",
+      "id": 189
+    },
+    {
+      "type": "sub-section",
+      "id": 70
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 100
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 102
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 104
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 105
+    },
+    {
+      "type": "sub-section",
+      "id": 190
+    },
+    {
+      "type": "sub-section",
+      "id": 191
+    },
+    {
+      "type": "sub-section",
+      "id": 193
+    },
+    {
+      "type": "sub-section",
+      "id": 194
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 75
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 76
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 77
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 78
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 79
+    },
+    {
+      "type": "sub-section",
+      "id": 186
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 80
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 81
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 82
+    },
+    {
+      "type": "sub-section",
+      "id": 187
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 83
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 84
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 85
+    },
+    {
+      "type": "sub-section",
+      "id": 196
+    },
+    {
+      "type": "sub-section",
+      "id": 210
+    },
+    {
+      "type": "sub-section",
+      "id": 211
+    },
+    {
+      "type": "sub-section",
+      "id": 212
+    },
+    {
+      "type": "sub-section",
+      "id": 213
+    },
+    {
+      "type": "sub-section",
+      "id": 214
+    },
+    {
+      "type": "sub-section",
+      "id": 215
+    },
+    {
+      "type": "sub-section",
+      "id": 216
+    },
+    {
+      "type": "sub-section",
+      "id": 195
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 86
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 87
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 88
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 89
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 90
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 91
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 92
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 93
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 94
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 95
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 96
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 97
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 98
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 106
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 107
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 108
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 109
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 110
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 111
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 112
+    },
+    {
+      "type": "sub-sub-section",
+      "id": 113
+    }
+  ],
+  "assetMap": {
+    "https://api-lms.jong.my.id/storage/image_assets/2026/07/01/2m5xy3VcectyEkBrsN3r.png": "/lms-assets/2m5xy3VcectyEkBrsN3r.png",
+    "https://api-lms.jong.my.id/storage/image_assets/2026/07/01/ay7HuBq62eallOswXsoc.png": "/lms-assets/ay7HuBq62eallOswXsoc.png"
+  }
+}

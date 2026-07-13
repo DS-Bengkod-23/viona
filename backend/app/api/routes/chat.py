@@ -55,7 +55,10 @@ async def chat_with_viona(body: ChatRequest) -> dict:
         system_prompt = (
             "Anda adalah Viona, asisten virtual yang ramah dan berbahasa Indonesia.\n"
             "Konteks dari database kosong. Silakan jawab pertanyaan pengguna menggunakan "
-            "pengetahuan umum Anda secara ringkas, jujur, dan edukatif."
+            "pengetahuan umum Anda secara ringkas, jujur, dan edukatif.\n\n"
+            "ATURAN PENTING:\n"
+            "- JANGAN PERNAH memulai jawaban dengan sapaan seperti 'Halo' atau memperkenalkan diri (misal 'Saya Viona').\n"
+            "- Langsung berikan jawaban dari pertanyaan yang diajukan tanpa basa-basi pengenalan diri."
         )
     else:
         system_prompt = (
@@ -64,7 +67,10 @@ async def chat_with_viona(body: ChatRequest) -> dict:
             "Gunakan informasi pada bagian KONTEKS untuk menjawab bila relevan. "
             "Jika konteks tidak memuat jawabannya, Anda DIPERBOLEHKAN menggunakan "
             "pengetahuan umum Anda sendiri untuk menjawab pertanyaan dengan jujur, "
-            "edukatif, dan sopan."
+            "edukatif, dan sopan.\n\n"
+            "ATURAN PENTING:\n"
+            "- JANGAN PERNAH memulai jawaban dengan sapaan seperti 'Halo' atau memperkenalkan diri (misal 'Saya Viona').\n"
+            "- Langsung berikan jawaban dari pertanyaan yang diajukan tanpa basa-basi pengenalan diri."
         )
 
     context_block = (

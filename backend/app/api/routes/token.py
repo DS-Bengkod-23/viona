@@ -42,6 +42,15 @@ async def get_token(
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Token generation failed: {exc}") from exc
 
+    import urllib.request
+    import urllib.parse
+    try:
+        data = urllib.parse.urlencode({"room_name": room, "identity": identity}).encode('utf-8')
+        req = urllib.request.Request("http://viona-agent:8081/dev/spawn", data=data)
+        urllib.request.urlopen(req, timeout=5)
+    except Exception as e:
+        print(f"Failed to trigger dev spawn: {e}")
+
     return {
         "token": token,
         "room": room,

@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     livekit_api_key: str = Field(...)
     livekit_api_secret: str = Field(...)
 
+    # Cartesia TTS
+    cartesia_api_key: str = Field(default="")
+    cartesia_voice_id: str = Field(default="694f9389-aac1-45b6-b726-9d9369183238") # Default indonesian/female/friendly if available
+
     # VoxCPM2 TTS (local, with voice cloning)
     # NOTE: defaults are DEV-SAFE (CPU). The prod profile opts into GPU explicitly
     # (voxcpm2_device=cuda). See docs/ENV_PROFILES.md. VoxCPM2 is heavy and needs a

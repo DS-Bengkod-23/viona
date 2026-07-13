@@ -14,7 +14,7 @@ from contextlib import asynccontextmanager
 
 import structlog
 import uvicorn
-from fastapi import FastAPI, Header, Request
+from fastapi import FastAPI, Header, Request, Form
 from fastapi.responses import Response
 from livekit.api import TokenVerifier, WebhookReceiver
 
@@ -54,6 +54,12 @@ def create_app() -> FastAPI:
     async def metrics() -> Response:
         body, content_type = metrics_output()
         return Response(content=body, media_type=content_type)
+
+    @app.post("/dev/spawn")
+    async def dev_spawn(room_name: str = Form(...), identity: str = Form(...)) -> dict:
+        logger.info("dev spawn triggered", room=room_name, identity=identity)
+        asyncio.create_task(_spawn(room_name, identity))
+        return {"spawned": True}
 
     @app.post("/webhooks/livekit")
     async def livekit_webhook(

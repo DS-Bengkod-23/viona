@@ -22,6 +22,7 @@ from pipecat.processors.aggregators.llm_response_universal import (
     LLMUserAggregatorParams,
 )
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
+from pipecat.processors.audio.vad_processor import VADProcessor
 from pipecat.services.ollama.llm import OLLamaLLMService
 from pipecat.transports.livekit.transport import LiveKitParams, LiveKitTransport
 from pipecat_flows import FlowManager
@@ -33,7 +34,8 @@ from app.infrastructure.metrics.prometheus import active_sessions, agent_ready
 from app.infrastructure.rag.retriever import get_rag_retriever
 from app.infrastructure.session.store import get_session_store
 from app.infrastructure.stt.faster_whisper_pipecat import FasterWhisperSTTService
-from app.infrastructure.tts.voxcpml2_pipecat import VoxCPML2TTSService
+from pipecat.services.cartesia.tts import CartesiaTTSService
+# FORCE REBUILD CACHE INVALIDATION
 
 logger = structlog.get_logger(__name__)
 
@@ -78,22 +80,15 @@ def _build_llm() -> OLLamaLLMService:
     return OLLamaLLMService(model=settings.ollama_model, base_url=base_url)
 
 
-def _build_tts() -> VoxCPML2TTSService:
-    # VOXCPM2_ENABLED gates the local TTS. It is disabled on dev (CPU/Mac) where
-    # VoxCPM2 can't run; fail loudly with an actionable message instead of a cryptic
-    # torchaudio/CUDA crash at first synthesis. See docs/ENV_PROFILES.md.
-    if not settings.voxcpm2_enabled:
+def _build_tts() -> CartesiaTTSService:
+    if not settings.cartesia_api_key:
         raise RuntimeError(
-            "VoxCPM2 TTS is disabled (VOXCPM2_ENABLED=false). The Pipecat voice "
-            "pipeline requires a TTS engine — enable it on a GPU host (prod profile) "
-            "or wire an alternative TTS before spawning a bot."
+            "Cartesia API Key is not set (CARTESIA_API_KEY). "
+            "Please configure it in .env to use Cartesia TTS."
         )
-    return VoxCPML2TTSService(
-        model_name=settings.voxcpm2_model_name,
-        device=settings.voxcpm2_device,
-        voice_preset=settings.voxcpm2_voice_preset,
-        reference_audio_path=settings.voxcpm2_reference_audio,
-        reference_transcript=settings.voxcpm2_reference_transcript,
+    return CartesiaTTSService(
+        api_key=settings.cartesia_api_key,
+        voice_id=settings.cartesia_voice_id,
     )
 
 
@@ -153,9 +148,12 @@ async def run_bot_for_room(room_name: str, customer_phone: str = "") -> None:
         user_params=LLMUserAggregatorParams(vad_analyzer=SileroVADAnalyzer()),
     )
 
+    vad = VADProcessor(vad_analyzer=SileroVADAnalyzer())
+
     pipeline = Pipeline(
         [
             transport.input(),
+            vad,
             stt,
             TranscriptLogger(session),
             aggregators.user(),

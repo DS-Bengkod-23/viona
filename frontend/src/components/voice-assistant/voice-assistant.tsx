@@ -22,7 +22,7 @@ import { normalizeForSpeech } from "@/lib/tts-text"
 // SILENCE_MS of quiet before submitting the turn.
 //   • Viona cuts you off mid-sentence?  -> raise SILENCE_MS
 //   • Feels sluggish to respond?        -> lower SILENCE_MS
-const SILENCE_MS = 1400
+const SILENCE_MS = 800
 // Ignore ultra-short blips (a cough, "eh") so background noise never fires a turn.
 const MIN_CHARS = 2
 
@@ -73,6 +73,7 @@ export function VoiceAssistant() {
   // Turn accumulation + silence timer for our own end-of-turn detection
   const finalTranscriptRef = useRef("")
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
   // Latest processUserInput, reachable from recognition callbacks without stale closure
   const processUserInputRef = useRef<(text: string) => void>(() => {})
 
@@ -249,6 +250,7 @@ export function VoiceAssistant() {
     synthRef.current.cancel()
 
     const utterance = new SpeechSynthesisUtterance(normalizeForSpeech(text))
+    utteranceRef.current = utterance // Prevent garbage collection
     utterance.lang = "id-ID"
     utterance.rate = 0.9
     utterance.pitch = 1
@@ -256,19 +258,21 @@ export function VoiceAssistant() {
     utterance.onstart = () => setIsBotSpeaking(true)
     utterance.onend = () => {
       setIsBotSpeaking(false)
+      utteranceRef.current = null
       if (isConnectedRef.current && !isMutedRef.current) {
         startListening()
       }
     }
     utterance.onerror = () => {
       setIsBotSpeaking(false)
+      utteranceRef.current = null
       if (isConnectedRef.current && !isMutedRef.current) {
         startListening()
       }
     }
 
     synthRef.current.speak(utterance)
-  }, [stopListening])
+  }, [stopListening, startListening])
 
   // Process user input and generate response
   const processUserInput = useCallback(
@@ -361,7 +365,7 @@ export function VoiceAssistant() {
       const welcomeMessage: Message = {
         id: "welcome",
         role: "assistant",
-        content: "Halo! Saya Viona, asisten virtual Anda. Ada yang bisa saya bantu hari ini?",
+        content: "Ada yang bisa saya bantu hari ini?",
         timestamp: new Date(),
       }
       setMessages([welcomeMessage])
@@ -408,7 +412,7 @@ export function VoiceAssistant() {
         </Button>
         <div className="flex items-center gap-1">
           <img
-            src="/viona-logo-new.png"
+            src="/dashboard/viona-logo-new.png"
             alt="Viona Logo"
             className="w-10 h-10 object-contain"
           />
@@ -504,7 +508,7 @@ export function VoiceAssistant() {
                   <div className="h-full flex items-center justify-center p-8">
                     <div className="text-center max-w-md space-y-4">
                       <img
-                        src="/viona-logo-new.png"
+                        src="/dashboard/viona-logo-new.png"
                         alt="Viona Logo"
                         className="w-20 h-20 mx-auto object-contain"
                       />
