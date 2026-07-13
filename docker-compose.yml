@@ -102,14 +102,14 @@ services:
 
   # ── Laravel Website (LMS Dummy) ─────────────────────────────────────────────
   website:
-    image: php:8.2-cli
+    build:
+      context: ./website
+      dockerfile: docker/Dockerfile
     container_name: viona-website
     restart: unless-stopped
     working_dir: /app
     volumes:
       - ./website:/app
-    # Run artisan serve on 0.0.0.0 to make it accessible to Nginx proxy
-    command: php artisan serve --host=0.0.0.0 --port=8002
     networks:
       - viona-net
     logging:

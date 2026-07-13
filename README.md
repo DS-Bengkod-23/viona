@@ -1,169 +1,75 @@
-# Viona — Indonesian Voice AI & LMS Virtual Assistant
+# Viona - AI Virtual Assistant for LMS
 
-Viona adalah platform asisten suara interaktif cerdas berbahasa Indonesia yang dirancang khusus untuk asistensi virtual LMS (Learning Management System) serta layanan bantuan pengguna (customer support). Platform ini memiliki **dua mode operasional utama**:
+Selamat datang di repositori **Viona**! Viona adalah asisten virtual cerdas berbasis AI yang dirancang khusus untuk platform Learning Management System (LMS) seperti Bengkel Koding. Viona mendukung interaksi melalui teks dan suara (*voice agent*) secara real-time.
 
-1. **Mode Offline (Client-Side Fallback)**: Berjalan secara lokal di browser menggunakan Web Speech API bawaan (tanpa membutuhkan server AI backend, berlatensi 0ms, sangat optimal untuk demonstrasi cepat).
-2. **Mode Online (Server-Side RAG + LLM)**: Terhubung ke LiveKit Server dengan pipeline end-to-end yang memproses suara (STT Whisper), kecerdasan (LLM Ollama + RAG Qdrant), dan sintesis ucapan (TTS VoxCPM2 dengan voice cloning).
-
----
-
-## 🚀 Fitur Utama
-
-- **LMS Multi-Materi & Multi-Versi**: Mendukung pemisahan dokumen kurikulum pembelajaran (misalnya Matematika, Fisika, Pemrograman, Sejarah) dengan berbagai edisi/versi (Versi 1.0, 2.0, 3.0) menggunakan filter payload metadata di database vektor Qdrant.
-- **Visualisasi Audio Real-time**: Menampilkan visualisasi gelombang suara visual (audio wave) dinamis berdasarkan status Viona (mendengarkan, berpikir, berbicara).
-- **Hybrid Speech Engine**: Kombinasi transkripsi lokal browser dan pemrosesan terdistribusi server menggunakan LiveKit Agents.
-- **Pembersihan Kata (Text Preprocessing)**: Penyaringan teks masukan dari noise audio (*"hmmm"*, *"aaa"*, dsb) dan konformasi ejaan bahasa Indonesia untuk menghasilkan respon suara yang lebih alami dan manusiawi.
+## ✨ Fitur Utama
+1. **Interactive Voice Assistant**: Berbicara langsung dengan AI secara *real-time* menggunakan WebRTC (LiveKit).
+2. **Text Chat Mode**: Mode chat teks biasa layaknya ChatGPT.
+3. **Context-Aware (LMS Integration)**: AI bisa mengenali dan membaca materi yang sedang dibuka oleh pengguna di LMS.
+4. **Pipecat Pipeline**: Pemrosesan suara pintar menggunakan Faster-Whisper (Speech-to-Text), Ollama (LLM Inference), dan Cartesia/VoxCPM2 (Text-to-Speech).
+5. **RAG Ready (Opsional)**: Dukungan *Retrieval-Augmented Generation* menggunakan Qdrant Vector Database.
 
 ---
 
-## 📂 Struktur Direktori Proyek
+## 🚀 Cara Menjalankan Viona (Untuk Pemula)
 
-Aplikasi ini dirancang menggunakan arsitektur modular yang memisahkan frontend (Next.js) dan backend (Python Clean Architecture):
+Jika kamu baru pertama kali mencoba menjalankan proyek ini, jangan khawatir! Ikuti langkah-langkah di bawah ini secara berurutan.
 
+### 1. Persiapan Awal
+Pastikan komputer kamu sudah terinstall aplikasi berikut:
+- **Docker & Docker Compose** (Sangat direkomendasikan menggunakan [Docker Desktop](https://www.docker.com/products/docker-desktop/) jika memakai Windows/Mac).
+- **Git** (Untuk mendownload repositori).
+
+### 2. Pengaturan `.env` (File Konfigurasi)
+Viona membutuhkan beberapa kunci rahasia (API Keys) agar bisa terhubung ke layanan AI.
+1. Buka folder `viona`.
+2. Kamu akan menemukan file bernama `.env.example`.
+3. **Duplikat (copy-paste)** file tersebut, lalu ubah nama hasil copy-nya menjadi **`.env`** (tanpa ekstensi `.example`).
+4. Buka file `.env` dan isikan data penting berikut:
+   - `LIVEKIT_URL`, `LIVEKIT_API_KEY`, dan `LIVEKIT_API_SECRET` (Dapatkan dari akun [LiveKit Cloud](https://livekit.io/)).
+   - `CARTESIA_API_KEY` (Jika kamu menggunakan suara Cartesia).
+   - `OLLAMA_API_KEY` (Jika menggunakan Ollama Cloud).
+   *(Kamu bisa membiarkan pengaturan lainnya secara default terlebih dahulu).*
+
+### 3. Menjalankan Server dengan Docker
+Viona terdiri dari banyak bagian (Backend, Frontend, Agent, Redis, Nginx, dll). Semuanya bisa dinyalakan sekaligus dengan satu perintah Docker!
+
+Buka **Terminal** atau **Command Prompt**, pastikan kamu berada di dalam folder `viona` (folder utama), lalu jalankan:
+
+```bash
+docker compose up -d --build
 ```
-viona/
-├── backend/                           # 🐍 Backend (Python & API Service)
-│   ├── app/
-│   │   ├── agents/                    # Logika agen LiveKit / Pipecat (worker.py, support.py)
-│   │   ├── api/                       # Router FastAPI (chat, ingestion, token, sessions)
-│   │   ├── core/                      # File konfigurasi utama (config.py, logging.py)
-│   │   ├── infrastructure/            # Adapter pihak ketiga (retriever Qdrant, stt, tts, redis)
-│   │   ├── prompts/                   # Kumpulan system prompt & instruksi Bahasa Indonesia
-│   │   └── utils/                     # Modul pembantu (text_cleaner.py)
-│   ├── docker/                        # Dockerfile untuk deployment backend
-│   ├── pyproject.toml                 # Dependensi Python via uv
-│   └── Makefile                       # Script shortcut untuk mempermudah jalannya perintah
-│
-├── frontend/                          # ⚛️ Frontend (Next.js 16 + Tailwind CSS)
-│   ├── src/
-│   │   ├── app/                       # Routing halaman utama (page.tsx, layout.tsx)
-│   │   ├── components/                # Komponen UI modular (voice-assistant, ui shadcn)
-│   │   ├── hooks/                     # Custom react hooks untuk audio & status
-│   │   └── lib/                       # Helper API client (api.ts)
-│   ├── docker/                        # Dockerfile untuk deployment frontend
-│   └── package.json                   # Dependensi JavaScript & Next.js
-│
-├── docker-compose.yml                 # 🐳 Orkestrasi 7 container (api, agent, qdrant, redis, ollama, frontend, nginx)
-└── .env.example                       # Contoh template berkas konfigurasi variabel lingkungan
+*Catatan: Parameter `--build` berguna untuk memastikan Docker membangun ulang (rebuild) kodenya jika ada perubahan baru. Proses pertama kali akan memakan waktu cukup lama karena Docker harus mendownload file-file sistem pendukung, menginstall Node.js, NPM, dan Composer secara otomatis untuk Frontend maupun Website (LMS).*
+
+**Apakah ada error atau frontend tidak ter-update?**
+Jika kamu mengubah sesuatu di kode frontend namun tidak muncul, atau ada kendala, kamu bisa mem-build/menjalankan ulang khusus bagian *frontend* dengan perintah ini:
+```bash
+docker compose up -d --no-deps --build frontend
 ```
 
----
+**Ingin menyalakan database RAG (Qdrant)?**
+Secara default, Qdrant dimatikan untuk menghemat memori. Jika kamu butuh menyalakannya, gunakan perintah:
+```bash
+docker compose --profile rag up -d
+```
 
-## 📝 Deskripsi Berkas `.env` (Environment Variables)
-
-Berkas `.env` digunakan untuk menghubungkan modul-modul AI, database, server komunikasi, dan API kunci eksternal. Berikut adalah rincian isi `.env.example`:
-
-| Variabel | Deskripsi | Nilai Default |
-| :--- | :--- | :--- |
-| **LIVEKIT_URL** | Alamat WebSocket server komunikasi LiveKit. | `wss://your-project.livekit.cloud` |
-| **LIVEKIT_API_KEY** | Kunci API otentikasi LiveKit Cloud. | `APIxxxxxxxxxxxxxxxx` |
-| **LIVEKIT_API_SECRET** | Token rahasia otentikasi LiveKit Cloud. | `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` |
-| **VOXCPM2_ENABLED** | Aktifkan TTS VoxCPM2 lokal dengan voice cloning. | `true` |
-| **VOXCPM2_MODEL_NAME** | Nama model VoxCPM2 (HuggingFace / lokal). | `openbmb/VoxCPM2` |
-| **VOXCPM2_DEVICE** | Perangkat komputasi VoxCPM2 (`cpu` / `cuda`). | `cuda` |
-| **VOXCPM2_REFERENCE_AUDIO** | Path audio referensi untuk voice cloning. | `assets/voice_reference_processed.wav` |
-| **OLLAMA_BASE_URL** | Endpoint API LLM Ollama lokal/server. | `http://ollama:11434/v1` |
-| **OLLAMA_MODEL** | Model bahasa besar (LLM) yang digunakan. | `gpt-oss:120b-cloud` / `llama3.2:3b` |
-| **QDRANT_URL** | Alamat database vektor Qdrant. | `http://qdrant:6333` |
-| **QDRANT_COLLECTION** | Nama koleksi indeks RAG di Qdrant. | `viona_faq` |
-| **REDIS_URL** | Alamat caching Redis untuk melacak sesi percakapan. | `redis://redis:6379/0` |
-| **WHISPER_MODEL_SIZE** | Ukuran model transkripsi Faster-Whisper. | `large-v3` / `small` |
-| **WHISPER_LANGUAGE** | Bahasa default pendeteksian suara STT. | `id` |
-| **WHISPER_DEVICE** | Perangkat komputasi Whisper (`cpu` / `cuda` GPU). | `auto` |
+### 4. Mengakses Aplikasi
+Setelah semua berjalan (status di Docker berwarna hijau / `Running`), kamu bisa membuka browser dan mengunjungi:
+- **Website LMS Utama:** [http://localhost](http://localhost) (atau `http://localhost:8002` tergantung pengaturan Nginx-mu).
+- **Viona Widget:** Akan muncul di pojok kanan bawah pada halaman LMS.
 
 ---
 
-## 🛠️ Panduan Integrasi PIPECAT di Backend
+## 🛠️ Struktur Folder Penting
+- `/frontend`: Berisi antarmuka web (Next.js) dan widget *popup* Viona.
+- `/backend`: Berisi API (FastAPI) dan *Worker/Agent* pengolah suara (Pipecat & LiveKit).
+- `/website`: Berisi *dummy website* / *Landing page* / Sistem LMS (Laravel) tempat Viona ditanamkan.
+- `/docker`: Konfigurasi Nginx dan sistem Docker pendukung lainnya.
 
-Untuk memaksimalkan backend dalam menangani percakapan suara real-time berlatensi sangat rendah, Anda dapat mengintegrasikan **Pipecat** (kerangka kerja open-source untuk Voice Agent) ke dalam `backend/app/agents/worker.py`.
+## 🛑 Cara Mematikan Viona
+Untuk menghentikan semua layanan server, ketik perintah berikut di terminal:
+```bash
+docker compose down
+```
 
-### Mengapa Memakai Pipecat?
-Pipecat mempermudah pembuatan pipeline asisten suara berkonsep aliran data (*dataflow*):
-`Input Audio -> VAD (Voice Activity Detection) -> STT -> LLM -> TTS -> Output Audio`
-Ia secara otomatis menangani interupsi suara (ketika user memotong pembicaraan bot), buffering audio, dan antrean pesan secara asinkron.
-
-### Bagian Backend yang Dapat Diperbarui dengan Pipecat:
-
-1. **Pipeline Runner (`worker.py`)**:
-   Mengganti kelas worker bawaan LiveKit Agent dengan runner Pipecat:
-   ```python
-   from pipecat.processors.frameworks.livekit import LiveKitFrameSerializer
-   from pipecat.pipeline.runner import PipelineRunner
-   from pipecat.pipeline.pipeline import Pipeline
-
-   # Inisialisasi runner pipecat
-   runner = PipelineRunner()
-   ```
-
-2. **Inisialisasi Services bawaan Pipecat**:
-   Pipecat memiliki kelas adaptor bawaan untuk Ollama dan Whisper. Untuk TTS, gunakan VoxCPM2 dengan voice cloning:
-   ```python
-   from pipecat.services.ollama import OllamaLLMService
-   from pipecat.services.whisper import WhisperSTTService
-   from app.infrastructure.tts.voxcpml2 import create_voxcpml2_tts
-
-   # Buat instance service langsung
-   stt = WhisperSTTService(model="large-v3", language="id")
-   llm = OllamaLLMService(model="llama3.2:3b", base_url="http://ollama:11434")
-   tts = create_voxcpml2_tts(
-       model_name="openbmb/VoxCPM2",
-       reference_audio_path="assets/voice_reference_processed.wav",
-   )
-   ```
-
-3. **Manajemen Interupsi & VAD**:
-   Pipecat menyediakan penganalisis aktivitas suara (Silero VAD) yang secara cerdas mendeteksi saat manusia mulai berbicara dan segera menghentikan output audio TTS dari Viona:
-   ```python
-   from pipecat.vad.silero import SileroVADAnalyzer
-   
-   vad = SileroVADAnalyzer()
-   ```
-
-4. **Context & Tool Calling (Action Handler)**:
-   Anda dapat mendaftarkan fungsi Python biasa sebagai **Tools** di LLM Context Pipecat. Misalnya, jika siswa meminta tugas baru melalui suara, LLM dapat memicu fungsi backend untuk mengambil kuis secara otomatis:
-   ```python
-   async def fetch_lms_quiz(quiz_id: str):
-       # Logika mengambil kuis lms dari database
-       return {"quiz": "Selesaikan integral berikut..."}
-
-   # Daftarkan ke context LLM Pipecat
-   llm.register_action("get_quiz", fetch_lms_quiz)
-   ```
-
----
-
-## 🚀 Langkah Menjalankan Aplikasi
-
-1. **Salin & Isi Environment**:
-   ```bash
-   cp .env.example .env
-   ```
-2. **Jalankan Container**:
-   ```bash
-   docker compose up -d --build
-   ```
-3. **Unduh Model LLM Lokal**:
-   ```bash
-   docker compose exec ollama ollama pull llama3.2:3b
-   ```
-4. **Unggah Dokumen LMS per Materi & Versi**:
-   Kirimkan berkas `.pdf` Anda ke API Ingestion dengan parameter `material_id` dan `version`:
-   ```bash
-   curl -X POST http://localhost/ingest/pdf \
-     -F "file=@/path/ke/materi-matematika.pdf" \
-     -F "category=lms" \
-     -F "material_id=matematika" \
-     -F "version=v1"
-   ```
-5. Akses antarmuka visual Viona di browser melalui alamat **`http://localhost/`**.
-
----
-
-## 🧪 Pengujian
-
-Panduan uji lengkap (unit test, health check, end-to-end panggilan, uji TTS LaTeX, escalation/SIP, troubleshooting) ada di **[`docs/TESTING.md`](docs/TESTING.md)** — sudah berformat checklist QA dengan *expected result* per langkah.
-
----
-
-## ⚖️ Lisensi
-Aplikasi ini dilisensikan di bawah [MIT License](LICENSE).
+Selamat bereksplorasi dengan Viona! 🚀

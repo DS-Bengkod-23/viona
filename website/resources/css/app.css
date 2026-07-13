@@ -221,8 +221,9 @@ textarea {
 }
 
 .lms-app.sidebar-collapsed .sidebar-toggle {
-    right: -44px;
-    border-radius: 7px;
+    right: calc(-28px - var(--sidebar));
+    border-radius: 7px 0 0 7px;
+    transform: scaleX(-1);
 }
 
 .lesson-shell {
