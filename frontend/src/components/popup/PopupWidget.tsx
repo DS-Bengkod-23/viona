@@ -13,9 +13,11 @@ import { TranscriptMode } from "./TranscriptMode"
 export function PopupWidget() {
   const [isOpen, setIsOpen] = useState(false)
   const [mode, setMode] = useState<"voice" | "transcript">("voice")
+  const [lmsContext, setLmsContext] = useState<string>("")
+  const [quotedText, setQuotedText] = useState<string>("")
   const router = useRouter()
   
-  const voiceConnection = useNativeVoiceConnection()
+  const voiceConnection = useNativeVoiceConnection(lmsContext)
   const { connectionState, connect, disconnect } = voiceConnection
 
   // Connect when popup opens
@@ -31,6 +33,25 @@ export function PopupWidget() {
       window.parent.postMessage({ type: 'viona-resize', isOpen }, '*')
     }
   }, [isOpen])
+
+  // Listen for lms-context and viona-quote from parent iframe
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'viona-context') {
+        setLmsContext(event.data.text || "")
+      } else if (event.data && event.data.type === 'viona-quote') {
+        setQuotedText(event.data.text || "")
+        setQuotedText(event.data.text || "")
+        setIsOpen(true) // Open widget automatically
+        setMode("transcript") // Switch to transcript mode
+      }
+    }
+    
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [])
 
   const handleMaximize = () => {
     // Navigate to dashboard in a new tab since we are in an iframe
@@ -94,7 +115,11 @@ export function PopupWidget() {
                 mode === "voice" ? (
                   <VoiceMode voiceConnection={voiceConnection} />
                 ) : (
-                  <TranscriptMode voiceConnection={voiceConnection} />
+                  <TranscriptMode 
+                    voiceConnection={voiceConnection} 
+                    quotedText={quotedText}
+                    setQuotedText={setQuotedText}
+                  />
                 )
               ) : (
                 <div className="flex-1 flex items-center justify-center p-6 text-center">

@@ -16,7 +16,7 @@ export interface Message {
 export type ConnectionState = "disconnected" | "connected"
 export type AgentState = "idle" | "listening" | "thinking" | "speaking"
 
-export function useNativeVoiceConnection() {
+export function useNativeVoiceConnection(lmsContext: string = "") {
   const [messages, setMessages] = useState<Message[]>([])
   const [connectionState, setConnectionState] = useState<ConnectionState>("disconnected")
   const [agentState, setAgentState] = useState<AgentState>("idle")
@@ -246,7 +246,7 @@ export function useNativeVoiceConnection() {
       const res = await fetch("/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userText, material_id: "matematika", version: "v1" }),
+        body: JSON.stringify({ message: userText, material_id: "matematika", version: "v1", lms_context: lmsContext }),
       })
       if (res.ok) {
         const data = await res.json()
@@ -268,7 +268,7 @@ export function useNativeVoiceConnection() {
     }
     setMessages(prev => [...prev, assistantMessage])
     speak(response)
-  }, [speak, stopListening])
+  }, [speak, stopListening, lmsContext])
 
   // Explicit text submission (from chat UI)
   const sendText = useCallback((text: string) => {

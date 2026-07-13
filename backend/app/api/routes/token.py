@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 from livekit.api import AccessToken, VideoGrants
 
 from app.core.config import settings
@@ -10,11 +11,17 @@ from app.core.config import settings
 router = APIRouter(prefix="/api", tags=["livekit"])
 
 
-@router.get("/token")
-async def get_token(
-    room: str = Query(default="", description="LiveKit room name"),
-    identity: str = Query(default="", description="Participant identity"),
-) -> dict:
+class TokenRequest(BaseModel):
+    room: str = ""
+    identity: str = ""
+    lms_context: str = ""
+
+@router.post("/token")
+async def get_token(req: TokenRequest) -> dict:
+    room = req.room
+    identity = req.identity
+    lms_context = req.lms_context
+
     if not room:
         room = f"support-{uuid.uuid4().hex[:8]}"
     if not identity:
@@ -45,7 +52,11 @@ async def get_token(
     import urllib.request
     import urllib.parse
     try:
-        data = urllib.parse.urlencode({"room_name": room, "identity": identity}).encode('utf-8')
+        data = urllib.parse.urlencode({
+            "room_name": room, 
+            "identity": identity,
+            "lms_context": lms_context
+        }).encode('utf-8')
         req = urllib.request.Request("http://viona-agent:8081/dev/spawn", data=data)
         urllib.request.urlopen(req, timeout=5)
     except Exception as e:

@@ -56,9 +56,9 @@ def create_app() -> FastAPI:
         return Response(content=body, media_type=content_type)
 
     @app.post("/dev/spawn")
-    async def dev_spawn(room_name: str = Form(...), identity: str = Form(...)) -> dict:
+    async def dev_spawn(room_name: str = Form(...), identity: str = Form(...), lms_context: str = Form("")) -> dict:
         logger.info("dev spawn triggered", room=room_name, identity=identity)
-        asyncio.create_task(_spawn(room_name, identity))
+        asyncio.create_task(_spawn(room_name, identity, lms_context))
         return {"spawned": True}
 
     @app.post("/webhooks/livekit")
@@ -78,16 +78,17 @@ def create_app() -> FastAPI:
         # Spawn a bot when a human caller joins (ignore the bot's own join).
         if event.event == "participant_joined" and identity != BOT_IDENTITY and room_name:
             logger.info("caller joined, spawning bot", room=room_name, identity=identity)
-            asyncio.create_task(_spawn(room_name, identity))
+            # When spawned via LiveKit webhook directly, lms_context is empty
+            asyncio.create_task(_spawn(room_name, identity, ""))
 
         return {"received": True}
 
     return app
 
 
-async def _spawn(room_name: str, identity: str) -> None:
+async def _spawn(room_name: str, identity: str, lms_context: str = "") -> None:
     try:
-        await run_bot_for_room(room_name, customer_phone=identity)
+        await run_bot_for_room(room_name, customer_phone=identity, lms_context=lms_context)
     except Exception as exc:  # noqa: BLE001
         logger.error("bot run failed", room=room_name, error=str(exc))
 

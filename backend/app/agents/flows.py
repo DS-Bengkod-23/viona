@@ -35,10 +35,10 @@ def _fn(
     )
 
 
-def create_support_node() -> NodeConfig:
+def create_support_node(lms_context: str = "") -> NodeConfig:
     return {
         "name": "support",
-        "role_message": build_support_prompt(),
+        "role_message": build_support_prompt(lms_context=lms_context),
         "task_messages": [
             {
                 "role": "system",

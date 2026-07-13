@@ -1,14 +1,16 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from "react"
-import { Send, ChevronDown, ChevronUp } from "lucide-react"
+import { Send, ChevronDown, ChevronUp, X } from "lucide-react"
 import { Message } from "@/hooks/useNativeVoiceConnection"
 
 interface TranscriptModeProps {
   voiceConnection: any
+  quotedText?: string
+  setQuotedText?: (text: string) => void
 }
 
-export function TranscriptMode({ voiceConnection }: TranscriptModeProps) {
+export function TranscriptMode({ voiceConnection, quotedText = "", setQuotedText }: TranscriptModeProps) {
   const { messages, sendText, connectionState } = voiceConnection
   const [inputText, setInputText] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -22,8 +24,16 @@ export function TranscriptMode({ voiceConnection }: TranscriptModeProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (inputText.trim() && connectionState === "connected") {
-      sendText(inputText)
+    if ((inputText.trim() || quotedText.trim()) && connectionState === "connected") {
+      let finalMessage = inputText.trim();
+      
+      if (quotedText.trim()) {
+        finalMessage = `Tolong jelaskan bagian ini:\n"${quotedText}"\n\n${finalMessage}`;
+        // Clear quoted text after sending
+        if (setQuotedText) setQuotedText("");
+      }
+      
+      sendText(finalMessage)
       setInputText("")
     }
   }
@@ -50,6 +60,27 @@ export function TranscriptMode({ voiceConnection }: TranscriptModeProps) {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Quoted Text Area */}
+      {quotedText && (
+        <div className="px-4 py-2 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 relative">
+          <div className="flex items-start justify-between">
+            <div className="pr-6">
+              <span className="text-[10px] font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1 block">Teks Sorotan</span>
+              <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 italic border-l-2 border-purple-500 pl-2">
+                "{quotedText}"
+              </p>
+            </div>
+            <button 
+              onClick={() => setQuotedText && setQuotedText("")}
+              className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors absolute right-4 top-2 text-slate-500"
+              title="Hapus Kutipan"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Input Area */}
       <form onSubmit={handleSubmit} className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex gap-2 items-center">
         <input
@@ -62,7 +93,7 @@ export function TranscriptMode({ voiceConnection }: TranscriptModeProps) {
         />
         <button
           type="submit"
-          disabled={!inputText.trim() || connectionState !== "connected"}
+          disabled={(!inputText.trim() && !quotedText.trim()) || connectionState !== "connected"}
           className="w-10 h-10 rounded-full bg-purple-600 hover:bg-purple-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 flex items-center justify-center text-white transition-colors"
         >
           <Send className="w-4 h-4" />

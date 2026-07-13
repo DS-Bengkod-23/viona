@@ -6,7 +6,7 @@ import { Room } from "livekit-client"
 export type ConnectionState = "disconnected" | "connecting" | "connected" | "error"
 export type AgentState = "idle" | "listening" | "thinking" | "speaking"
 
-export function useLiveKitConnection() {
+export function useLiveKitConnection(lmsContext: string = "") {
   const [connectionState, setConnectionState] = useState<ConnectionState>("disconnected")
   const [agentState, setAgentState] = useState<AgentState>("idle")
   // We no longer manage the room manually to match the Maximize (VoiceAgent) behavior
@@ -20,8 +20,12 @@ export function useLiveKitConnection() {
       setConnectionState("connecting")
       setError(null)
 
-      // Fetch token from backend via Nginx proxy
-      const res = await fetch("/api/token")
+      // Fetch token from backend via Nginx proxy using POST to send context
+      const res = await fetch("/api/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lms_context: lmsContext })
+      })
       if (!res.ok) {
         throw new Error("Failed to fetch LiveKit token")
       }
@@ -40,7 +44,7 @@ export function useLiveKitConnection() {
       setError(err.message || "Failed to connect to LiveKit")
       setConnectionState("error")
     }
-  }, [])
+  }, [lmsContext])
 
   const disconnect = useCallback(async () => {
     setConnectionState("disconnected")

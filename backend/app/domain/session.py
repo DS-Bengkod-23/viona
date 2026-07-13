@@ -24,3 +24,4 @@ class VionaSession:
     complaint_count: int = 0
     escalated: bool = False
     retriever: RAGRetriever | None = None
+    lms_context: str = ""

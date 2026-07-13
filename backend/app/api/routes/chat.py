@@ -18,6 +18,7 @@ class ChatRequest(BaseModel):
     message: str
     material_id: str | None = None  # filter RAG per-materi LMS (mis. "matematika")
     version: str | None = None      # filter RAG per-versi (mis. "v1")
+    lms_context: str | None = None  # text context directly injected from the web page
 
 
 async def _retrieve_context(query: str, material_id: str | None, version: str | None) -> str:
@@ -48,36 +49,56 @@ async def chat_with_viona(body: ChatRequest) -> dict:
         raise HTTPException(status_code=400, detail="Message must not be empty")
 
     t_rag = perf_counter()
-    context = await _retrieve_context(body.message, body.material_id, body.version)
-    rag_ms = (perf_counter() - t_rag) * 1000
-
-    if not context:
+    if body.lms_context and body.lms_context.strip():
+        # Context Injection takes priority over RAG
+        context = body.lms_context.strip()
+        rag_ms = (perf_counter() - t_rag) * 1000
+        
         system_prompt = (
-            "Anda adalah Viona, asisten virtual yang ramah dan berbahasa Indonesia.\n"
-            "Konteks dari database kosong. Silakan jawab pertanyaan pengguna menggunakan "
-            "pengetahuan umum Anda secara ringkas, jujur, dan edukatif.\n\n"
-            "ATURAN PENTING:\n"
-            "- JANGAN PERNAH memulai jawaban dengan sapaan seperti 'Halo' atau memperkenalkan diri (misal 'Saya Viona').\n"
-            "- Langsung berikan jawaban dari pertanyaan yang diajukan tanpa basa-basi pengenalan diri."
+            "Anda adalah Viona, asisten virtual cerdas untuk LMS Bengkel Koding.\n"
+            "Tugas utama Anda adalah membantu menjawab pertanyaan siswa MURNI BERDASARKAN "
+            "materi pelajaran yang sedang mereka buka di layar.\n\n"
+            "ATURAN KETAT (PENTING):\n"
+            "1. Jika pertanyaan siswa BISA DIJAWAB menggunakan informasi pada KONTEKS MATERI, "
+            "berikan jawaban yang jelas dan edukatif berdasarkan teks tersebut.\n"
+            "2. Jika pertanyaan siswa SAMA SEKALI TIDAK ADA di dalam KONTEKS MATERI, Anda DILARANG KERAS "
+            "menggunakan pengetahuan umum Anda untuk menjawab. Anda HARUS MENOLAK dengan ramah "
+            "dan menyatakan bahwa pertanyaan tersebut berada di luar materi yang sedang dibaca.\n"
+            "3. JANGAN PERNAH memulai jawaban dengan sapaan seperti 'Halo' atau memperkenalkan diri.\n"
+            "4. JANGAN menebak-nebak jawaban."
         )
+        context_block = f"KONTEKS MATERI LMS SAAT INI:\n{context}\n\n"
     else:
-        system_prompt = (
-            "Anda adalah Viona, asisten virtual LMS yang membantu, ramah, dan berbicara "
-            "dengan bahasa Indonesia yang natural.\n"
-            "Gunakan informasi pada bagian KONTEKS untuk menjawab bila relevan. "
-            "Jika konteks tidak memuat jawabannya, Anda DIPERBOLEHKAN menggunakan "
-            "pengetahuan umum Anda sendiri untuk menjawab pertanyaan dengan jujur, "
-            "edukatif, dan sopan.\n\n"
-            "ATURAN PENTING:\n"
-            "- JANGAN PERNAH memulai jawaban dengan sapaan seperti 'Halo' atau memperkenalkan diri (misal 'Saya Viona').\n"
-            "- Langsung berikan jawaban dari pertanyaan yang diajukan tanpa basa-basi pengenalan diri."
-        )
+        context = await _retrieve_context(body.message, body.material_id, body.version)
+        rag_ms = (perf_counter() - t_rag) * 1000
 
-    context_block = (
-        f"KONTEKS:\n{context}\n\n"
-        if context
-        else ""
-    )
+        if not context:
+            system_prompt = (
+                "Anda adalah Viona, asisten virtual yang ramah dan berbahasa Indonesia.\n"
+                "Konteks dari database kosong. Silakan jawab pertanyaan pengguna menggunakan "
+                "pengetahuan umum Anda secara ringkas, jujur, dan edukatif.\n\n"
+                "ATURAN PENTING:\n"
+                "- JANGAN PERNAH memulai jawaban dengan sapaan seperti 'Halo' atau memperkenalkan diri (misal 'Saya Viona').\n"
+                "- Langsung berikan jawaban dari pertanyaan yang diajukan tanpa basa-basi pengenalan diri."
+            )
+        else:
+            system_prompt = (
+                "Anda adalah Viona, asisten virtual LMS yang membantu, ramah, dan berbicara "
+                "dengan bahasa Indonesia yang natural.\n"
+                "Gunakan informasi pada bagian KONTEKS untuk menjawab bila relevan. "
+                "Jika konteks tidak memuat jawabannya, Anda DIPERBOLEHKAN menggunakan "
+                "pengetahuan umum Anda sendiri untuk menjawab pertanyaan dengan jujur, "
+                "edukatif, dan sopan.\n\n"
+                "ATURAN PENTING:\n"
+                "- JANGAN PERNAH memulai jawaban dengan sapaan seperti 'Halo' atau memperkenalkan diri (misal 'Saya Viona').\n"
+                "- Langsung berikan jawaban dari pertanyaan yang diajukan tanpa basa-basi pengenalan diri."
+            )
+
+        context_block = (
+            f"KONTEKS:\n{context}\n\n"
+            if context
+            else ""
+        )
 
     # Gunakan native Ollama API (/api/chat)
     ollama_url = f"{settings.ollama_base_url.rstrip('/')}/api/chat"

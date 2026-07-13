@@ -113,7 +113,7 @@ class TranscriptLogger(FrameProcessor):
             logger.error("transcript log failed", error=str(exc))
 
 
-async def run_bot_for_room(room_name: str, customer_phone: str = "") -> None:
+async def run_bot_for_room(room_name: str, customer_phone: str = "", lms_context: str = "") -> None:
     """Join ``room_name`` and run the voice pipeline until the call ends."""
     if room_name in _active_rooms:
         logger.info("bot already active for room, skipping", room=room_name)
@@ -123,7 +123,7 @@ async def run_bot_for_room(room_name: str, customer_phone: str = "") -> None:
     logger.info("starting pipecat bot", room=room_name)
     retriever = await get_rag_retriever()
     session = VionaSession(
-        room_name=room_name, customer_phone=customer_phone, retriever=retriever
+        room_name=room_name, customer_phone=customer_phone, retriever=retriever, lms_context=lms_context
     )
 
     transport = LiveKitTransport(
@@ -188,7 +188,7 @@ async def run_bot_for_room(room_name: str, customer_phone: str = "") -> None:
                 "status": "active",
             },
         )
-        await flow_manager.initialize(create_support_node())
+        await flow_manager.initialize(create_support_node(lms_context=lms_context))
 
     @transport.event_handler("on_participant_disconnected")
     async def _on_left(_transport, participant) -> None:  # noqa: ANN001
