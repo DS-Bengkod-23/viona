@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 import structlog
 import uvicorn
@@ -10,7 +10,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api.routes import health, ingestion, sessions, token, webhooks, chat
+from app.api.routes import chat, health, ingestion, sessions, token
 from app.core.config import settings
 from app.core.logging import configure_logging
 from app.infrastructure.rag.retriever import get_rag_retriever
@@ -75,7 +75,6 @@ def create_app() -> FastAPI:
     app.include_router(token.router)
     app.include_router(sessions.router)
     app.include_router(ingestion.router)
-    app.include_router(webhooks.router)
     app.include_router(chat.router)
 
     return app

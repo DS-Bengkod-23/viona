@@ -1,15 +1,16 @@
-"""Tool handlers for the Pipecat voice agent.
+"""Tool handlers for the Viona voice agent.
 
-These are the function-calling tools the LLM can invoke, ported from the
-LiveKit ``@function_tool`` methods on ``CustomerSupportAgent`` /
-``HumanEscalationAgent`` into plain async handlers that follow the
-pipecat-flows convention:
+Only ``search_faq`` remains — RAG is **parked** (the LMS pivot answers from injected
+page context, not vector search), so this tool is not currently exposed on any flow
+node but is kept for when/if RAG is re-wired. Customer-service handlers (customer
+info, complaints, human escalation) were removed with the pivot.
+
+Convention (pipecat-flows):
 
     async def handler(args: dict, flow_manager: FlowManager)
         -> tuple[result, next_node | None]
 
-Shared per-call state lives in ``flow_manager.state["session"]`` as a
-``VionaSession``.
+Shared per-call state lives in ``flow_manager.state["session"]`` as a ``VionaSession``.
 """
 from __future__ import annotations
 
@@ -20,7 +21,6 @@ import structlog
 from app.core.config import settings
 from app.domain.session import VionaSession
 from app.infrastructure.metrics.prometheus import rag_queries_total
-from app.infrastructure.session.store import get_session_store
 from app.prompts.indonesian import build_rag_context
 
 if TYPE_CHECKING:
@@ -36,7 +36,7 @@ def _session(flow_manager: FlowManager) -> VionaSession:
 
 
 async def search_faq(args: dict, flow_manager: FlowManager) -> ToolResult:
-    """Cari informasi relevan dari basis pengetahuan (RAG)."""
+    """Cari informasi relevan dari basis pengetahuan (RAG — parked)."""
     query = args["query"]
     session = _session(flow_manager)
     if session.retriever is None:
@@ -47,32 +47,3 @@ async def search_faq(args: dict, flow_manager: FlowManager) -> ToolResult:
     if not results:
         return "Tidak ada informasi relevan ditemukan untuk pertanyaan ini.", None
     return build_rag_context(results), None
-
-
-async def get_customer_info(args: dict, flow_manager: FlowManager) -> ToolResult:
-    """Ambil informasi sesi pelanggan saat ini dari memori."""
-    session = _session(flow_manager)
-    store = await get_session_store()
-    data = await store.get(session.session_id)
-    if not data:
-        return "Tidak ada data pelanggan yang tersimpan untuk sesi ini.", None
-
-    lines = [f"Session ID: {session.session_id}"]
-    if data.get("customer_phone"):
-        lines.append(f"Nomor telepon: {data['customer_phone']}")
-    if data.get("customer_name"):
-        lines.append(f"Nama: {data['customer_name']}")
-    if data.get("complaints"):
-        lines.append(f"Keluhan sebelumnya: {len(data['complaints'])} item")
-    return "\n".join(lines), None
-
-
-async def save_customer_name(args: dict, flow_manager: FlowManager) -> ToolResult:
-    """Simpan nama pelanggan ke memori sesi."""
-    name = args["name"]
-    session = _session(flow_manager)
-    session.customer_name = name
-    store = await get_session_store()
-    await store.update(session.session_id, {"customer_name": name})
-    logger.info("customer name saved", name=name, session=session.session_id)
-    return f"Nama pelanggan '{name}' sudah dicatat.", None

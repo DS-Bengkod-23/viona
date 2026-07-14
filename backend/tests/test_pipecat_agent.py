@@ -68,15 +68,13 @@ async def test_search_faq_without_retriever():
     assert "tidak tersedia" in result.lower()
 
 
-def test_support_node_has_expected_tools():
-    node = flows.create_support_node()
+def test_support_node_injects_lms_context_and_has_no_tools():
+    # LMS pivot: answers come from injected lms_context, not from tools.
+    node = flows.create_support_node(lms_context="Materi: dasar HTML dan tag <p>.")
     assert node["name"] == "support"
-    names = {f.name for f in node["functions"]}
-    assert names == {
-        "search_faq",
-        "get_customer_info",
-        "save_customer_name",
-    }
+    assert node["functions"] == []
+    assert "KONTEKS MATERI" in node["role_message"]
+    assert "dasar HTML" in node["role_message"]
 
 
 def test_session_state_defaults():

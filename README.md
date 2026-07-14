@@ -6,8 +6,8 @@ Selamat datang di repositori **Viona**! Viona adalah asisten virtual cerdas berb
 1. **Interactive Voice Assistant**: Berbicara langsung dengan AI secara *real-time* menggunakan WebRTC (LiveKit).
 2. **Text Chat Mode**: Mode chat teks biasa layaknya ChatGPT.
 3. **Context-Aware (LMS Integration)**: AI bisa mengenali dan membaca materi yang sedang dibuka oleh pengguna di LMS.
-4. **Pipecat Pipeline**: Pemrosesan suara pintar menggunakan Faster-Whisper (Speech-to-Text), Ollama (LLM Inference), dan Cartesia/VoxCPM2 (Text-to-Speech).
-5. **RAG Ready (Opsional)**: Dukungan *Retrieval-Augmented Generation* menggunakan Qdrant Vector Database.
+4. **Pipecat Pipeline**: Pemrosesan suara menggunakan Faster-Whisper (Speech-to-Text), Ollama (LLM Inference), dan **Cartesia** (Text-to-Speech cloud — engine aktif; VoxCPM2 lokal adalah opsi cadangan yang belum di-wire, butuh GPU).
+5. **RAG (Di-park)**: Infrastruktur *Retrieval-Augmented Generation* (Qdrant) tersedia tapi **di-park** — jalur LMS menjawab dari *context-injection* konten halaman, bukan vector search. Qdrant mati secara default (`--profile rag` untuk menyalakan).
 
 ---
 

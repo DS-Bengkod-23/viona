@@ -19,11 +19,14 @@ class Settings(BaseSettings):
     livekit_api_key: str = Field(...)
     livekit_api_secret: str = Field(...)
 
-    # Cartesia TTS
+    # Cartesia TTS (cloud) — the ACTIVE TTS engine (sonic-multilingual, low-latency,
+    # no GPU). VoxCPM2 below is a parked local alternative (see docs/ENV_PROFILES.md).
     cartesia_api_key: str = Field(default="")
-    cartesia_voice_id: str = Field(default="694f9389-aac1-45b6-b726-9d9369183238") # Default indonesian/female/friendly if available
+    # Default Indonesian female/friendly voice (if available on the account).
+    cartesia_voice_id: str = Field(default="694f9389-aac1-45b6-b726-9d9369183238")
 
-    # VoxCPM2 TTS (local, with voice cloning)
+    # VoxCPM2 TTS (local, with voice cloning) — PARKED alternative, not wired into
+    # _build_tts (which uses Cartesia). Backlogged to GPU (task D).
     # NOTE: defaults are DEV-SAFE (CPU). The prod profile opts into GPU explicitly
     # (voxcpm2_device=cuda). See docs/ENV_PROFILES.md. VoxCPM2 is heavy and needs a
     # GPU to be usable; dev typically sets voxcpm2_enabled=false.
@@ -58,12 +61,6 @@ class Settings(BaseSettings):
     api_host: str = Field(default="0.0.0.0")
     api_port: int = Field(default=8000)
     api_secret_key: str = Field(default="change-me-in-production")
-
-    # Twilio
-    twilio_account_sid: str = Field(default="")
-    twilio_auth_token: str = Field(default="")
-    twilio_phone_number: str = Field(default="")
-    twilio_sip_trunk_sid: str = Field(default="")
 
     # Faster-Whisper STT
     # DEV-SAFE defaults: device=auto (picks CPU when no CUDA), compute_type=int8
