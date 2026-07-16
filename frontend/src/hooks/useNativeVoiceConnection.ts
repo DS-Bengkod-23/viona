@@ -16,6 +16,19 @@ export interface Message {
 export type ConnectionState = "disconnected" | "connected"
 export type AgentState = "idle" | "listening" | "thinking" | "speaking"
 
+export interface InsightBubble {
+  type: "insight" | "mnemonic" | "formula" | "warning"
+  text: string
+}
+
+// Bubble tampil 8-10 detik setelah muncul, mulai 2-3 detik setelah Viona selesai bicara.
+const BUBBLE_SHOW_DELAY_MS = 2500
+const BUBBLE_VISIBLE_MS = 9000
+
+// Jumlah pesan terakhir (gabungan user+assistant) yang dikirim sebagai riwayat
+// percakapan ke backend, supaya pertanyaan lanjutan tetap paham konteks topik.
+const HISTORY_TURNS = 6
+
 export function useNativeVoiceConnection(lmsContext: string = "") {
   const [messages, setMessages] = useState<Message[]>([])
   const [connectionState, setConnectionState] = useState<ConnectionState>("disconnected")
@@ -23,13 +36,29 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
   const [isMuted, setIsMuted] = useState(false)
   const [interimText, setInterimText] = useState("")
   const [sttError, setSttError] = useState("")
-  
+  const [activeBubble, setActiveBubble] = useState<InsightBubble | null>(null)
+  const [activeImage, setActiveImage] = useState<string | null>(null)
+
   const synthRef = useRef<SpeechSynthesis | null>(null)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
   const micStreamRef = useRef<MediaStream | null>(null)
   const finalTranscriptRef = useRef("")
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
+  // startListening is memoized once (deps never change) and calls processUserInput
+  // from inside a closure created on mount — without this ref indirection it would
+  // permanently call the FIRST processUserInput, frozen with lmsContext="" from
+  // mount time, even after lmsContext updates from the LMS page's postMessage.
+  const processUserInputRef = useRef<(text: string) => void>(() => {})
+  const pendingBubblesRef = useRef<InsightBubble[]>([])
+  const pendingImageRef = useRef<string | null>(null)
+  const bubbleQueueRef = useRef<InsightBubble[]>([])
+  const bubbleShowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const bubbleHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Mirror of `messages` for reading inside processUserInput's closure — that
+  // callback isn't recreated when messages changes (see its deps below), so a
+  // direct `messages` read there would be stale. Same pattern as stateRef.
+  const messagesRef = useRef<Message[]>([])
 
   // Ref mirrors to avoid stale closures inside event listeners
   const stateRef = useRef({
@@ -46,6 +75,10 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     stateRef.current.isMuted = isMuted
   }, [connectionState, agentState, isMuted])
 
+  useEffect(() => {
+    messagesRef.current = messages
+  }, [messages])
+
   // Initialize SpeechSynthesis
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -59,6 +92,60 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
       silenceTimerRef.current = null
     }
   }, [])
+
+  const clearBubbleTimers = useCallback(() => {
+    if (bubbleShowTimerRef.current) {
+      clearTimeout(bubbleShowTimerRef.current)
+      bubbleShowTimerRef.current = null
+    }
+    if (bubbleHideTimerRef.current) {
+      clearTimeout(bubbleHideTimerRef.current)
+      bubbleHideTimerRef.current = null
+    }
+  }, [])
+
+  // Menampilkan bubble berikutnya dari antrean, lalu menjadwalkan diri sendiri
+  // lagi setelah BUBBLE_VISIBLE_MS — sehingga beberapa bubble (mis. formula +
+  // mnemonic) tampil bergantian satu per satu, bukan sekaligus menumpuk.
+  const showNextBubble = useCallback(() => {
+    const queue = bubbleQueueRef.current
+    if (queue.length === 0) {
+      setActiveBubble(null)
+      setActiveImage(null)
+      return
+    }
+    const [next, ...rest] = queue
+    bubbleQueueRef.current = rest
+    setActiveBubble(next)
+    bubbleHideTimerRef.current = setTimeout(showNextBubble, BUBBLE_VISIBLE_MS)
+  }, [])
+
+  // Bubble gambar (chart) tampil bersamaan dengan bubble teks pertama, dan
+  // tetap terlihat selama antrean bubble teks masih berjalan — hilang bareng
+  // saat antrean habis (lihat showNextBubble) atau saat konteks berubah.
+  const scheduleBubbles = useCallback((bubbles: InsightBubble[], image: string | null = null) => {
+    clearBubbleTimers()
+    setActiveBubble(null)
+    setActiveImage(null)
+    bubbleQueueRef.current = []
+    if (!bubbles || bubbles.length === 0) return
+    bubbleQueueRef.current = bubbles
+    bubbleShowTimerRef.current = setTimeout(() => {
+      setActiveImage(image)
+      showNextBubble()
+    }, BUBBLE_SHOW_DELAY_MS)
+  }, [clearBubbleTimers, showNextBubble])
+
+  // Konteks materi berubah (user pindah artikel/halaman) -> bubble yang sedang
+  // tampil tidak relevan lagi, sembunyikan segera.
+  useEffect(() => {
+    clearBubbleTimers()
+    setActiveBubble(null)
+    setActiveImage(null)
+    bubbleQueueRef.current = []
+    pendingBubblesRef.current = []
+    pendingImageRef.current = null
+  }, [lmsContext, clearBubbleTimers])
 
   const stopListening = useCallback(() => {
     clearSilenceTimer()
@@ -103,7 +190,7 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
         setInterimText("")
         if (text.length >= MIN_CHARS && !stateRef.current.isBotSpeaking && !stateRef.current.isProcessing) {
           recognition.stop()
-          processUserInput(text)
+          processUserInputRef.current(text)
         }
       }, SILENCE_MS)
     }
@@ -233,6 +320,14 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     stopListening()
     setAgentState("thinking")
 
+    // Ambil beberapa giliran terakhir SEBELUM menambahkan pesan user yang baru,
+    // supaya backend punya konteks percakapan untuk pertanyaan lanjutan yang
+    // merujuk jawaban sebelumnya tanpa mengulang kata kunci topiknya.
+    const history = messagesRef.current.slice(-HISTORY_TURNS).map(m => ({
+      role: m.role,
+      content: m.content,
+    }))
+
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
@@ -242,15 +337,19 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     setMessages(prev => [...prev, userMessage])
 
     let response = ""
+    pendingBubblesRef.current = []
+    pendingImageRef.current = null
     try {
       const res = await fetch("/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userText, material_id: "matematika", version: "v1", lms_context: lmsContext }),
+        body: JSON.stringify({ message: userText, material_id: "matematika", version: "v1", lms_context: lmsContext, history }),
       })
       if (res.ok) {
         const data = await res.json()
         response = data.response
+        pendingBubblesRef.current = data.bubbles ?? []
+        pendingImageRef.current = data.image ?? null
       } else {
         throw new Error("Backend error status: " + res.status)
       }
@@ -267,8 +366,19 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
       timestamp: new Date(),
     }
     setMessages(prev => [...prev, assistantMessage])
+    // Dijadwalkan langsung begitu jawaban tiba — TIDAK menunggu event 'onend' dari
+    // speechSynthesis, karena beberapa browser tidak pernah memicu onend/onerror
+    // kalau tidak ada output audio (mis. speaker mati), sehingga bubble bisa macet
+    // selamanya kalau ditaruh di situ.
+    scheduleBubbles(pendingBubblesRef.current, pendingImageRef.current)
     speak(response)
-  }, [speak, stopListening, lmsContext])
+  }, [speak, stopListening, lmsContext, scheduleBubbles])
+
+  // Keep the ref pointed at the latest processUserInput (current lmsContext) so
+  // startListening's frozen closure always dispatches through up-to-date logic.
+  useEffect(() => {
+    processUserInputRef.current = processUserInput
+  }, [processUserInput])
 
   // Explicit text submission (from chat UI)
   const sendText = useCallback((text: string) => {
@@ -306,11 +416,17 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     stopListening()
     micStreamRef.current?.getTracks().forEach(t => t.stop())
     micStreamRef.current = null
-    
+    clearBubbleTimers()
+    pendingBubblesRef.current = []
+    pendingImageRef.current = null
+    bubbleQueueRef.current = []
+
     setConnectionState("disconnected")
     setAgentState("idle")
     setMessages([])
-  }, [stopListening])
+    setActiveBubble(null)
+    setActiveImage(null)
+  }, [stopListening, clearBubbleTimers])
 
   const toggleMute = useCallback(() => {
     const newMuted = !isMuted
@@ -330,6 +446,8 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     interimText,
     sttError,
     isMuted,
+    activeBubble,
+    activeImage,
     connect,
     disconnect,
     sendText,

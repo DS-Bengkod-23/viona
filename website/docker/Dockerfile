@@ -13,9 +13,13 @@ RUN apt-get update && apt-get install -y \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Install Node.js (v20) and npm
+# NodeSource's nodejs package only ships corepack shims, not a direct `npm`
+# binary — `corepack enable npm` links /usr/bin/npm so `npm install`/`npm run
+# build` in start.sh actually resolve.
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && corepack enable npm
 
 WORKDIR /app
 

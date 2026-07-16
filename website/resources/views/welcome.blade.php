@@ -50,17 +50,17 @@
     </div>
 
     <!-- Viona AI Assistant Widget -->
-    <iframe id="viona-widget" src="/dashboard/widget" 
-            allow="microphone" 
-            style="position:fixed; bottom:0; right:0; width:100px; height:100px; border:none; z-index:9999; background:transparent; transition: all 0.3s ease;">
+    <iframe id="viona-widget" src="/dashboard/widget"
+            allow="microphone"
+            style="position:fixed; bottom:0; right:0; width:210px; height:220px; border:none; z-index:9999; background:transparent; transition: all 0.3s ease;">
     </iframe>
     <script>
         window.addEventListener('message', function(event) {
             if (event.data && event.data.type === 'viona-resize') {
                 const widget = document.getElementById('viona-widget');
                 if (event.data.isOpen) {
-                    widget.style.width = '420px';
-                    widget.style.height = '600px';
+                    widget.style.width = '560px';
+                    widget.style.height = '630px';
                     
                     // Inject Context: Send lesson content to Viona Widget
                     const lessonContent = document.getElementById('lesson-content');
@@ -73,8 +73,8 @@
                         }, '*');
                     }
                 } else {
-                    widget.style.width = '100px';
-                    widget.style.height = '100px';
+                    widget.style.width = '210px';
+                    widget.style.height = '220px';
                 }
             }
         });

@@ -1,0 +1,43 @@
+# Jangan kirim folder-folder ini ke Docker build context
+# (mempercepat build dan mencegah state lokal menimpa hasil build di container)
+
+# Virtual environment lokal — akan di-install ulang di dalam container via uv/pip
+.venv/
+venv/
+
+# Git
+.git/
+.gitignore
+
+# Python cache & artefak
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Model / weight caches lokal (akan di-download ulang di container / lewat volume)
+.cache/
+
+# Testing
+tests/
+
+# Editor & OS
+.DS_Store
+*.log
+.vscode/
+.idea/
+
+# Docs (kecuali README.md - dibutuhkan pyproject.toml [project.readme] oleh hatchling)
+*.md
+!README.md

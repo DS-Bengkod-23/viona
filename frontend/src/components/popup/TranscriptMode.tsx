@@ -65,8 +65,8 @@ export function TranscriptMode({ voiceConnection, quotedText = "", setQuotedText
         <div className="px-4 py-2 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 relative">
           <div className="flex items-start justify-between">
             <div className="pr-6">
-              <span className="text-[10px] font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1 block">Teks Sorotan</span>
-              <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 italic border-l-2 border-purple-500 pl-2">
+              <span className="text-[10px] font-semibold text-violet-600 dark:text-violet-400 uppercase tracking-wider mb-1 block">Teks Sorotan</span>
+              <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 italic border-l-2 border-violet-500 pl-2">
                 "{quotedText}"
               </p>
             </div>
@@ -89,12 +89,12 @@ export function TranscriptMode({ voiceConnection, quotedText = "", setQuotedText
           onChange={(e) => setInputText(e.target.value)}
           placeholder="Ketik pesan kamu di sini..."
           disabled={connectionState !== "connected"}
-          className="flex-1 py-2 px-4 bg-slate-100 dark:bg-slate-800 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50"
+          className="flex-1 py-2 px-4 bg-slate-100 dark:bg-slate-800 rounded-full text-xs focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={(!inputText.trim() && !quotedText.trim()) || connectionState !== "connected"}
-          className="w-10 h-10 rounded-full bg-purple-600 hover:bg-purple-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 flex items-center justify-center text-white transition-colors"
+          className="w-10 h-10 rounded-full bg-linear-to-br from-violet-600 via-violet-700 to-indigo-600 hover:from-violet-500 hover:via-violet-600 hover:to-indigo-500 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:bg-none flex items-center justify-center text-white transition-colors"
         >
           <Send className="w-4 h-4" />
         </button>
@@ -115,15 +115,15 @@ function ChatMessage({ message, isUser, timestamp }: { message: string, isUser: 
       <div className={`flex gap-2 max-w-[85%] ${isUser ? "flex-row-reverse" : "flex-row"}`}>
         {/* Avatar for Viona */}
         {!isUser && (
-          <div className="w-8 h-8 rounded-full bg-purple-100 flex-shrink-0 flex items-center justify-center border border-purple-200">
+          <div className="w-8 h-8 rounded-full bg-violet-100 flex-shrink-0 flex items-center justify-center border border-violet-200">
             <img src="/dashboard/viona-logo-new.png" alt="Viona" className="w-6 h-6 object-contain" />
           </div>
         )}
         
         {/* Message Bubble */}
-        <div className={`relative px-4 py-3 rounded-2xl text-sm shadow-sm ${
-          isUser 
-            ? "bg-purple-600 text-white rounded-tr-sm" 
+        <div className={`relative px-4 py-3 rounded-2xl text-xs shadow-sm ${
+          isUser
+            ? "bg-linear-to-br from-violet-600 via-violet-700 to-indigo-600 text-white rounded-tr-sm"
             : "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-tl-sm"
         }`}>
           <p className="whitespace-pre-wrap leading-relaxed">
@@ -134,7 +134,7 @@ function ChatMessage({ message, isUser, timestamp }: { message: string, isUser: 
           {!isUser && isLong && (
             <button 
               onClick={() => setExpanded(!expanded)}
-              className="mt-2 flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 hover:underline font-medium"
+              className="mt-2 flex items-center gap-1 text-xs text-violet-600 dark:text-violet-400 hover:underline font-medium"
             >
               {expanded ? (
                <>Tutup penjelasan <ChevronUp className="w-3 h-3" /></>

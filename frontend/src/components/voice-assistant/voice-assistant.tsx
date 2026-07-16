@@ -1,12 +1,11 @@
 "use client"
 
 import { useState, useRef, useCallback, useEffect } from "react"
-import { Send, Sun, Moon } from "lucide-react"
+import { Send, Sun, Moon, Minimize2 } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AudioVisualizer } from "./audio-visualizer"
 import { ChatMessage } from "./chat-message"
 import { UserAudioInput } from "./user-audio-input"
@@ -25,12 +24,15 @@ import { normalizeForSpeech } from "@/lib/tts-text"
 const SILENCE_MS = 800
 // Ignore ultra-short blips (a cough, "eh") so background noise never fires a turn.
 const MIN_CHARS = 2
+// Jumlah pesan terakhir yang dikirim sebagai riwayat percakapan ke backend.
+const HISTORY_TURNS = 6
 
 interface Message {
   id: string
   role: "user" | "assistant"
   content: string
   timestamp: Date
+  image?: string | null
 }
 
 export function VoiceAssistant() {
@@ -40,8 +42,6 @@ export function VoiceAssistant() {
   const [isRecording, setIsRecording] = useState(false)
   const [isBotSpeaking, setIsBotSpeaking] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
-  const [selectedMaterial, setSelectedMaterial] = useState("matematika")
-  const [selectedVersion, setSelectedVersion] = useState("v1")
   const [textInput, setTextInput] = useState("")
   const [hasCompletedSession, setHasCompletedSession] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -82,6 +82,10 @@ export function VoiceAssistant() {
   const isConnectedRef   = useRef(false)
   const isMutedRef       = useRef(false)
   const isProcessingRef  = useRef(false)
+  // Mirror of `messages`, read inside processUserInput's closure to build chat
+  // history for the backend without depending on `messages` (avoids re-creating
+  // the callback and stale closures in recognition event handlers).
+  const messagesRef = useRef<Message[]>([])
 
   // Initialize speech synthesis
   useEffect(() => {
@@ -92,6 +96,7 @@ export function VoiceAssistant() {
   useEffect(() => {
     const el = chatScrollRef.current
     if (el) el.scrollTop = el.scrollHeight
+    messagesRef.current = messages
   }, [messages])
 
   // Start/stop recognition when connection changes
@@ -283,6 +288,13 @@ export function VoiceAssistant() {
 
       stopListening()
 
+      // Giliran terakhir SEBELUM pesan user baru ditambahkan, supaya backend
+      // punya konteks percakapan untuk pertanyaan lanjutan.
+      const history = messagesRef.current.slice(-HISTORY_TURNS).map((m) => ({
+        role: m.role,
+        content: m.content,
+      }))
+
       // Add user message
       const userMessage: Message = {
         id: Date.now().toString(),
@@ -295,6 +307,7 @@ export function VoiceAssistant() {
       setIsProcessing(true)
 
       let response = ""
+      let image: string | null = null
       try {
         const res = await fetch("/chat", {
           method: "POST",
@@ -303,13 +316,13 @@ export function VoiceAssistant() {
           },
           body: JSON.stringify({
             message: userText,
-            material_id: selectedMaterial,
-            version: selectedVersion,
+            history,
           }),
         })
         if (res.ok) {
           const data = await res.json()
           response = data.response
+          image = data.image ?? null
         } else {
           throw new Error("Backend error status: " + res.status)
         }
@@ -324,6 +337,7 @@ export function VoiceAssistant() {
         role: "assistant",
         content: response,
         timestamp: new Date(),
+        image,
       }
 
       setMessages((prev) => [...prev, assistantMessage])
@@ -333,7 +347,7 @@ export function VoiceAssistant() {
       // Speak the response
       speak(response)
     },
-    [speak, stopListening, selectedMaterial, selectedVersion]
+    [speak, stopListening]
   )
 
   // Keep the latest processUserInput reachable from recognition callbacks
@@ -385,6 +399,17 @@ export function VoiceAssistant() {
     }
   }
 
+  // Minimize back: this page is opened via window.open() from the popup
+  // widget's Maximize button, so closing it returns the user to the popup.
+  // If opened directly (no opener, e.g. bookmark), fall back to the LMS home.
+  const handleMinimize = () => {
+    if (window.opener) {
+      window.close()
+    } else {
+      window.location.href = "/"
+    }
+  }
+
   // Handle text input submission
   const handleTextSubmit = (e: { preventDefault(): void }) => {
     e.preventDefault()
@@ -416,48 +441,33 @@ export function VoiceAssistant() {
             alt="Viona Logo"
             className="w-10 h-10 object-contain"
           />
-          <h1 className="text-2xl font-bold bg-linear-to-r from-fuchsia-500 via-violet-600 to-purple-800 bg-clip-text text-transparent mr-4">
+          <h1 className="text-2xl font-bold bg-linear-to-r from-violet-600 via-violet-700 to-indigo-600 bg-clip-text text-transparent mr-4">
             VIONA
           </h1>
         </div>
 
-        {/* LMS Material & Version Dropdowns */}
-        <div className="flex items-center gap-3">
-          <Select value={selectedMaterial} onValueChange={setSelectedMaterial}>
-            <SelectTrigger className="w-[150px] h-9">
-              <SelectValue placeholder="Pilih Materi" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="matematika">📐 Matematika</SelectItem>
-              <SelectItem value="fisika">⚡ Fisika</SelectItem>
-              <SelectItem value="pemrograman">💻 Pemrograman</SelectItem>
-              <SelectItem value="sejarah">📜 Sejarah</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={selectedVersion} onValueChange={setSelectedVersion}>
-            <SelectTrigger className="w-[120px] h-9">
-              <SelectValue placeholder="Pilih Versi" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="v1">Versi 1.0</SelectItem>
-              <SelectItem value="v2">Versi 2.0</SelectItem>
-              <SelectItem value="v3">Versi 3.0</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleMinimize}
+            aria-label="Minimize"
+            title="Minimize"
+          >
+            <Minimize2 className="w-4 h-4" />
+          </Button>
+          <Button
+            onClick={handleConnectionToggle}
+            className={cn(
+              "min-w-30 font-medium transition-all",
+              isConnected
+                ? "bg-red-500 hover:bg-red-600 text-white"
+                : "bg-green-500 hover:bg-green-600 text-white"
+            )}
+          >
+            {isConnected ? "Disconnect" : "Connect"}
+          </Button>
         </div>
-
-        <Button
-          onClick={handleConnectionToggle}
-          className={cn(
-            "min-w-30 font-medium transition-all",
-            isConnected
-              ? "bg-red-500 hover:bg-red-600 text-white"
-              : "bg-green-500 hover:bg-green-600 text-white"
-          )}
-        >
-          {isConnected ? "Disconnect" : "Connect"}
-        </Button>
       </header>
 
       {/* Main Content - 3 Column Layout */}
@@ -530,6 +540,7 @@ export function VoiceAssistant() {
                         role={message.role}
                         content={message.content}
                         timestamp={message.timestamp}
+                        image={message.image}
                       />
                     ))}
                     {interimText && !isProcessing && (

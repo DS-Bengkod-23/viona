@@ -26,12 +26,12 @@ export function VoiceMode({ voiceConnection }: VoiceModeProps) {
   }, [state])
 
   return (
-    <div className="flex flex-col items-center justify-center flex-1 h-full py-8">
-      <div className="relative w-48 h-48 flex items-center justify-center">
+    <div className="flex flex-col items-center justify-center flex-1 h-full py-6">
+      <div className="relative w-36 h-36 flex items-center justify-center">
         <AudioVisualizer vionaStatus={state} isConnected={true} className="w-full h-full scale-125" />
       </div>
 
-      <div className="mt-8 text-center">
+      <div className="mt-6 text-center">
         <p className="text-sm font-medium text-slate-700 dark:text-slate-300 transition-all">
           {statusText}
         </p>

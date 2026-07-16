@@ -129,7 +129,7 @@ export default function VoiceAgent() {
     return (
       <div className="flex flex-col items-center justify-center gap-8 py-16">
         {/* Avatar */}
-        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-xl shadow-blue-900/40">
+        <div className="w-32 h-32 rounded-full bg-linear-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-xl shadow-blue-900/40">
           <span className="text-5xl">🤖</span>
         </div>
 
