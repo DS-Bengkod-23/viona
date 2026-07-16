@@ -4,7 +4,8 @@ FROM python:3.11-slim AS builder
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
-    UV_LINK_MODE=copy
+    UV_LINK_MODE=copy \
+    UV_HTTP_TIMEOUT=300
 
 WORKDIR /app
 
@@ -15,10 +16,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml ./
-RUN uv sync --no-dev --no-install-project
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --no-dev --no-install-project
 
 COPY . .
-RUN uv sync --no-dev
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --no-dev
 
 # ── Stage 2: runtime ──────────────────────────────────────────────────────────
 FROM python:3.11-slim AS runtime

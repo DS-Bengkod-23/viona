@@ -9,6 +9,8 @@ import { useNativeVoiceConnection } from "@/hooks/useNativeVoiceConnection"
 import { FloatingButton } from "./FloatingButton"
 import { VoiceMode } from "./VoiceMode"
 import { TranscriptMode } from "./TranscriptMode"
+import { InsightBubbleCard } from "./InsightBubble"
+import { ImageBubbleCard } from "./ImageBubble"
 
 export function PopupWidget() {
   const [isOpen, setIsOpen] = useState(false)
@@ -18,7 +20,7 @@ export function PopupWidget() {
   const router = useRouter()
   
   const voiceConnection = useNativeVoiceConnection(lmsContext)
-  const { connectionState, connect, disconnect, setVoiceEnabled } = voiceConnection
+  const { connectionState, connect, disconnect, activeBubble, activeImage } = voiceConnection
 
   // Connect when popup opens
   useEffect(() => {
@@ -26,12 +28,6 @@ export function PopupWidget() {
       connect()
     }
   }, [isOpen, connectionState, connect])
-
-  // Only listen in voice mode. In transcript mode the mic is suspended so Viona's
-  // own TTS is not transcribed back as user input (feedback loop).
-  useEffect(() => {
-    setVoiceEnabled(mode === "voice")
-  }, [mode, setVoiceEnabled])
 
   // Send resize message to parent iframe if embedded
   useEffect(() => {
@@ -81,14 +77,18 @@ export function PopupWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed bottom-6 right-6 z-50 w-[380px] h-[550px] max-w-[calc(100vw-32px)] max-h-[calc(100vh-32px)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden"
+            className="fixed bottom-6 right-6 z-50 w-[320px] h-115 max-w-[calc(100vw-32px)] max-h-[calc(100vh-32px)]"
           >
+            <InsightBubbleCard bubble={activeBubble} />
+            <ImageBubbleCard image={activeImage} />
+
+            <div className="w-full h-full bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
               <div className="flex items-center gap-2">
                 <img src="/dashboard/viona-logo-new.png" alt="Viona" className="w-8 h-8 object-contain" />
                 <div className="flex flex-col">
-                  <span className="font-bold text-sm bg-linear-to-r from-fuchsia-600 to-purple-600 bg-clip-text text-transparent">
+                  <span className="font-bold text-sm bg-linear-to-r from-violet-600 via-violet-700 to-indigo-600 bg-clip-text text-transparent">
                     VIONA
                   </span>
                   <span className="text-[10px] text-slate-500 font-medium">AI Assistant Bengkel Koding</span>
@@ -132,6 +132,7 @@ export function PopupWidget() {
                   <p className="text-sm text-slate-500">Mempersiapkan asisten...</p>
                 </div>
               )}
+            </div>
             </div>
           </motion.div>
         )}

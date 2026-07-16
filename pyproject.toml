@@ -1,7 +1,7 @@
 [project]
 name = "viona-api"
 version = "1.0.0"
-description = "Viona – Indonesian Realtime Voice AI Customer Support"
+description = "Viona – Indonesian Voice AI Learning Companion"
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
 dependencies = [
