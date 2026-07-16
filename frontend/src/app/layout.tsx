@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono"
 
 export const metadata: Metadata = {
   title: 'Viona',
-  description: 'Asisten suara virtual untuk layanan pelanggan',
+  description: 'Asisten suara pendamping belajar LMS',
   icons: {
     icon: [
       { url: '/dashboard/viona-logo-new.png', type: 'image/png' },

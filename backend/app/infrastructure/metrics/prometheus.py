@@ -11,13 +11,6 @@ from prometheus_client import (
 
 REGISTRY = CollectorRegistry(auto_describe=True)
 
-calls_total = Counter(
-    "viona_calls_total",
-    "Total inbound/outbound calls handled",
-    ["direction", "status"],
-    registry=REGISTRY,
-)
-
 stt_requests_total = Counter(
     "viona_stt_requests_total",
     "Total STT transcription requests",
@@ -43,13 +36,6 @@ rag_queries_total = Counter(
     "viona_rag_queries_total",
     "Total RAG retrieval queries",
     ["collection"],
-    registry=REGISTRY,
-)
-
-escalations_total = Counter(
-    "viona_escalations_total",
-    "Total human escalation events",
-    ["reason"],
     registry=REGISTRY,
 )
 

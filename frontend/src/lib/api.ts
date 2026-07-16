@@ -9,11 +9,7 @@ export interface TokenResponse {
 
 export interface SessionData {
   session_id: string;
-  customer_phone?: string;
-  customer_name?: string;
   status?: string;
-  escalated?: boolean;
-  complaints?: { ticket_id: string; description: string; category: string; status: string }[];
   history?: { role: string; text: string }[];
 }
 

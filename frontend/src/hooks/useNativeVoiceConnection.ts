@@ -200,33 +200,6 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     }
   }, [clearSilenceTimer])
 
-  // Simple response generator as fallback
-  const generateResponse = (input: string): string => {
-    const lowerInput = input.toLowerCase()
-    if (lowerInput.includes("harga") || lowerInput.includes("biaya")) {
-      return "Untuk informasi harga, kami memiliki beberapa paket yang bisa disesuaikan dengan kebutuhan Anda. Apakah Anda ingin saya jelaskan paket-paket yang tersedia?"
-    }
-    if (lowerInput.includes("jam") || lowerInput.includes("buka") || lowerInput.includes("operasional")) {
-      return "Layanan kami tersedia setiap hari dari pukul 08.00 hingga 22.00 WIB. Untuk layanan darurat, kami siap 24 jam."
-    }
-    if (lowerInput.includes("lokasi") || lowerInput.includes("alamat") || lowerInput.includes("kantor")) {
-      return "Kantor pusat kami berlokasi di Jakarta. Kami juga memiliki cabang di beberapa kota besar di Indonesia. Kota mana yang paling dekat dengan Anda?"
-    }
-    if (lowerInput.includes("keluhan") || lowerInput.includes("komplain") || lowerInput.includes("masalah")) {
-      return "Saya mohon maaf atas ketidaknyamanan yang Anda alami. Bisa Anda ceritakan lebih detail mengenai masalah yang terjadi agar saya dapat membantu menyelesaikannya?"
-    }
-    if (lowerInput.includes("terima kasih") || lowerInput.includes("makasih")) {
-      return "Sama-sama! Senang bisa membantu Anda. Apakah ada hal lain yang bisa saya bantu?"
-    }
-    if (lowerInput.includes("bantuan") || lowerInput.includes("help") || lowerInput.includes("tolong")) {
-      return "Tentu, saya siap membantu! Anda bisa bertanya tentang produk, layanan, harga, jam operasional, atau menyampaikan keluhan. Apa yang ingin Anda ketahui?"
-    }
-    if (lowerInput.includes("halo") || lowerInput.includes("hai") || lowerInput.includes("hi")) {
-      return "Halo! Senang bertemu dengan Anda. Ada yang bisa saya bantu hari ini?"
-    }
-    return "Terima kasih atas pertanyaan Anda. Untuk memberikan jawaban yang tepat, bisa Anda jelaskan lebih detail apa yang ingin Anda ketahui?"
-  }
-
   const speak = useCallback((text: string) => {
     if (!synthRef.current) return
 
@@ -292,9 +265,8 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
         throw new Error("Backend error status: " + res.status)
       }
     } catch (err) {
-      console.warn("Using fallback local response due to:", err)
-      await new Promise(resolve => setTimeout(resolve, 800))
-      response = generateResponse(userText)
+      console.warn("Backend /chat failed:", err)
+      response = "Maaf kak, koneksi ke server sedang bermasalah. Coba lagi ya."
     }
 
     const assistantMessage: Message = {

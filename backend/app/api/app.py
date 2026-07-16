@@ -53,7 +53,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="Viona Voice AI API",
         version="1.0.0",
-        description="Indonesian realtime voice AI customer support backend",
+        description="Indonesian voice AI learning companion backend",
         docs_url="/docs" if settings.environment != "production" else None,
         redoc_url=None,
         lifespan=_lifespan,

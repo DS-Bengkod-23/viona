@@ -37,46 +37,14 @@ function SessionRow({ sessionId }: { sessionId: string }) {
             data.status === "active" ? "bg-green-400 animate-pulse" : "bg-slate-500",
           )} />
           <span className="text-sm font-mono text-slate-300">{data.session_id?.slice(0, 12)}…</span>
-          {data.customer_name && (
-            <span className="text-sm text-slate-400">{data.customer_name}</span>
-          )}
-          {data.escalated && (
-            <span className="px-2 py-0.5 bg-red-900/40 text-red-400 text-xs rounded-full border border-red-700/40">
-              Eskalasi
-            </span>
-          )}
         </div>
         <div className="flex items-center gap-2 text-slate-500">
-          <span className="text-xs">{(data.complaints?.length ?? 0)} tiket</span>
           {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </div>
       </button>
 
       {expanded && (
         <div className="px-4 pb-4 border-t border-slate-700/60 space-y-3 pt-3 animate-fade-in">
-          {/* Phone */}
-          {data.customer_phone && (
-            <p className="text-xs text-slate-400">Telepon: <span className="text-slate-200">{data.customer_phone}</span></p>
-          )}
-          {/* Complaints */}
-          {(data.complaints?.length ?? 0) > 0 && (
-            <div>
-              <p className="text-xs font-semibold text-slate-400 mb-2">Keluhan:</p>
-              <div className="space-y-1.5">
-                {data.complaints!.map((c) => (
-                  <div key={c.ticket_id} className="flex items-start justify-between gap-2 bg-slate-900/60 rounded-lg px-3 py-2">
-                    <div>
-                      <span className="text-xs font-mono text-blue-400">{c.ticket_id}</span>
-                      <p className="text-xs text-slate-300 mt-0.5">{c.description}</p>
-                    </div>
-                    <span className="text-xs px-2 py-0.5 bg-slate-700 rounded-full text-slate-400 whitespace-nowrap">
-                      {c.category}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
           {/* History */}
           {(data.history?.length ?? 0) > 0 && (
             <div>
@@ -169,8 +137,8 @@ export default function AdminPage() {
               color={healthOk ? "green" : "red"}
             />
             <StatsCard label="LiveKit Agent" value="—" icon="🤖" color="blue" subtitle="Cek LiveKit console" />
-            <StatsCard label="Sesi Aktif" value={demoSessions.length} icon="📞" color="yellow" />
-            <StatsCard label="Eskalasi Hari Ini" value="—" icon="🚨" color="red" subtitle="Via Prometheus /metrics" />
+            <StatsCard label="Sesi Aktif" value={demoSessions.length} icon="📚" color="yellow" />
+            <StatsCard label="Metrics" value="—" icon="📊" color="blue" subtitle="Via Prometheus /metrics" />
           </div>
         </div>
 
@@ -190,7 +158,7 @@ export default function AdminPage() {
               <div className="bg-slate-800/40 border border-slate-700 rounded-xl p-8 text-center">
                 <p className="text-slate-500 text-sm">Belum ada sesi tersimpan.</p>
                 <p className="text-slate-600 text-xs mt-1">
-                  Sesi akan muncul setelah ada panggilan masuk.
+                  Sesi akan muncul setelah ada sesi belajar.
                 </p>
               </div>
             ) : (

@@ -12,7 +12,7 @@ viona/
 │   ├── app/
 │   │   ├── agents/        # pipecat_worker.py, server.py (dispatch :8081), flows.py, tools.py
 │   │   ├── api/
-│   │   │   ├── routes/    # token, sessions, ingestion, chat, webhooks, health, telephony
+│   │   │   ├── routes/    # token, sessions, ingestion, chat, health
 │   │   │   └── app.py     # FastAPI :8000 (VIONA_MODE=api)
 │   │   ├── core/          # config.py (pydantic-settings), text_cleaner.py, logging.py
 │   │   ├── domain/        # session.py (VionaSession)
@@ -22,15 +22,14 @@ viona/
 │   │   │   ├── stt/       # faster_whisper_pipecat.py
 │   │   │   ├── tts/       # voxcpml2_pipecat.py
 │   │   │   └── metrics/   # prometheus.py
-│   │   ├── prompts/       # indonesian.py
-│   │   └── telephony/     # sip.py (Twilio SIP transfer)
-│   ├── tests/             # test_text_cleaner.py, test_pipecat_agent.py (24 tes)
+│   │   └── prompts/       # indonesian.py
+│   ├── tests/             # test_text_cleaner.py, test_pipecat_agent.py
 │   ├── pyproject.toml · uv.lock · main.py · scripts/start.sh
 ├── frontend/
 │   └── src/
 │       ├── app/           # page.tsx, demo/, admin/, layout.tsx, globals.css
 │       ├── components/    # voice-assistant/ (VoiceAssistant, chat-message, math-text…),
-│       │                  #   ui/ (radix), agents-ui/, + Transcript.tsx/VoiceAgent.tsx (LiveKit — TAK dipakai demo)
+│       │                  #   ui/ (radix), agents-ui/, popup/ (widget), + Transcript.tsx
 │       ├── hooks/ · lib/  # lib/api.ts, lib/tts-text.ts (normalizeForSpeech)
 ├── docker/ (nginx conf, Dockerfiles) · docker-compose.yml · Makefile
 └── docs/   # ARCHITECTURE.md, TESTING.md, STATUS.md · CLAUDE.md
@@ -45,7 +44,7 @@ viona/
 - RAG: `pypdf>=5.1.0` (Qdrant & embeddings via **httpx REST**, sengaja tanpa
   `qdrant-client`/`fastembed` — tak stabil di ARM/Docker)
 - `fastapi>=0.115`, `uvicorn[standard]>=0.32`, `redis[hiredis]>=5.2`,
-  `pydantic>=2.10`, `twilio>=9.3`, `structlog`, `prometheus-client`, `numpy<2.0`
+  `pydantic>=2.10`, `structlog`, `prometheus-client`, `numpy<2.0`
 
 **Frontend** (`package.json`) — ⚠️ **drift dari CLAUDE.md** (yang menyebut Next 14):
 - **`next@16.2.6`**, **`react@19`**, `typescript@5.7.3`, `tailwindcss@4.2`

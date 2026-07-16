@@ -29,8 +29,6 @@ dependencies = [
     # Observability
     "prometheus-client>=0.21.0",
     "structlog>=24.4.0",
-    # Telephony
-    "twilio>=9.3.0",
     # Config / utilities
     "pydantic>=2.10.0",
     "pydantic-settings>=2.7.0",
@@ -54,7 +52,7 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = [
     "agents", "api", "stt", "llm", "tts",
-    "rag", "telephony", "prompts", "services",
+    "rag", "prompts", "services",
     "core", "utils",
 ]
 

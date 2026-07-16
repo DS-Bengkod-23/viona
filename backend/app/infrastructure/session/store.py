@@ -15,7 +15,7 @@ _KEY_PREFIX = "viona:session:"
 
 
 class SessionStore:
-    """Async Redis-backed customer session storage."""
+    """Async Redis-backed session storage."""
 
     def __init__(self) -> None:
         self._redis: aioredis.Redis | None = None

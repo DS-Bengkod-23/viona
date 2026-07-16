@@ -9,7 +9,7 @@ export type AgentState = "idle" | "listening" | "thinking" | "speaking"
 export function useLiveKitConnection(lmsContext: string = "") {
   const [connectionState, setConnectionState] = useState<ConnectionState>("disconnected")
   const [agentState, setAgentState] = useState<AgentState>("idle")
-  // We no longer manage the room manually to match the Maximize (VoiceAgent) behavior
+  // We no longer manage the room manually — the LiveKit components own the room lifecycle
   const [room, setRoom] = useState<Room | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [token, setToken] = useState<string | null>(null)

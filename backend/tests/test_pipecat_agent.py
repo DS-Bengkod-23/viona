@@ -1,4 +1,4 @@
-"""Tests for the Pipecat migration: TTS LaTeX cleaning, RAG tool, support node."""
+"""Tests for the Pipecat pipeline: TTS LaTeX cleaning, RAG tool, support node."""
 from __future__ import annotations
 
 import pytest
@@ -81,4 +81,4 @@ def test_session_state_defaults():
     s = VionaSession(room_name="r")
     assert s.room_name == "r"
     assert s.session_id  # uuid generated
-    assert s.escalated is False
+    assert s.lms_context == ""

@@ -88,9 +88,9 @@ def create_app() -> FastAPI:
 
 async def _spawn(room_name: str, identity: str, lms_context: str = "") -> None:
     try:
-        await run_bot_for_room(room_name, customer_phone=identity, lms_context=lms_context)
+        await run_bot_for_room(room_name, lms_context=lms_context)
     except Exception as exc:  # noqa: BLE001
-        logger.error("bot run failed", room=room_name, error=str(exc))
+        logger.error("bot run failed", room=room_name, identity=identity, error=str(exc))
 
 
 def main() -> None:

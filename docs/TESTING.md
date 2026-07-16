@@ -11,7 +11,7 @@ Legenda: ✅ = expected result kalau sehat.
 
 | Uji | Command | ✅ Expected |
 |---|---|---|
-| Unit test migrasi | `cd backend && uv run pytest tests/test_pipecat_agent.py -v` | 6 passed (TTS LaTeX, RAG tool, handoff escalation, node tools) |
+| Unit test pipeline | `cd backend && uv run pytest tests/test_pipecat_agent.py -v` | pass (TTS LaTeX, RAG tool, support node, session defaults) |
 | Semua test | `cd backend && uv run pytest tests/ -q` | semua pass, tanpa error collection |
 | Self-test pembersih LaTeX | `cd backend && uv run python app/core/text_cleaner.py` | `$\frac{1}{2}$`→"1 per 2"; `anak-anak` tetap utuh |
 | Lint | `cd backend && uv run ruff check app/ main.py` | error hanya di file lama pra-migrasi (bukan file Pipecat) |
@@ -60,8 +60,7 @@ Legenda: ✅ = expected result kalau sehat.
 | Panggilan dasar | Buka `http://localhost/` → mulai call → bicara Bahasa Indonesia | bot menyapa & menjawab; transkrip muncul di log |
 | Fitur LaTeX (TTS) | Pancing jawaban berisi rumus (mis. "setengah tambah seperempat") | TTS membaca "satu per dua", BUKAN simbol `$`/`\frac` |
 | RAG | Tanya hal yang ada di FAQ | jawaban memakai `search_faq` (cek log `rag`) |
-| Escalation + SIP | Minta "sambungkan ke agen manusia" | log `escalating to human` → `sip transfer initiated` |
-| Akhiri call | Tutup tab / hangup | log `participant left, ending` → `pipecat bot ended`; status sesi `ended` |
+| Akhiri sesi | Tutup tab / hangup | log `participant left, ending` → `pipecat bot ended`; status sesi `ended` |
 
 ---
 
@@ -106,7 +105,6 @@ WHISPER_COMPUTE_TYPE=int8
 | Webhook ditolak | `grep "webhook verify failed"` | `LIVEKIT_API_KEY/SECRET` salah |
 | STT diam | `grep "transcription done"` kosong | VAD / device Whisper / audio in bukan 16 kHz |
 | TTS error | `grep "voxcpm synthesis failed"` | device/model VoxCPM2 (CUDA tak ada di image slim) |
-| Handoff | `grep -E "escalating\|sip transfer"` | alur escalation |
 
 ---
 
