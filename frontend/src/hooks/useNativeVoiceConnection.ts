@@ -5,6 +5,11 @@ import { normalizeForSpeech } from "@/lib/tts-text"
 
 const SILENCE_MS = 800
 const MIN_CHARS = 2
+// Wake word (interim, Web Speech string-match). When enabled, Viona stays dormant
+// and only answers an utterance that contains "viona"; the text after it is the query
+// (e.g. "Hai Viona, apa itu tag paragraf?" → "apa itu tag paragraf?").
+// Proper engine (livekit-wakeword, Apache-2.0 ONNX) is planned to replace this.
+const WAKE_WORD = "viona"
 
 export interface Message {
   id: string
@@ -23,6 +28,7 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
   const [isMuted, setIsMuted] = useState(false)
   const [interimText, setInterimText] = useState("")
   const [sttError, setSttError] = useState("")
+  const [wakeWordEnabled, setWakeWordEnabled] = useState(false)
   
   const synthRef = useRef<SpeechSynthesis | null>(null)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
@@ -30,6 +36,12 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
   const finalTranscriptRef = useRef("")
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
+  // Push-to-talk: while held, the mic captures continuously and the turn is NOT
+  // auto-sent on silence — it is sent on release (endPTT).
+  const pttActiveRef = useRef(false)
+  // Voice enabled only in voice mode. In transcript mode we suspend listening so
+  // Viona's own TTS is not picked up by the mic and re-sent as user input.
+  const voiceEnabledRef = useRef(true)
 
   // Ref mirrors to avoid stale closures inside event listeners
   const stateRef = useRef({
@@ -37,6 +49,7 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     isBotSpeaking: false,
     isProcessing: false,
     isMuted: false,
+    wakeEnabled: false,
   })
 
   useEffect(() => {
@@ -44,7 +57,8 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     stateRef.current.isBotSpeaking = agentState === "speaking"
     stateRef.current.isProcessing = agentState === "thinking"
     stateRef.current.isMuted = isMuted
-  }, [connectionState, agentState, isMuted])
+    stateRef.current.wakeEnabled = wakeWordEnabled
+  }, [connectionState, agentState, isMuted, wakeWordEnabled])
 
   // Initialize SpeechSynthesis
   useEffect(() => {
@@ -76,6 +90,7 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
 
   const startListening = useCallback(() => {
     if (typeof window === "undefined") return
+    if (!voiceEnabledRef.current) return // suspended (e.g. transcript mode)
     if (stateRef.current.isBotSpeaking || stateRef.current.isProcessing) return
 
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition
@@ -96,11 +111,21 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     finalTranscriptRef.current = ""
     
     const scheduleEndOfTurn = () => {
+      if (pttActiveRef.current) return // PTT sends on release, not on silence
       clearSilenceTimer()
       silenceTimerRef.current = setTimeout(() => {
-        const text = finalTranscriptRef.current.trim()
+        let text = finalTranscriptRef.current.trim()
         finalTranscriptRef.current = ""
         setInterimText("")
+
+        // Wake-word gate: stay dormant unless the utterance contains "viona";
+        // the query is whatever follows it.
+        if (stateRef.current.wakeEnabled) {
+          const idx = text.toLowerCase().indexOf(WAKE_WORD)
+          if (idx === -1) return // no wake word — ignore, keep listening
+          text = text.slice(idx + WAKE_WORD.length).replace(/^[\s,.!?]+/, "").trim()
+        }
+
         if (text.length >= MIN_CHARS && !stateRef.current.isBotSpeaking && !stateRef.current.isProcessing) {
           recognition.stop()
           processUserInput(text)
@@ -136,7 +161,13 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     }
 
     recognition.onend = () => {
-      if (stateRef.current.isConnected && !stateRef.current.isMuted && !stateRef.current.isBotSpeaking && !stateRef.current.isProcessing) {
+      // While PTT is held, Chrome may end the continuous session — restart fast so
+      // capture continues until the user releases the button.
+      if (pttActiveRef.current) {
+        setTimeout(() => startListening(), 100)
+        return
+      }
+      if (voiceEnabledRef.current && stateRef.current.isConnected && !stateRef.current.isMuted && !stateRef.current.isBotSpeaking && !stateRef.current.isProcessing) {
         setAgentState("idle")
         setTimeout(() => startListening(), 300)
       }
@@ -212,20 +243,26 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     utterance.onend = () => {
       setAgentState("idle")
       utteranceRef.current = null
-      if (stateRef.current.isConnected && !stateRef.current.isMuted) {
+      if (voiceEnabledRef.current && stateRef.current.isConnected && !stateRef.current.isMuted) {
         startListening()
       }
     }
     utterance.onerror = () => {
       setAgentState("idle")
       utteranceRef.current = null
-      if (stateRef.current.isConnected && !stateRef.current.isMuted) {
+      if (voiceEnabledRef.current && stateRef.current.isConnected && !stateRef.current.isMuted) {
         startListening()
       }
     }
 
     synthRef.current.speak(utterance)
   }, [stopListening, startListening])
+
+  // Stop button / barge-in: cut Viona's speech mid-utterance. cancel() fires the
+  // utterance.onend above → agentState "idle" → listening resumes (if unmuted).
+  const stopSpeaking = useCallback(() => {
+    if (synthRef.current) synthRef.current.cancel()
+  }, [])
 
   const processUserInput = useCallback(async (userText: string) => {
     if (stateRef.current.isProcessing) return
@@ -269,6 +306,41 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     setMessages(prev => [...prev, assistantMessage])
     speak(response)
   }, [speak, stopListening, lmsContext])
+
+  // Push-to-talk: momentary override of the hands-free loop. Hold to capture,
+  // release to send. Does not require a persistent mode switch.
+  const startPTT = useCallback(() => {
+    if (!stateRef.current.isConnected) return
+    pttActiveRef.current = true
+    clearSilenceTimer()
+    finalTranscriptRef.current = ""
+    setInterimText("")
+    if (stateRef.current.isBotSpeaking) {
+      // Barge-in: cut TTS; its onend restarts listening (auto-send stays suppressed
+      // because pttActiveRef is true).
+      stopSpeaking()
+    } else {
+      startListening()
+    }
+  }, [clearSilenceTimer, startListening, stopSpeaking])
+
+  const endPTT = useCallback(() => {
+    if (!pttActiveRef.current) return
+    pttActiveRef.current = false
+    clearSilenceTimer()
+    const text = finalTranscriptRef.current.trim()
+    if (recognitionRef.current) {
+      recognitionRef.current.stop()
+      recognitionRef.current = null
+    }
+    finalTranscriptRef.current = ""
+    setInterimText("")
+    if (text.length >= MIN_CHARS) {
+      processUserInput(text)
+    } else if (stateRef.current.isConnected && !stateRef.current.isMuted) {
+      startListening() // nothing captured — resume hands-free loop
+    }
+  }, [clearSilenceTimer, processUserInput, startListening])
 
   // Explicit text submission (from chat UI)
   const sendText = useCallback((text: string) => {
@@ -323,6 +395,28 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     }
   }, [isMuted, connectionState, agentState, stopListening, startListening])
 
+  const toggleWakeWord = useCallback(() => {
+    // Interim Web Speech gate — the recognizer already runs, so no lifecycle change;
+    // this only flips whether utterances must contain the wake word to be answered.
+    setWakeWordEnabled((prev) => !prev)
+  }, [])
+
+  // Suspend/resume the listening loop. Voice mode → true; transcript mode → false
+  // (prevents Viona's TTS from being heard by the mic and re-sent as input).
+  const setVoiceEnabled = useCallback((enabled: boolean) => {
+    voiceEnabledRef.current = enabled
+    if (!enabled) {
+      stopListening()
+    } else if (
+      stateRef.current.isConnected &&
+      !stateRef.current.isMuted &&
+      !stateRef.current.isBotSpeaking &&
+      !stateRef.current.isProcessing
+    ) {
+      startListening()
+    }
+  }, [stopListening, startListening])
+
   return {
     connectionState,
     agentState,
@@ -334,6 +428,12 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     disconnect,
     sendText,
     toggleMute,
+    stopSpeaking,
+    startPTT,
+    endPTT,
+    wakeWordEnabled,
+    toggleWakeWord,
+    setVoiceEnabled,
     micStream: micStreamRef.current
   }
 }

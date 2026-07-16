@@ -186,7 +186,12 @@ services:
 
   # ── Ollama LLM inference ────────────────────────────────────────────────────
   ollama:
-    image: ollama/ollama:0.13.1-rc0
+    # Image ramping: ollama/ollama:0.13.1-rc0 di-flatten tanpa runner GPU (CUDA ~4.5GB).
+    # Viona hanya proxy LLM cloud + embedding CPU, jadi GPU libs tak terpakai.
+    build:
+      context: ./docker/ollama
+      dockerfile: Dockerfile
+    image: viona-ollama-slim:0.13.1-rc0
     container_name: viona-ollama
     restart: unless-stopped
     # LLM is cloud (gemma4:31b-cloud); this container only routes + runs the local

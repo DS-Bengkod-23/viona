@@ -3,11 +3,14 @@
 Selamat datang di repositori **Viona**! Viona adalah asisten virtual cerdas berbasis AI yang dirancang khusus untuk platform Learning Management System (LMS) seperti Bengkel Koding. Viona mendukung interaksi melalui teks dan suara (*voice agent*) secara real-time.
 
 ## ✨ Fitur Utama
-1. **Interactive Voice Assistant**: Berbicara langsung dengan AI secara *real-time* menggunakan WebRTC (LiveKit).
-2. **Text Chat Mode**: Mode chat teks biasa layaknya ChatGPT.
-3. **Context-Aware (LMS Integration)**: AI bisa mengenali dan membaca materi yang sedang dibuka oleh pengguna di LMS.
-4. **Pipecat Pipeline**: Pemrosesan suara menggunakan Faster-Whisper (Speech-to-Text), Ollama (LLM Inference), dan **Cartesia** (Text-to-Speech cloud — engine aktif; VoxCPM2 lokal adalah opsi cadangan yang belum di-wire, butuh GPU).
-5. **RAG (Di-park)**: Infrastruktur *Retrieval-Augmented Generation* (Qdrant) tersedia tapi **di-park** — jalur LMS menjawab dari *context-injection* konten halaman, bukan vector search. Qdrant mati secara default (`--profile rag` untuk menyalakan).
+1. **Interactive Voice Assistant**: Berbicara langsung dengan AI secara *real-time*. Ada **dua jalur suara**:
+   - **Native (dipakai popup live)** — STT & TTS jalan di **browser** (Web Speech API). Ringan, tanpa GPU. **Wajib Google Chrome / Microsoft Edge** (Brave/Firefox/Safari tidak didukung).
+   - **LiveKit/Pipecat (pipeline server)** — bot suara di server via WebRTC (LiveKit).
+2. **Kontrol Suara**: **Push-to-talk** (tahan tombol/spasi untuk bicara), tombol **Stop** (potong jawaban Viona/*barge-in*), dan **Wake word** (ucapkan "Hai Viona" + pertanyaan).
+3. **Text Chat Mode**: Mode chat teks biasa layaknya ChatGPT.
+4. **Context-Aware (LMS Integration)**: AI mengenali & membaca materi yang sedang dibuka di LMS (konteks di-*inject* ke prompt).
+5. **Pipecat Pipeline** (jalur LiveKit): Faster-Whisper (Speech-to-Text), Ollama (LLM Inference), dan **Cartesia** (Text-to-Speech cloud — engine aktif; VoxCPM2 lokal opsi cadangan, belum di-wire, butuh GPU).
+6. **RAG (Di-park)**: Infrastruktur *Retrieval-Augmented Generation* (Qdrant) tersedia tapi **di-park** — jalur LMS menjawab dari *context-injection* konten halaman, bukan vector search. Qdrant mati secara default (`--profile rag` untuk menyalakan).
 
 ---
 
@@ -54,9 +57,19 @@ docker compose --profile rag up -d
 ```
 
 ### 4. Mengakses Aplikasi
-Setelah semua berjalan (status di Docker berwarna hijau / `Running`), kamu bisa membuka browser dan mengunjungi:
-- **Website LMS Utama:** [http://localhost](http://localhost) (atau `http://localhost:8002` tergantung pengaturan Nginx-mu).
-- **Viona Widget:** Akan muncul di pojok kanan bawah pada halaman LMS.
+Setelah semua berjalan (status di Docker berwarna hijau / `Running`), buka browser (**pakai Chrome/Edge** agar fitur suara jalan) dan kunjungi:
+
+| Halaman | URL |
+|---------|-----|
+| **Website LMS utama (landing page)** | [http://localhost/](http://localhost/) |
+| **Dashboard admin** | [http://localhost/dashboard/admin](http://localhost/dashboard/admin) |
+| Popup widget langsung | [http://localhost/dashboard/widget](http://localhost/dashboard/widget) |
+| Demo suara standalone | [http://localhost/dashboard/demo](http://localhost/dashboard/demo) |
+
+- **Viona Widget** otomatis muncul di pojok kanan bawah halaman LMS (`/`).
+- Catatan: frontend Next.js memakai `basePath: /dashboard`, jadi **`/` = website Laravel**, sedangkan **`/dashboard/*` = frontend**. Detail rute lihat `docs/ENDPOINTS.md` & `docs/ARCHITECTURE.md`.
+
+> ⚠️ **Kena error 502** setelah rebuild? Nginx me-resolve alamat service saat start. Jalankan `docker compose restart nginx`.
 
 ---
 

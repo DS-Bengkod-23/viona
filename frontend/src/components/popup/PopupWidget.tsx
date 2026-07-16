@@ -18,7 +18,7 @@ export function PopupWidget() {
   const router = useRouter()
   
   const voiceConnection = useNativeVoiceConnection(lmsContext)
-  const { connectionState, connect, disconnect } = voiceConnection
+  const { connectionState, connect, disconnect, setVoiceEnabled } = voiceConnection
 
   // Connect when popup opens
   useEffect(() => {
@@ -26,6 +26,12 @@ export function PopupWidget() {
       connect()
     }
   }, [isOpen, connectionState, connect])
+
+  // Only listen in voice mode. In transcript mode the mic is suspended so Viona's
+  // own TTS is not transcribed back as user input (feedback loop).
+  useEffect(() => {
+    setVoiceEnabled(mode === "voice")
+  }, [mode, setVoiceEnabled])
 
   // Send resize message to parent iframe if embedded
   useEffect(() => {
