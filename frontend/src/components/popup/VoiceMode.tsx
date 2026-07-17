@@ -1,7 +1,6 @@
 "use client"
 
-import React, { useMemo } from "react"
-import { motion } from "motion/react"
+import { useMemo } from "react"
 import { Mic, MicOff } from "lucide-react"
 import { AudioVisualizer } from "../voice-assistant/audio-visualizer"
 
@@ -11,11 +10,7 @@ interface VoiceModeProps {
 
 export function VoiceMode({ voiceConnection }: VoiceModeProps) {
   const { agentState: state, sttError, isMuted, toggleMute } = voiceConnection
-  
-  // Calculate dynamic scale and opacity based on state
-  const waveScale = state === "speaking" ? 1.5 : 1
-  const waveOpacity = state === "speaking" ? 0.9 : 0.5
-  
+
   const statusText = useMemo(() => {
     switch (state) {
       case "listening": return "Viona sedang mendengarkan..."
@@ -26,12 +21,12 @@ export function VoiceMode({ voiceConnection }: VoiceModeProps) {
   }, [state])
 
   return (
-    <div className="flex flex-col items-center justify-center flex-1 h-full py-6">
-      <div className="relative w-36 h-36 flex items-center justify-center">
+    <div className="flex flex-col items-center justify-center flex-1 h-full py-8">
+      <div className="relative w-48 h-48 flex items-center justify-center">
         <AudioVisualizer vionaStatus={state} isConnected={true} className="w-full h-full scale-125" />
       </div>
 
-      <div className="mt-6 text-center">
+      <div className="mt-8 text-center">
         <p className="text-sm font-medium text-slate-700 dark:text-slate-300 transition-all">
           {statusText}
         </p>

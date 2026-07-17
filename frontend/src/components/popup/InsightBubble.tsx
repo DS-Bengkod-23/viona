@@ -7,7 +7,6 @@ import type { InsightBubble as InsightBubbleData } from "@/hooks/useNativeVoiceC
 
 const VARIANTS = {
   insight: {
-    label: "Insight",
     icon: Lightbulb,
     bg: "bg-amber-50 dark:bg-amber-950/60",
     border: "border-amber-200 dark:border-amber-800",
@@ -15,7 +14,6 @@ const VARIANTS = {
     iconBg: "bg-amber-400 text-amber-950",
   },
   mnemonic: {
-    label: "Jembatan Keledai",
     icon: Brain,
     bg: "bg-emerald-50 dark:bg-emerald-950/60",
     border: "border-emerald-200 dark:border-emerald-800",
@@ -23,7 +21,6 @@ const VARIANTS = {
     iconBg: "bg-emerald-400 text-emerald-950",
   },
   formula: {
-    label: "Rumus",
     icon: Calculator,
     bg: "bg-blue-50 dark:bg-blue-950/60",
     border: "border-blue-200 dark:border-blue-800",
@@ -31,7 +28,6 @@ const VARIANTS = {
     iconBg: "bg-blue-400 text-blue-950",
   },
   warning: {
-    label: "Miskonsepsi",
     icon: AlertTriangle,
     bg: "bg-rose-50 dark:bg-rose-950/60",
     border: "border-rose-200 dark:border-rose-800",
@@ -54,15 +50,15 @@ export function InsightBubbleCard({ bubble }: InsightBubbleProps) {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 8, scale: 0.9 }}
           transition={{ type: "spring", damping: 20, stiffness: 260 }}
-          className="absolute -top-3 right-4 -translate-y-full z-10 max-w-[240px]"
+          className="absolute -top-3 right-4 -translate-y-full z-10 max-w-60"
         >
           <div
-            className={`flex items-start gap-1.5 px-2.5 py-2 rounded-2xl rounded-br-sm border shadow-lg ${VARIANTS[bubble.type].bg} ${VARIANTS[bubble.type].border}`}
+            className={`flex items-start gap-2 px-3 py-2.5 rounded-2xl rounded-br-sm border shadow-lg ${VARIANTS[bubble.type].bg} ${VARIANTS[bubble.type].border}`}
           >
-            <span className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${VARIANTS[bubble.type].iconBg}`}>
-              {React.createElement(VARIANTS[bubble.type].icon, { className: "w-3 h-3" })}
+            <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${VARIANTS[bubble.type].iconBg}`}>
+              {React.createElement(VARIANTS[bubble.type].icon, { className: "w-3.5 h-3.5" })}
             </span>
-            <span className={`text-[10px] font-semibold leading-snug ${VARIANTS[bubble.type].text}`}>
+            <span className={`text-xs font-semibold leading-snug ${VARIANTS[bubble.type].text}`}>
               {bubble.text}
             </span>
           </div>

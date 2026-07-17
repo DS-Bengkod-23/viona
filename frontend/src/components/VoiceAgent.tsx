@@ -8,7 +8,7 @@ import {
   useVoiceAssistant,
   VoiceAssistantControlBar,
 } from "@livekit/components-react";
-import { MicOff, PhoneOff } from "lucide-react";
+import { PhoneOff } from "lucide-react";
 import { useCallback, useState } from "react";
 import { fetchToken, type TokenResponse } from "@/lib/api";
 import Transcript from "./Transcript";

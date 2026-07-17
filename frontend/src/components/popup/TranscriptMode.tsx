@@ -115,13 +115,13 @@ function ChatMessage({ message, isUser, timestamp }: { message: string, isUser: 
       <div className={`flex gap-2 max-w-[85%] ${isUser ? "flex-row-reverse" : "flex-row"}`}>
         {/* Avatar for Viona */}
         {!isUser && (
-          <div className="w-8 h-8 rounded-full bg-violet-100 flex-shrink-0 flex items-center justify-center border border-violet-200">
+          <div className="w-8 h-8 rounded-full bg-violet-100 shrink-0 flex items-center justify-center border border-violet-200">
             <img src="/dashboard/viona-logo-new.png" alt="Viona" className="w-6 h-6 object-contain" />
           </div>
         )}
         
         {/* Message Bubble */}
-        <div className={`relative px-4 py-3 rounded-2xl text-xs shadow-sm ${
+        <div className={`relative px-4 py-3 rounded-2xl text-[12px] shadow-sm ${
           isUser
             ? "bg-linear-to-br from-violet-600 via-violet-700 to-indigo-600 text-white rounded-tr-sm"
             : "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-tl-sm"

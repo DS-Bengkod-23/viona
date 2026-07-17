@@ -106,7 +106,7 @@ function SessionRow({ sessionId }: { sessionId: string }) {
 
 export default function AdminPage() {
   const [healthOk, setHealthOk] = useState<boolean | null>(null);
-  const [sessionIds, setSessionIds] = useState<string[]>([]);
+  const [sessionIds] = useState<string[]>([]);
   const [loadingHealth, setLoadingHealth] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(new Date());
 
