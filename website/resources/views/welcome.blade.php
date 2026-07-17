@@ -59,7 +59,7 @@
             if (event.data && event.data.type === 'viona-resize') {
                 const widget = document.getElementById('viona-widget');
                 if (event.data.isOpen) {
-                    widget.style.width = '560px';
+                    widget.style.width = '780px';
                     widget.style.height = '630px';
                     
                     // Inject Context: Send lesson content to Viona Widget

@@ -53,12 +53,12 @@ export function InsightBubbleCard({ bubble }: InsightBubbleProps) {
           className="absolute -top-3 right-4 -translate-y-full z-10 max-w-60"
         >
           <div
-            className={`flex items-start gap-2 px-3 py-2.5 rounded-2xl rounded-br-sm border shadow-lg ${VARIANTS[bubble.type].bg} ${VARIANTS[bubble.type].border}`}
+            className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl rounded-br-sm border shadow-lg ${VARIANTS[bubble.type].bg} ${VARIANTS[bubble.type].border}`}
           >
             <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${VARIANTS[bubble.type].iconBg}`}>
               {React.createElement(VARIANTS[bubble.type].icon, { className: "w-3.5 h-3.5" })}
             </span>
-            <span className={`text-xs font-semibold leading-snug ${VARIANTS[bubble.type].text}`}>
+            <span className={`text-xs font-semibold leading-tight ${VARIANTS[bubble.type].text}`}>
               {bubble.text}
             </span>
           </div>
