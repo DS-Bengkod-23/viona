@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { ingestPDF, ingestText } from "@/lib/api";
-import { Upload, FileText, CheckCircle, AlertCircle } from "lucide-react";
+import { Upload, CheckCircle, AlertCircle } from "lucide-react";
 import clsx from "clsx";
 
 type Status = "idle" | "uploading" | "success" | "error";
@@ -160,8 +160,8 @@ export default function FAQUpload() {
             : "bg-red-900/30 border border-red-700 text-red-300",
         )}>
           {status === "success"
-            ? <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-            : <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+            ? <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" />
+            : <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
           }
           {message}
         </div>

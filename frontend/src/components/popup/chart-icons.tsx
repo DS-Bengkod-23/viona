@@ -106,10 +106,10 @@ export function HeatmapIcon() {
     [7, 5, 4, 2], [5, 7, 3, 1], [4, 3, 7, 6], [2, 1, 6, 7],
   ]
   const cell = 26
-  const ox = 24
-  const oy = 6
+  const ox = 8
+  const oy = 8
   return (
-    <svg viewBox="0 0 160 120" className="w-full h-full">
+    <svg viewBox="0 0 120 120" className="w-full h-full">
       {grid.map((row, r) =>
         row.map((v, c) => (
           <g key={`${r}-${c}`}>
@@ -141,8 +141,8 @@ export function HeatmapIcon() {
 export function ConfusionMatrixIcon() {
   const cellW = 56
   const cellH = 40
-  const ox = 20
-  const oy = 12
+  const ox = 6
+  const oy = 6
   const cells = [
     { label: "TP", count: 13, x: ox, y: oy },
     { label: "FP", count: 2, x: ox + cellW + 4, y: oy },
@@ -150,7 +150,7 @@ export function ConfusionMatrixIcon() {
     { label: "TN", count: 9, x: ox + cellW + 4, y: oy + cellH + 4 },
   ]
   return (
-    <svg viewBox="0 0 160 120" className="w-full h-full">
+    <svg viewBox="0 0 128 96" className="w-full h-full">
       {cells.map((c) => (
         <g key={c.label}>
           <rect

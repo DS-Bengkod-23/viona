@@ -1,6 +1,5 @@
 "use client"
 
-import React from "react"
 import { motion, AnimatePresence } from "motion/react"
 
 interface FloatingButtonProps {
@@ -44,7 +43,7 @@ export function FloatingButton({ onClick, isOpen }: FloatingButtonProps) {
             onClick={onClick}
             id="viona-floating-icon"
             aria-label="Buka chat Viona"
-            className="fixed bottom-6 right-8 z-50"
+            className="fixed bottom-6 right-6 z-50"
             style={{
               display: "flex",
               flexDirection: "column",
@@ -56,7 +55,7 @@ export function FloatingButton({ onClick, isOpen }: FloatingButtonProps) {
               padding: 0,
             }}
           >
-          <div style={{ transform: "scale(0.72)", transformOrigin: "bottom right", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div style={{ transform: "scale(0.6)", transformOrigin: "bottom right", display: "flex", flexDirection: "column", alignItems: "center" }}>
             {/* Karakter Blob Organik */}
             <div style={{ position: "relative", width: 130, height: 140 }}>
               {/* Body blob */}

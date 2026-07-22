@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { MessageSquare, Mic, MicOff, Maximize2, X } from "lucide-react"
 import { useNativeVoiceConnection } from "@/hooks/useNativeVoiceConnection"

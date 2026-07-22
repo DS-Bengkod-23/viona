@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo } from "react"
+import { useMemo } from "react"
 import { Mic, MicOff, Square } from "lucide-react"
 import { AudioVisualizer } from "../voice-assistant/audio-visualizer"
 
@@ -34,18 +34,25 @@ export function VoiceMode({ voiceConnection }: VoiceModeProps) {
   }, [state, conversationActive])
 
   return (
-    <div className="flex flex-col items-center justify-center flex-1 h-full py-6 px-4">
-      <div className="relative w-32 h-32 flex items-center justify-center">
+    <div className="flex flex-col items-center justify-center flex-1 h-full py-8">
+      <div className="relative w-48 h-48 flex items-center justify-center">
         <AudioVisualizer vionaStatus={state} isConnected={true} className="w-full h-full scale-125" />
       </div>
 
-      <p className="mt-5 text-sm font-medium text-slate-700 dark:text-slate-300 text-center transition-all">
-        {statusText}
-      </p>
+      <div className="mt-8 text-center">
+        <p className="text-sm font-medium text-slate-700 dark:text-slate-300 transition-all">
+          {statusText}
+        </p>
+        <p className="text-xs text-slate-500 mt-2">
+          {state === "listening"
+            ? "Bicara sekarang, Viona akan menjawab saat kamu selesai berbicara."
+            : ""}
+        </p>
+      </div>
 
       {/* Sepenuhnya hands-free: tidak ada tombol bicara. Gerbangnya wake-word
           ("Hai Viona"), lalu percakapan tetap terbuka beberapa detik untuk lanjutan. */}
-      <p className="mt-2 text-[11px] text-slate-400">
+      <p className="mt-3 text-[11px] text-slate-400">
         Selalu mendengarkan panggilan{" "}
         <span className="font-medium text-violet-500">&quot;Hai Viona&quot;</span>
       </p>
