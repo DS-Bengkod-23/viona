@@ -19,11 +19,17 @@ class Settings(BaseSettings):
     livekit_api_key: str = Field(...)
     livekit_api_secret: str = Field(...)
 
-    # Cartesia TTS (cloud) — the ACTIVE TTS engine (sonic-multilingual, low-latency,
-    # no GPU). VoxCPM2 below is a parked local alternative (see docs/ENV_PROFILES.md).
+    # Cartesia TTS (cloud) — the ACTIVE TTS engine (low-latency, no GPU). Used by
+    # BOTH voice paths: the Pipecat pipeline and the native path via POST /tts.
+    # VoxCPM2 below is a parked local alternative (see docs/ENV_PROFILES.md).
     cartesia_api_key: str = Field(default="")
-    # Default Indonesian female/friendly voice (if available on the account).
-    cartesia_voice_id: str = Field(default="694f9389-aac1-45b6-b726-9d9369183238")
+    # "Siti - Ad Narrator": satu-satunya suara PEREMPUAN berbahasa Indonesia di
+    # katalog Cartesia (dari 832 suara, hanya 2 ber-language "id"). Viona itu
+    # persona perempuan, jadi jangan diganti ke voice English tanpa alasan —
+    # suaranya jadi terdengar seperti penutur asing.
+    cartesia_voice_id: str = Field(default="b441c4fd-4910-4c55-ae56-f0291057e2cc")
+    # Matches pipecat.services.cartesia's own default, so both paths sound alike.
+    cartesia_model: str = Field(default="sonic-3.5")
 
     # VoxCPM2 TTS (local, with voice cloning) — PARKED alternative, not wired into
     # _build_tts (which uses Cartesia). Backlogged to GPU (task D).

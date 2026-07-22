@@ -26,6 +26,30 @@ export function normalizeForSpeech(input: string): string {
     .replace(/\\pm/g, " plus minus ")
     .replace(/\\pi/g, " pi ")
 
+  // Unicode pecahan umum -> kata (mis. hasil model yang menulis "½")
+  s = s
+    .replace(/½/g, " setengah ")
+    .replace(/⅓/g, " sepertiga ")
+    .replace(/⅔/g, " dua per tiga ")
+    .replace(/¼/g, " seperempat ")
+    .replace(/¾/g, " tiga per empat ")
+
+  // Unicode simbol matematika/umum -> kata terucap
+  s = s
+    .replace(/×/g, " kali ")
+    .replace(/÷/g, " bagi ")
+    .replace(/√/g, " akar ")
+    .replace(/π/g, " pi ")
+    .replace(/≈/g, " kira-kira ")
+    .replace(/≠/g, " tidak sama dengan ")
+    .replace(/≤/g, " kurang dari atau sama dengan ")
+    .replace(/≥/g, " lebih dari atau sama dengan ")
+    .replace(/±/g, " plus minus ")
+    .replace(/²/g, " kuadrat ")
+    .replace(/³/g, " pangkat tiga ")
+    .replace(/°/g, " derajat ")
+    .replace(/%/g, " persen ")
+
   // strip math delimiters $$ $ \( \) \[ \]
   s = s.replace(/\$\$?|\\\(|\\\)|\\\[|\\\]/g, " ")
 

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react"
 import { normalizeForSpeech } from "@/lib/tts-text"
+import { fetchTTS } from "@/lib/api"
 
 const SILENCE_MS = 800
 const MIN_CHARS = 2
@@ -29,7 +30,50 @@ const BUBBLE_VISIBLE_MS = 9000
 // percakapan ke backend, supaya pertanyaan lanjutan tetap paham konteks topik.
 const HISTORY_TURNS = 6
 
-export function useNativeVoiceConnection(lmsContext: string = "") {
+// Setelah wake-word membuka gerbang, percakapan tetap "terbuka" selama ini —
+// lanjutan bisa diucapkan tanpa memanggil "Hai Viona" lagi. Reset tiap giliran.
+const CONVERSATION_WINDOW_MS = 10000
+
+// Wake-word (gate). Web Speech tidak memberi confidence yang andal di mode
+// continuous, jadi gate = phrase-match toleran: terima "viona" + variasi salah-dengar
+// umum dari STT id-ID. `query` = teks setelah pemicu ("hai viona apa itu EDA" -> "apa itu EDA").
+const WAKE_WORDS = [
+  "viona", "fiona", "viyona", "fiyona", "piona", "biona",
+  "vionna", "vyona", "wiona", "vi ona", "fi ona", "viana",
+]
+function matchWakeWord(text: string): { matched: boolean; query: string } {
+  const lower = text.toLowerCase()
+  for (const w of WAKE_WORDS) {
+    const idx = lower.indexOf(w)
+    if (idx !== -1) {
+      const query = text.slice(idx + w.length).replace(/^[\s,.!?]+/, "").trim()
+      return { matched: true, query }
+    }
+  }
+  // Fallback longgar: pola "v/f/p/b/w + i + (y)o/a + n + a".
+  const m = lower.match(/[vfpbw]i+\s?y?[oa]nn?a/)
+  if (m) {
+    const query = text.slice((m.index ?? 0) + m[0].length).replace(/^[\s,.!?]+/, "").trim()
+    return { matched: true, query }
+  }
+  return { matched: false, query: "" }
+}
+
+// Bersihkan transkrip STT sebelum dikirim ke LLM: buang filler & rapikan spasi.
+// Rule-based (nol latensi, tanpa model). Lihat rencana bagian Parafrase.
+function cleanTranscript(text: string): string {
+  return text
+    .replace(/\b(?:e{2,}|m{2,}|eh{1,}|hmm+|anu)\b/gi, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim()
+}
+
+export function useNativeVoiceConnection(
+  lmsContext: string = "",
+  isQuiz: boolean = false,
+  courseTitle: string = "",
+  sessionId: string = "",
+) {
   const [messages, setMessages] = useState<Message[]>([])
   const [connectionState, setConnectionState] = useState<ConnectionState>("disconnected")
   const [agentState, setAgentState] = useState<AgentState>("idle")
@@ -38,13 +82,28 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
   const [sttError, setSttError] = useState("")
   const [activeBubble, setActiveBubble] = useState<InsightBubble | null>(null)
   const [activeImage, setActiveImage] = useState<string | null>(null)
+  // Percakapan sedang "terbuka" (untuk indikator UI). Gate wake-word SELALU aktif;
+  // window ini menandai boleh-lanjut-tanpa-wake-word selama beberapa detik.
+  const [conversationActive, setConversationActive] = useState(false)
 
   const synthRef = useRef<SpeechSynthesis | null>(null)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
   const micStreamRef = useRef<MediaStream | null>(null)
   const finalTranscriptRef = useRef("")
+  // Teks "hidup" = hasil final + interim terbaru. Web Speech sering belum men-final-kan
+  // saat silence timer menyala, jadi ini yang dibaca (bukan
+  // hanya finalTranscriptRef) agar ucapan & wake-word tidak hilang di interim.
+  const liveTextRef = useRef("")
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
+  // TTS Cartesia: elemen audio yang sedang diputar + request sintesis yang masih
+  // terbang + object URL blob-nya (wajib di-revoke agar tidak bocor memori).
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const ttsAbortRef = useRef<AbortController | null>(null)
+  const audioUrlRef = useRef<string | null>(null)
+  // Nomor urut giliran bicara; dinaikkan tiap speak()/stopSpeaking() agar callback
+  // ucapan lama bisa dikenali dan diabaikan.
+  const speakSeqRef = useRef(0)
   // startListening is memoized once (deps never change) and calls processUserInput
   // from inside a closure created on mount — without this ref indirection it would
   // permanently call the FIRST processUserInput, frozen with lmsContext="" from
@@ -59,6 +118,9 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
   // callback isn't recreated when messages changes (see its deps below), so a
   // direct `messages` read there would be stale. Same pattern as stateRef.
   const messagesRef = useRef<Message[]>([])
+  // Conversation window: gate wake-word terbuka sementara untuk lanjutan.
+  const conversationOpenRef = useRef(false)
+  const conversationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Ref mirrors to avoid stale closures inside event listeners
   const stateRef = useRef({
@@ -91,6 +153,28 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
       clearTimeout(silenceTimerRef.current)
       silenceTimerRef.current = null
     }
+  }, [])
+
+  // Buka/segarkan window percakapan: selama ~10 dtk berikutnya, ucapan diterima
+  // tanpa perlu menyebut "Hai Viona" lagi. Dipanggil saat giliran user diterima
+  // dan saat Viona selesai membalas (biar lanjutan mulus).
+  const openConversationWindow = useCallback(() => {
+    conversationOpenRef.current = true
+    setConversationActive(true)
+    if (conversationTimerRef.current) clearTimeout(conversationTimerRef.current)
+    conversationTimerRef.current = setTimeout(() => {
+      conversationOpenRef.current = false
+      setConversationActive(false)
+    }, CONVERSATION_WINDOW_MS)
+  }, [])
+
+  const closeConversationWindow = useCallback(() => {
+    if (conversationTimerRef.current) {
+      clearTimeout(conversationTimerRef.current)
+      conversationTimerRef.current = null
+    }
+    conversationOpenRef.current = false
+    setConversationActive(false)
   }, [])
 
   const clearBubbleTimers = useCallback(() => {
@@ -154,6 +238,7 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
       recognitionRef.current = null
     }
     finalTranscriptRef.current = ""
+    liveTextRef.current = ""
     setInterimText("")
     if (stateRef.current.isConnected && !stateRef.current.isProcessing && !stateRef.current.isBotSpeaking) {
        // Only go back to idle if we aren't in another state
@@ -179,18 +264,33 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     recognition.lang = "id-ID"
     recognition.interimResults = true
     recognition.continuous = true
-    
+
     finalTranscriptRef.current = ""
-    
+    liveTextRef.current = ""
+
     const scheduleEndOfTurn = () => {
       clearSilenceTimer()
       silenceTimerRef.current = setTimeout(() => {
-        const text = finalTranscriptRef.current.trim()
+        let text = liveTextRef.current.trim()
         finalTranscriptRef.current = ""
+        liveTextRef.current = ""
         setInterimText("")
-        if (text.length >= MIN_CHARS && !stateRef.current.isBotSpeaking && !stateRef.current.isProcessing) {
+
+        // Gate wake-word: bila window percakapan TERTUTUP, hanya lanjut jika ucapan
+        // memuat "Viona"; query = teks setelahnya. Bila TERBUKA, lanjut apa adanya.
+        if (!conversationOpenRef.current) {
+          const { matched, query } = matchWakeWord(text)
+          if (!matched) return // belum dipanggil — abaikan, tetap mendengarkan
+          openConversationWindow() // dipanggil -> buka window untuk lanjutan
+          text = query
+          if (!text) return // hanya menyapa "Hai Viona" tanpa pertanyaan; tunggu lanjutan
+        }
+
+        const cleaned = cleanTranscript(text)
+        if (cleaned.length >= MIN_CHARS && !stateRef.current.isBotSpeaking && !stateRef.current.isProcessing) {
+          openConversationWindow() // segarkan window
           recognition.stop()
-          processUserInputRef.current(text)
+          processUserInputRef.current(cleaned)
         }
       }, SILENCE_MS)
     }
@@ -217,8 +317,9 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
       }
       
       const live = (finalTranscriptRef.current + interim).trim()
+      liveTextRef.current = live
       setInterimText(live)
-      
+
       if (live) scheduleEndOfTurn()
     }
 
@@ -256,40 +357,106 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     }
   }, [clearSilenceTimer])
 
-  const speak = useCallback((text: string) => {
+  // Akhir satu giliran bicara — dulu diduplikasi di onend & onerror. `seq` menjaga
+  // agar callback ucapan LAMA (yang keburu di-barge-in atau diganti) tidak
+  // menyalakan ulang listening setelah ucapan baru dimulai.
+  const finishSpeaking = useCallback((seq: number) => {
+    if (seq !== speakSeqRef.current) return
+    setAgentState("idle")
+    utteranceRef.current = null
+    // Viona selesai membalas: jika sedang dalam percakapan, segarkan window agar
+    // user bisa lanjut tanpa memanggil "Hai Viona" lagi.
+    if (conversationOpenRef.current) openConversationWindow()
+    if (stateRef.current.isConnected && !stateRef.current.isMuted) {
+      startListening()
+    }
+  }, [startListening, openConversationWindow])
+
+  // Hentikan audio Cartesia yang sedang berjalan + batalkan request yang masih terbang.
+  const teardownAudio = useCallback(() => {
+    ttsAbortRef.current?.abort()
+    ttsAbortRef.current = null
+    const audio = audioRef.current
+    if (audio) {
+      audio.onended = null
+      audio.onerror = null
+      audio.pause()
+      audioRef.current = null
+    }
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current)
+      audioUrlRef.current = null
+    }
+  }, [])
+
+  // Fallback: Web Speech API browser. Dipakai kalau Cartesia gagal (kunci belum
+  // diset, jaringan mati, autoplay diblokir) supaya Viona tetap bersuara.
+  // Di sini normalizeForSpeech() dipakai klien; untuk Cartesia normalisasi
+  // dikerjakan server via normalize_for_tts().
+  const speakWithWebSpeech = useCallback((text: string, seq: number) => {
     if (!synthRef.current) return
-
-    stopListening()
-    synthRef.current.cancel()
-
     const utterance = new SpeechSynthesisUtterance(normalizeForSpeech(text))
     utteranceRef.current = utterance // Prevent garbage collection
     utterance.lang = "id-ID"
     utterance.rate = 0.9
     utterance.pitch = 1
-
     utterance.onstart = () => setAgentState("speaking")
-    utterance.onend = () => {
-      setAgentState("idle")
-      utteranceRef.current = null
-      if (stateRef.current.isConnected && !stateRef.current.isMuted) {
-        startListening()
-      }
-    }
-    utterance.onerror = () => {
-      setAgentState("idle")
-      utteranceRef.current = null
-      if (stateRef.current.isConnected && !stateRef.current.isMuted) {
-        startListening()
-      }
-    }
-
+    utterance.onend = () => finishSpeaking(seq)
+    utterance.onerror = () => finishSpeaking(seq)
     synthRef.current.speak(utterance)
-  }, [stopListening, startListening])
+  }, [finishSpeaking])
+
+  // TTS utama: Cartesia (via server), kualitas & suara Indonesia konsisten di semua
+  // browser — tidak lagi bergantung SpeechSynthesis yang hanya baik di Chrome/Edge.
+  const speak = useCallback((text: string) => {
+    stopListening()
+
+    // Batalkan ucapan sebelumnya, apa pun jalurnya.
+    const seq = ++speakSeqRef.current
+    teardownAudio()
+    synthRef.current?.cancel()
+
+    void (async () => {
+      const controller = new AbortController()
+      ttsAbortRef.current = controller
+      try {
+        const blob = await fetchTTS(text, controller.signal)
+        if (seq !== speakSeqRef.current) return // keburu di-barge-in saat sintesis
+
+        const url = URL.createObjectURL(blob)
+        audioUrlRef.current = url
+        const audio = new Audio(url)
+        audioRef.current = audio
+        audio.onended = () => finishSpeaking(seq)
+        audio.onerror = () => finishSpeaking(seq)
+        setAgentState("speaking")
+        await audio.play()
+      } catch {
+        if (seq !== speakSeqRef.current) return // dibatalkan, bukan kegagalan nyata
+        teardownAudio()
+        speakWithWebSpeech(text, seq)
+      }
+    })()
+  }, [stopListening, teardownAudio, finishSpeaking, speakWithWebSpeech])
+
+  // Barge-in: potong ucapan Viona di tengah. Menaikkan seq membatalkan callback
+  // ucapan berjalan, lalu siklus dilanjutkan eksplisit — audio yang di-pause tidak
+  // memicu onended sendiri (berbeda dari synth.cancel() yang memicu onend).
+  const stopSpeaking = useCallback(() => {
+    // Kalau Viona tidak sedang bicara, ini harus no-op: melanjutkan siklus di sini
+    // akan memaksa state "thinking" jadi "idle" dan menyalakan listening di tengah
+    // proses. (Web Speech dulu aman sendiri: cancel() tanpa ucapan tak memicu onend.)
+    const wasSpeaking = stateRef.current.isBotSpeaking
+    const seq = ++speakSeqRef.current
+    teardownAudio()
+    synthRef.current?.cancel()
+    if (wasSpeaking) finishSpeaking(seq)
+  }, [teardownAudio, finishSpeaking])
 
   const processUserInput = useCallback(async (userText: string) => {
     if (stateRef.current.isProcessing) return
-    
+
+    openConversationWindow() // sedang berdialog -> lanjutan boleh tanpa wake-word
     stopListening()
     setAgentState("thinking")
 
@@ -316,7 +483,7 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
       const res = await fetch("/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userText, material_id: "matematika", version: "v1", lms_context: lmsContext, history }),
+        body: JSON.stringify({ message: userText, material_id: "matematika", version: "v1", lms_context: lmsContext, history, is_quiz: isQuiz, course_title: courseTitle, session_id: sessionId }),
       })
       if (res.ok) {
         const data = await res.json()
@@ -344,7 +511,7 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     // selamanya kalau ditaruh di situ.
     scheduleBubbles(pendingBubblesRef.current, pendingImageRef.current)
     speak(response)
-  }, [speak, stopListening, lmsContext, scheduleBubbles])
+  }, [speak, stopListening, lmsContext, scheduleBubbles, isQuiz, courseTitle, sessionId, openConversationWindow])
 
   // Keep the ref pointed at the latest processUserInput (current lmsContext) so
   // startListening's frozen closure always dispatches through up-to-date logic.
@@ -365,10 +532,41 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     } catch {
       // Permission denied, but we can still connect and speak back
     }
-    
+
     setConnectionState("connected")
-    setMessages([])
-    
+
+    // Restore transkrip session dari Redis (bila ada) supaya tidak hilang saat
+    // buka ulang / refresh / maximize. GET 404 = session baru -> mulai dengan sapaan.
+    let restored: Message[] = []
+    if (sessionId) {
+      try {
+        const res = await fetch(`/sessions/${encodeURIComponent(sessionId)}/history`)
+        if (res.ok) {
+          const data = await res.json()
+          restored = (data.history || []).map(
+            (h: { role: string; text: string }, i: number): Message => ({
+              id: `h-${i}`,
+              role: h.role === "user" ? "user" : "assistant",
+              content: h.text,
+              timestamp: new Date(),
+            }),
+          )
+        }
+      } catch {
+        // gagal ambil history -> lanjut sebagai session baru
+      }
+    }
+
+    if (restored.length > 0) {
+      setMessages(restored) // lanjut session lama, tanpa sapaan ulang
+      // WAJIB: tanpa ini mikrofon tak pernah menyala di sesi yang dipulihkan, karena
+      // startListening() hanya terpanggil sebagai efek samping saat salam pembuka
+      // SELESAI diucapkan — dan salam itu dilewati di sini. Akibatnya wake-word
+      // "Hai Viona" tampak mati total bagi user yang membuka popup lagi.
+      startListening()
+      return
+    }
+
     const welcomeMessage: Message = {
       id: "welcome",
       role: "assistant",
@@ -376,15 +574,23 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
       timestamp: new Date(),
     }
     setMessages([welcomeMessage])
-    
-    // Simulate connection delay for UI
+    setTimeout(() => speak(welcomeMessage.content), 500)
+    // Jaring pengaman: kalau sintesis/pemutaran salam gagal tanpa memicu callback
+    // selesai, loop dengar tetap hidup sehingga wake-word tidak ikut mati.
     setTimeout(() => {
-      speak(welcomeMessage.content)
-    }, 500)
-  }, [speak])
+      if (stateRef.current.isConnected && !stateRef.current.isMuted && !stateRef.current.isBotSpeaking) {
+        startListening()
+      }
+    }, 4000)
+  }, [speak, sessionId, startListening])
 
   const disconnect = useCallback(() => {
     if (synthRef.current) synthRef.current.cancel()
+    // Naikkan seq + hentikan audio Cartesia, kalau tidak suara Viona lanjut
+    // terputar setelah popup ditutup.
+    speakSeqRef.current++
+    teardownAudio()
+    closeConversationWindow()
     stopListening()
     micStreamRef.current?.getTracks().forEach(t => t.stop())
     micStreamRef.current = null
@@ -398,7 +604,7 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     setMessages([])
     setActiveBubble(null)
     setActiveImage(null)
-  }, [stopListening, clearBubbleTimers])
+  }, [stopListening, clearBubbleTimers, closeConversationWindow, teardownAudio])
 
   const toggleMute = useCallback(() => {
     const newMuted = !isMuted
@@ -420,10 +626,12 @@ export function useNativeVoiceConnection(lmsContext: string = "") {
     isMuted,
     activeBubble,
     activeImage,
+    conversationActive,
     connect,
     disconnect,
     sendText,
     toggleMute,
+    stopSpeaking,
     micStream: micStreamRef.current
   }
 }

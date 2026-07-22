@@ -8,6 +8,13 @@ x-common-env: &common-env
   VOXCPM2_MODEL_NAME: ${VOXCPM2_MODEL_NAME:-openbmb/VoxCPM2}
   VOXCPM2_DEVICE: ${VOXCPM2_DEVICE:-cpu}
   VOXCPM2_REFERENCE_AUDIO: ${VOXCPM2_REFERENCE_AUDIO:-/app/assets/voice_reference_processed.wav}
+  # Cartesia TTS (cloud) — dipakai DUA jalur suara: pipeline Pipecat (_build_tts)
+  # dan jalur native lewat POST /tts. Tanpa baris ini key tak pernah sampai ke
+  # container dan kedua jalur gagal ("CARTESIA_API_KEY belum diset").
+  CARTESIA_API_KEY: ${CARTESIA_API_KEY:-}
+  # "Siti - Ad Narrator" — suara perempuan berbahasa Indonesia (lihat config.py).
+  CARTESIA_VOICE_ID: ${CARTESIA_VOICE_ID:-b441c4fd-4910-4c55-ae56-f0291057e2cc}
+  CARTESIA_MODEL: ${CARTESIA_MODEL:-sonic-3.5}
   OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
   OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma4:31b-cloud}
   OLLAMA_API_KEY: ${OLLAMA_API_KEY:-}

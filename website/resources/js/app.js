@@ -452,10 +452,54 @@ function goToOffset(offset) {
     }
 }
 
+// Susun teks SELURUH course (semua section/sub-section) untuk di-inject sebagai
+// lms_context — KECUALI item bertipe QUIZ (soal tak boleh ikut). Diekspos ke global
+// agar bisa dibaca script inline (postVionaContext) di welcome.blade.php.
+const COURSE_CONTEXT_MAX = 24000;
+function buildCourseContext() {
+    if (!state.data) return;
+
+    const parts = [];
+    const collectItem = (id) => {
+        const item = normalizeItem(state.data.items[String(id)]);
+        if (!item || item.item_type === 'QUIZ') return; // soal quiz tak ikut konteks
+        const bodyText = (item.builder_fields || [])
+            .filter((field) => field.type === 'richtext')
+            .map((field) => stripTags(contentAsHtml(field.content)))
+            .join('\n')
+            .trim();
+        if (item.title || bodyText) {
+            parts.push(`## ${item.title || ''}\n${bodyText}`.trim());
+        }
+    };
+
+    for (const section of state.data.sections) {
+        parts.push(`# ${section.title}`);
+        for (const ref of section.items) {
+            collectItem(ref.id);
+            for (const childId of ref.children || []) {
+                collectItem(childId);
+            }
+        }
+    }
+
+    let text = parts.join('\n\n');
+    if (text.length > COURSE_CONTEXT_MAX) {
+        text = text.slice(0, COURSE_CONTEXT_MAX);
+    }
+
+    const courseEl = document.querySelector('.course-title h1');
+    window.__vionaCourse = {
+        text,
+        title: (courseEl && courseEl.textContent.trim()) || document.title || '',
+    };
+}
+
 async function boot() {
     const response = await fetch('/data/course.json');
     state.data = await response.json();
     flattenLessons();
+    buildCourseContext();
 
     const pathId = Number(location.pathname.match(/\/(\d+)$/)?.[1]);
     const firstId = state.flatLessons[0]?.id;

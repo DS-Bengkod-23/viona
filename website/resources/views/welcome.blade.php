@@ -51,27 +51,41 @@
 
     <!-- Viona AI Assistant Widget -->
     <iframe id="viona-widget" src="/dashboard/widget"
-            allow="microphone"
+            {{-- autoplay WAJIB: TTS Cartesia diputar lewat <audio> di dalam iframe ini.
+                 Tanpa izin ini audio.play() ditolak browser dan widget diam-diam
+                 jatuh ke Web Speech. (SpeechSynthesis tidak terkena aturan autoplay,
+                 jadi gejalanya terlihat seperti "Cartesia tidak aktif".) --}}
+            allow="microphone; autoplay"
             style="position:fixed; bottom:0; right:0; width:210px; height:220px; border:none; z-index:9999; background:transparent; transition: all 0.3s ease;">
     </iframe>
     <script>
+        // Kirim konteks materi ke widget Viona. Di halaman KUIS, sengaja TIDAK
+        // mengirim isi materi (agar Viona tak pernah "melihat" soal) — cukup flag
+        // isQuiz + judul course (dinamis, mendukung course apa pun tanpa hardcode).
+        function postVionaContext(widget) {
+            if (!widget || !widget.contentWindow) return;
+            const lc = document.getElementById('lesson-content');
+            const isQuiz = !!(lc && lc.querySelector('.quiz-card'));
+            const course = window.__vionaCourse || {};
+            const courseEl = document.querySelector('.course-title h1');
+            widget.contentWindow.postMessage({
+                type: 'viona-context',
+                // Kirim SELURUH isi course (tanpa quiz). TIDAK dikosongkan saat halaman
+                // quiz — Viona tetap perlu materi untuk bantu KONSEP; flag isQuiz hanya
+                // memicu guard "jangan beri jawaban soal" di backend.
+                text: course.text || (lc && lc.innerText) || '',
+                isQuiz: isQuiz,
+                courseTitle: course.title || (courseEl && courseEl.innerText) || document.title || '',
+            }, '*');
+        }
+
         window.addEventListener('message', function(event) {
             if (event.data && event.data.type === 'viona-resize') {
                 const widget = document.getElementById('viona-widget');
                 if (event.data.isOpen) {
                     widget.style.width = '560px';
                     widget.style.height = '630px';
-                    
-                    // Inject Context: Send lesson content to Viona Widget
-                    const lessonContent = document.getElementById('lesson-content');
-                    if (lessonContent && widget.contentWindow) {
-                        // Extract text, replacing multiple newlines with single spaces to keep it clean
-                        const text = lessonContent.innerText || "";
-                        widget.contentWindow.postMessage({ 
-                            type: 'viona-context', 
-                            text: text 
-                        }, '*');
-                    }
+                    postVionaContext(widget);
                 } else {
                     widget.style.width = '210px';
                     widget.style.height = '220px';
@@ -160,14 +174,7 @@
                 const widget = document.getElementById('viona-widget');
                 if (widget && widget.contentWindow) {
                     // Update context explicitly before sending quote
-                    const lessonContent = document.getElementById('lesson-content');
-                    if (lessonContent) {
-                        widget.contentWindow.postMessage({ 
-                            type: 'viona-context', 
-                            text: lessonContent.innerText || "" 
-                        }, '*');
-                    }
-                    
+                    postVionaContext(widget);
                     widget.contentWindow.postMessage({
                         type: 'viona-quote',
                         text: selectedText
@@ -181,13 +188,7 @@
             const lessonContent = document.getElementById('lesson-content');
             if (lessonContent) {
                 const observer = new MutationObserver(function(mutations) {
-                    const widget = document.getElementById('viona-widget');
-                    if (widget && widget.contentWindow) {
-                        widget.contentWindow.postMessage({ 
-                            type: 'viona-context', 
-                            text: lessonContent.innerText || "" 
-                        }, '*');
-                    }
+                    postVionaContext(document.getElementById('viona-widget'));
                 });
                 observer.observe(lessonContent, { childList: true, subtree: true, characterData: true });
             }

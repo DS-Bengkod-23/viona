@@ -60,6 +60,19 @@ export async function ingestText(text: string, source = "manual", category = "fa
   return res.json();
 }
 
+/** Sintesis suara via Cartesia (server-side; kunci API tidak pernah sampai ke browser).
+ *  Melempar kalau gagal — pemanggil diharapkan fallback ke Web Speech. */
+export async function fetchTTS(text: string, signal?: AbortSignal): Promise<Blob> {
+  const res = await fetch(`${API_BASE}/tts`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text }),
+    signal,
+  });
+  if (!res.ok) throw new Error(`TTS gagal (${res.status})`);
+  return res.blob();
+}
+
 export async function fetchHealth(): Promise<{ status: string }> {
   const res = await fetch(`${API_BASE}/health`);
   if (!res.ok) throw new Error(await res.text());

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 import json
+import re
 from time import perf_counter
 
 import httpx
@@ -10,6 +12,7 @@ from pydantic import BaseModel
 
 from app.core.config import settings
 from app.infrastructure.rag.retriever import get_rag_retriever
+from app.infrastructure.session.store import get_session_store
 
 logger = structlog.get_logger(__name__)
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -38,6 +41,13 @@ _LANGUAGE_INSTRUCTION = (
     "Jangan pernah bercampur dengan aksara atau bahasa lain (mis. Mandarin, "
     "Jepang, Korea) di tengah jawaban, kecuali istilah teknis yang memang "
     "lazim ditulis apa adanya (mis. \"accuracy\", \"precision\", \"epoch\")."
+)
+
+_BREVITY_INSTRUCTION = (
+    "\n\nGAYA JAWABAN (dibacakan via suara): ringkas dan natural seperti sedang "
+    "ngobrol — idealnya 2-3 kalimat. Langsung ke inti, hindari bertele-tele. "
+    "Untuk matematika saat diucapkan: pakai kata/simbol yang mudah dibaca "
+    "(mis. \"×\" untuk kali, bukan huruf \"x\")."
 )
 
 _BUBBLE_INSTRUCTION = (
@@ -250,6 +260,25 @@ _STATIC_QA: list[dict] = [
 ]
 
 
+def _extract_json_obj(text: str) -> str:
+    """Ambil objek JSON dari output model untuk structured-output.
+
+    Model cloud (mis. *-cloud) sering MENGABAIKAN param `format` dan membungkus
+    JSON dalam pagar markdown ```json ... ``` atau menambah prosa. Fungsi ini
+    membuang pagar dan mengambil dari '{' pertama sampai '}' terakhir agar
+    json.loads berhasil.
+    """
+    t = text.strip()
+    if t.startswith("```"):
+        t = re.sub(r"^```[a-zA-Z0-9]*\s*", "", t)
+        t = re.sub(r"\s*```$", "", t).strip()
+    if not t.startswith("{"):
+        i, j = t.find("{"), t.rfind("}")
+        if i != -1 and j > i:
+            t = t[i : j + 1]
+    return t
+
+
 def _match_static_qa(message: str, history: list[ChatHistoryTurn] | None = None) -> dict | None:
     lower = message.lower()
     for entry in _STATIC_QA:
@@ -279,6 +308,9 @@ class ChatRequest(BaseModel):
     version: str | None = None      # filter RAG per-versi (mis. "v1")
     lms_context: str | None = None  # text context directly injected from the web page
     history: list[ChatHistoryTurn] | None = None  # beberapa giliran terakhir, untuk konteks follow-up
+    is_quiz: bool = False            # halaman kuis: Viona tolak jawaban soal (tetap bantu konsep)
+    course_title: str | None = None  # judul course aktif (dinamis dari DOM)
+    session_id: str | None = None    # id session (persist transkrip ke Redis)
 
 
 async def _retrieve_context(query: str, material_id: str | None, version: str | None) -> str:
@@ -302,6 +334,45 @@ async def _retrieve_context(query: str, material_id: str | None, version: str | 
     return "\n".join(f"- {h['text']}" for h in hits)
 
 
+# Guardrail kuis (halaman KUIS): Viona TIDAK boleh memberi jawaban langsung soal,
+# tapi WAJIB tetap membantu menjelaskan KONSEP dari materi course (rule 2
+# app/prompts/indonesian.py). Disisipkan ke system prompt saat is_quiz — bukan
+# memblok semua pertanyaan (bantuan konsep tetap jalan).
+_QUIZ_GUARD = (
+    "\n\nPERHATIAN — HALAMAN KUIS: Siswa sedang di halaman kuis/latihan. DILARANG "
+    "KERAS memberi jawaban langsung atas soal (memilih opsi, menyebut jawaban akhir, "
+    "atau menyelesaikan soal untuk siswa). TAPI kamu WAJIB tetap MEMBANTU siswa "
+    "memahami KONSEP yang relevan dari materi dan mengarahkannya menemukan jawaban "
+    "sendiri. Jika siswa meminta jawaban langsung, tolak dengan ramah lalu tawarkan "
+    "penjelasan konsepnya."
+)
+
+
+def _instruction_suffix(is_quiz: bool) -> str:
+    """Rakit imbuhan instruksi untuk system prompt (bahasa, brevity, guard kuis, bubble)."""
+    suffix = _LANGUAGE_INSTRUCTION + _BREVITY_INSTRUCTION
+    if is_quiz:
+        suffix += _QUIZ_GUARD
+    suffix += _BUBBLE_INSTRUCTION
+    return suffix
+
+
+def _log_session(session_id: str | None, user_msg: str, reply: str) -> None:
+    """Catat 1 giliran (user + assistant) ke Redis session store (fire-and-forget)."""
+    if not session_id:
+        return
+
+    async def _do() -> None:
+        try:
+            store = await get_session_store()
+            await store.log_interaction(session_id, "user", user_msg)
+            await store.log_interaction(session_id, "assistant", reply)
+        except Exception as exc:  # noqa: BLE001 - logging session tak boleh gagalkan chat
+            logger.warning("session log failed", error=str(exc))
+
+    asyncio.create_task(_do())
+
+
 @router.post("")
 async def chat_with_viona(body: ChatRequest) -> dict:
     """Chat dengan Viona: RAG (Qdrant) + LLM (Ollama native API)."""
@@ -311,6 +382,7 @@ async def chat_with_viona(body: ChatRequest) -> dict:
     static_match = _match_static_qa(body.message, body.history)
     if static_match:
         logger.info("chat static match", keyword_groups=static_match["keyword_groups"])
+        _log_session(body.session_id, body.message, static_match["answer"])
         return {
             "response": static_match["answer"],
             "bubbles": static_match["bubbles"],
@@ -338,7 +410,12 @@ async def chat_with_viona(body: ChatRequest) -> dict:
             "3. JANGAN PERNAH memulai jawaban dengan sapaan seperti 'Halo' atau memperkenalkan diri.\n"
             "4. JANGAN menebak-nebak jawaban."
         )
-        context_block = f"KONTEKS MATERI LMS SAAT INI:\n{context}\n\n"
+        course_label = (
+            f" COURSE ({body.course_title.strip()})"
+            if body.course_title and body.course_title.strip()
+            else ""
+        )
+        context_block = f"KONTEKS MATERI{course_label} SAAT INI:\n{context}\n\n"
     else:
         context = await _retrieve_context(body.message, body.material_id, body.version)
         rag_ms = (perf_counter() - t_rag) * 1000
@@ -371,7 +448,7 @@ async def chat_with_viona(body: ChatRequest) -> dict:
             else ""
         )
 
-    system_prompt += _LANGUAGE_INSTRUCTION + _BUBBLE_INSTRUCTION
+    system_prompt += _instruction_suffix(body.is_quiz)
 
     # Gunakan native Ollama API (/api/chat)
     ollama_url = f"{settings.ollama_base_url.rstrip('/')}/api/chat"
@@ -423,7 +500,7 @@ async def chat_with_viona(body: ChatRequest) -> dict:
     # output), pakai raw_content apa adanya sebagai jawaban dan bubble ditiadakan.
     bubble: dict | None = None
     try:
-        parsed = json.loads(raw_content)
+        parsed = json.loads(_extract_json_obj(raw_content))
         reply = str(parsed.get("response", "")).strip()
         raw_bubble = parsed.get("bubble")
         if isinstance(raw_bubble, dict) and raw_bubble.get("type") in _BUBBLE_TYPES and raw_bubble.get("text"):
@@ -469,6 +546,7 @@ async def chat_with_viona(body: ChatRequest) -> dict:
         has_context=bool(context),
         has_bubble=bool(bubble),
     )
+    _log_session(body.session_id, body.message, reply)
     return {
         "response": reply,
         "bubbles": [bubble] if bubble else [],
