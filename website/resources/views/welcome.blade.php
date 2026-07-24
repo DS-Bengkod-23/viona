@@ -66,16 +66,24 @@
             if (!widget || !widget.contentWindow) return;
             const lc = document.getElementById('lesson-content');
             const isQuiz = !!(lc && lc.querySelector('.quiz-card'));
-            const course = window.__vionaCourse || {};
             const courseEl = document.querySelector('.course-title h1');
+
+            // Sembunyikan iframe sepenuhnya di halaman quiz
+            widget.style.display = isQuiz ? 'none' : '';
+            
+            let syllabus = '';
+            const navEl = document.getElementById('course-nav');
+            if (navEl) {
+                syllabus = navEl.innerText;
+            }
+
             widget.contentWindow.postMessage({
                 type: 'viona-context',
-                // Kirim SELURUH isi course (tanpa quiz). TIDAK dikosongkan saat halaman
-                // quiz — Viona tetap perlu materi untuk bantu KONSEP; flag isQuiz hanya
-                // memicu guard "jangan beri jawaban soal" di backend.
-                text: course.text || (lc && lc.innerText) || '',
+                // Kirim isi halaman saat ini (lesson-content)
+                text: (lc && lc.innerText) || '',
+                syllabus: syllabus,
                 isQuiz: isQuiz,
-                courseTitle: course.title || (courseEl && courseEl.innerText) || document.title || '',
+                courseTitle: (courseEl && courseEl.innerText) || document.title || '',
             }, '*');
         }
 

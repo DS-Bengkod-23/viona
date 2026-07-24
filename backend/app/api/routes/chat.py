@@ -284,16 +284,6 @@ def _match_static_qa(message: str, history: list[ChatHistoryTurn] | None = None)
     for entry in _STATIC_QA:
         if all(any(kw in lower for kw in group) for group in entry["keyword_groups"]):
             return entry
-
-    # Follow-up pendek (mis. "bagaimana bentuk tabelnya") sering tidak menyebut
-    # ulang kata kunci topik. Coba lagi dengan riwayat percakapan disertakan —
-    # jawaban Viona sebelumnya (bila dari static QA juga) memuat kata kunci asli
-    # topiknya, jadi follow-up tetap match ke entry yang sama.
-    if history:
-        combined = lower + " " + " ".join(turn.content.lower() for turn in history)
-        for entry in _STATIC_QA:
-            if all(any(kw in combined for kw in group) for group in entry["keyword_groups"]):
-                return entry
     return None
 
 
@@ -307,6 +297,7 @@ class ChatRequest(BaseModel):
     material_id: str | None = None  # filter RAG per-materi LMS (mis. "matematika")
     version: str | None = None      # filter RAG per-versi (mis. "v1")
     lms_context: str | None = None  # text context directly injected from the web page
+    syllabus: str | None = None     # Daftar isi/silabus keseluruhan course
     history: list[ChatHistoryTurn] | None = None  # beberapa giliran terakhir, untuk konteks follow-up
     is_quiz: bool = False            # halaman kuis: Viona tolak jawaban soal (tetap bantu konsep)
     course_title: str | None = None  # judul course aktif (dinamis dari DOM)
@@ -392,61 +383,37 @@ async def chat_with_viona(body: ChatRequest) -> dict:
         }
 
     t_rag = perf_counter()
-    if body.lms_context and body.lms_context.strip():
-        # Context Injection takes priority over RAG
-        context = body.lms_context.strip()
-        rag_ms = (perf_counter() - t_rag) * 1000
-        
-        system_prompt = (
-            "Anda adalah Viona, asisten virtual cerdas untuk LMS Bengkel Koding.\n"
-            "Tugas utama Anda adalah membantu menjawab pertanyaan siswa MURNI BERDASARKAN "
-            "materi pelajaran yang sedang mereka buka di layar.\n\n"
-            "ATURAN KETAT (PENTING):\n"
-            "1. Jika pertanyaan siswa BISA DIJAWAB menggunakan informasi pada KONTEKS MATERI, "
-            "berikan jawaban yang jelas dan edukatif berdasarkan teks tersebut.\n"
-            "2. Jika pertanyaan siswa SAMA SEKALI TIDAK ADA di dalam KONTEKS MATERI, Anda DILARANG KERAS "
-            "menggunakan pengetahuan umum Anda untuk menjawab. Anda HARUS MENOLAK dengan ramah "
-            "dan menyatakan bahwa pertanyaan tersebut berada di luar materi yang sedang dibaca.\n"
-            "3. JANGAN PERNAH memulai jawaban dengan sapaan seperti 'Halo' atau memperkenalkan diri.\n"
-            "4. JANGAN menebak-nebak jawaban."
-        )
-        course_label = (
-            f" COURSE ({body.course_title.strip()})"
-            if body.course_title and body.course_title.strip()
-            else ""
-        )
-        context_block = f"KONTEKS MATERI{course_label} SAAT INI:\n{context}\n\n"
-    else:
-        context = await _retrieve_context(body.message, body.material_id, body.version)
-        rag_ms = (perf_counter() - t_rag) * 1000
+    context_current = body.lms_context.strip() if body.lms_context else ""
+    context_rag = await _retrieve_context(body.message, body.material_id, body.version)
+    rag_ms = (perf_counter() - t_rag) * 1000
 
-        if not context:
-            system_prompt = (
-                "Anda adalah Viona, asisten virtual yang ramah dan berbahasa Indonesia.\n"
-                "Konteks dari database kosong. Silakan jawab pertanyaan pengguna menggunakan "
-                "pengetahuan umum Anda secara ringkas, jujur, dan edukatif.\n\n"
-                "ATURAN PENTING:\n"
-                "- JANGAN PERNAH memulai jawaban dengan sapaan seperti 'Halo' atau memperkenalkan diri (misal 'Saya Viona').\n"
-                "- Langsung berikan jawaban dari pertanyaan yang diajukan tanpa basa-basi pengenalan diri."
-            )
-        else:
-            system_prompt = (
-                "Anda adalah Viona, asisten virtual LMS yang membantu, ramah, dan berbicara "
-                "dengan bahasa Indonesia yang natural.\n"
-                "Gunakan informasi pada bagian KONTEKS untuk menjawab bila relevan. "
-                "Jika konteks tidak memuat jawabannya, Anda DIPERBOLEHKAN menggunakan "
-                "pengetahuan umum Anda sendiri untuk menjawab pertanyaan dengan jujur, "
-                "edukatif, dan sopan.\n\n"
-                "ATURAN PENTING:\n"
-                "- JANGAN PERNAH memulai jawaban dengan sapaan seperti 'Halo' atau memperkenalkan diri (misal 'Saya Viona').\n"
-                "- Langsung berikan jawaban dari pertanyaan yang diajukan tanpa basa-basi pengenalan diri."
-            )
+    system_prompt = (
+        "Anda adalah Viona, asisten virtual cerdas untuk LMS Bengkel Koding.\n"
+        "Tugas utama Anda adalah membantu menjawab pertanyaan siswa MURNI BERDASARKAN "
+        "materi pelajaran (baik yang sedang dibuka maupun dari silabus course).\n\n"
+        "ATURAN KETAT (PENTING):\n"
+        "1. Jika pertanyaan siswa berkaitan dengan materi di HALAMAN SAAT INI atau HASIL PENCARIAN, "
+        "berikan jawaban yang jelas dan edukatif berdasarkan teks tersebut.\n"
+        "2. Jika pertanyaan siswa berada di luar cakupan SILABUS KURSUS dan konteks yang diberikan, Anda DILARANG KERAS "
+        "menggunakan pengetahuan umum untuk menjawab. Anda HARUS MENOLAK dengan ramah "
+        "dan menyatakan bahwa pertanyaan tersebut berada di luar materi.\n"
+        "3. JANGAN PERNAH memulai jawaban dengan sapaan seperti 'Halo' atau memperkenalkan diri.\n"
+        "4. JANGAN menebak-nebak jawaban."
+    )
 
-        context_block = (
-            f"KONTEKS:\n{context}\n\n"
-            if context
-            else ""
-        )
+    course_label = (
+        f" COURSE ({body.course_title.strip()})"
+        if body.course_title and body.course_title.strip()
+        else ""
+    )
+    
+    context_block = ""
+    if body.syllabus and body.syllabus.strip():
+        context_block += f"SILABUS{course_label}:\n{body.syllabus.strip()}\n\n"
+    if context_current:
+        context_block += f"KONTEKS HALAMAN SAAT INI:\n{context_current}\n\n"
+    if context_rag:
+        context_block += f"HASIL PENCARIAN MATERI LAIN (RAG):\n{context_rag}\n\n"
 
     system_prompt += _instruction_suffix(body.is_quiz)
 
@@ -543,7 +510,7 @@ async def chat_with_viona(body: ChatRequest) -> dict:
         eff_tok_per_s=eff_tok_per_s,
         out_tokens=out_tokens,
         out_chars=len(reply),
-        has_context=bool(context),
+        has_context=bool(context_current),
         has_bubble=bool(bubble),
     )
     _log_session(body.session_id, body.message, reply)

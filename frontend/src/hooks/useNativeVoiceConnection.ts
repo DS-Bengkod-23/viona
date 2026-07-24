@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react"
 import { normalizeForSpeech } from "@/lib/tts-text"
 import { fetchTTS } from "@/lib/api"
 
-const SILENCE_MS = 800
+const SILENCE_MS = 700
 const MIN_CHARS = 2
 
 export interface Message {
@@ -70,6 +70,7 @@ function cleanTranscript(text: string): string {
 
 export function useNativeVoiceConnection(
   lmsContext: string = "",
+  syllabus: string = "",
   isQuiz: boolean = false,
   courseTitle: string = "",
   sessionId: string = "",
@@ -77,7 +78,7 @@ export function useNativeVoiceConnection(
   const [messages, setMessages] = useState<Message[]>([])
   const [connectionState, setConnectionState] = useState<ConnectionState>("disconnected")
   const [agentState, setAgentState] = useState<AgentState>("idle")
-  const [isMuted, setIsMuted] = useState(false)
+  const [isMuted, setIsMuted] = useState(true)
   const [interimText, setInterimText] = useState("")
   const [sttError, setSttError] = useState("")
   const [activeBubble, setActiveBubble] = useState<InsightBubble | null>(null)
@@ -276,17 +277,22 @@ export function useNativeVoiceConnection(
         liveTextRef.current = ""
         setInterimText("")
 
-        // Gate wake-word: bila window percakapan TERTUTUP, hanya lanjut jika ucapan
-        // memuat "Viona"; query = teks setelahnya. Bila TERBUKA, lanjut apa adanya.
-        if (!conversationOpenRef.current) {
+        const needsWakeWord = stateRef.current.isMuted
+        let finalQuery = text
+
+        if (needsWakeWord) {
           const { matched, query } = matchWakeWord(text)
-          if (!matched) return // belum dipanggil — abaikan, tetap mendengarkan
-          openConversationWindow() // dipanggil -> buka window untuk lanjutan
-          text = query
-          if (!text) return // hanya menyapa "Hai Viona" tanpa pertanyaan; tunggu lanjutan
+          if (!matched) {
+             // Ignored if wake word not found
+             return
+          }
+          finalQuery = query
+          // Wake word matched! Unmute the mic automatically
+          setIsMuted(false)
+          stateRef.current.isMuted = false
         }
 
-        const cleaned = cleanTranscript(text)
+        const cleaned = cleanTranscript(finalQuery)
         if (cleaned.length >= MIN_CHARS && !stateRef.current.isBotSpeaking && !stateRef.current.isProcessing) {
           openConversationWindow() // segarkan window
           recognition.stop()
@@ -324,7 +330,7 @@ export function useNativeVoiceConnection(
     }
 
     recognition.onend = () => {
-      if (stateRef.current.isConnected && !stateRef.current.isMuted && !stateRef.current.isBotSpeaking && !stateRef.current.isProcessing) {
+      if (stateRef.current.isConnected && !stateRef.current.isBotSpeaking && !stateRef.current.isProcessing) {
         setAgentState("idle")
         setTimeout(() => startListening(), 300)
       }
@@ -335,14 +341,14 @@ export function useNativeVoiceConnection(
       const err = (event as unknown as { error?: string }).error ?? "unknown"
       
       if (err === "network" || err === "service-not-allowed") {
-        setSttError("Layanan pengenalan suara diblokir oleh browser.")
+        setSttError("Koneksi STT terputus, mencoba ulang...")
       } else if (err === "not-allowed") {
         setSttError("Izin mikrofon ditolak.")
       } else if (err === "audio-capture") {
         setSttError("Mikrofon tidak terdeteksi.")
       }
 
-      if (stateRef.current.isConnected && !stateRef.current.isMuted && !stateRef.current.isBotSpeaking && !stateRef.current.isProcessing && err !== "network" && err !== "service-not-allowed" && err !== "not-allowed") {
+      if (stateRef.current.isConnected && !stateRef.current.isBotSpeaking && !stateRef.current.isProcessing && err !== "not-allowed") {
         setTimeout(() => startListening(), 1000)
       } else {
         setAgentState("idle")
@@ -367,7 +373,8 @@ export function useNativeVoiceConnection(
     // Viona selesai membalas: jika sedang dalam percakapan, segarkan window agar
     // user bisa lanjut tanpa memanggil "Hai Viona" lagi.
     if (conversationOpenRef.current) openConversationWindow()
-    if (stateRef.current.isConnected && !stateRef.current.isMuted) {
+    // Selalu nyalakan STT setelah bicara, meskipun muted (karena muted = mode wake word)
+    if (stateRef.current.isConnected) {
       startListening()
     }
   }, [startListening, openConversationWindow])
@@ -395,20 +402,30 @@ export function useNativeVoiceConnection(
   // dikerjakan server via normalize_for_tts().
   const speakWithWebSpeech = useCallback((text: string, seq: number) => {
     if (!synthRef.current) return
+    
+    setIsMuted(true)
+    stateRef.current.isMuted = true
+    
     const utterance = new SpeechSynthesisUtterance(normalizeForSpeech(text))
     utteranceRef.current = utterance // Prevent garbage collection
     utterance.lang = "id-ID"
     utterance.rate = 0.9
     utterance.pitch = 1
     utterance.onstart = () => setAgentState("speaking")
-    utterance.onend = () => finishSpeaking(seq)
-    utterance.onerror = () => finishSpeaking(seq)
+    utterance.onend = () => {
+      finishSpeaking(seq)
+    }
+    utterance.onerror = () => {
+      finishSpeaking(seq)
+    }
     synthRef.current.speak(utterance)
   }, [finishSpeaking])
 
   // TTS utama: Cartesia (via server), kualitas & suara Indonesia konsisten di semua
   // browser — tidak lagi bergantung SpeechSynthesis yang hanya baik di Chrome/Edge.
   const speak = useCallback((text: string) => {
+    setIsMuted(true)
+    stateRef.current.isMuted = true
     stopListening()
 
     // Batalkan ucapan sebelumnya, apa pun jalurnya.
@@ -427,8 +444,12 @@ export function useNativeVoiceConnection(
         audioUrlRef.current = url
         const audio = new Audio(url)
         audioRef.current = audio
-        audio.onended = () => finishSpeaking(seq)
-        audio.onerror = () => finishSpeaking(seq)
+        audio.onended = () => {
+          finishSpeaking(seq)
+        }
+        audio.onerror = () => {
+          finishSpeaking(seq)
+        }
         setAgentState("speaking")
         await audio.play()
       } catch {
@@ -483,7 +504,7 @@ export function useNativeVoiceConnection(
       const res = await fetch("/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userText, material_id: "matematika", version: "v1", lms_context: lmsContext, history, is_quiz: isQuiz, course_title: courseTitle, session_id: sessionId }),
+        body: JSON.stringify({ message: userText, material_id: "matematika", version: "v1", lms_context: lmsContext, syllabus, history, is_quiz: isQuiz, course_title: courseTitle, session_id: sessionId }),
       })
       if (res.ok) {
         const data = await res.json()
@@ -511,7 +532,7 @@ export function useNativeVoiceConnection(
     // selamanya kalau ditaruh di situ.
     scheduleBubbles(pendingBubblesRef.current, pendingImageRef.current)
     speak(response)
-  }, [speak, stopListening, lmsContext, scheduleBubbles, isQuiz, courseTitle, sessionId, openConversationWindow])
+  }, [speak, stopListening, lmsContext, syllabus, scheduleBubbles, isQuiz, courseTitle, sessionId, openConversationWindow])
 
   // Keep the ref pointed at the latest processUserInput (current lmsContext) so
   // startListening's frozen closure always dispatches through up-to-date logic.
@@ -526,7 +547,10 @@ export function useNativeVoiceConnection(
     }
   }, [processUserInput])
 
-  const connect = useCallback(async () => {
+  const connect = useCallback(async (options?: { startMuted?: boolean, autoGreeting?: boolean }) => {
+    const startMuted = options?.startMuted ?? false
+    const autoGreeting = options?.autoGreeting ?? false
+
     try {
       micStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
     } catch {
@@ -544,10 +568,10 @@ export function useNativeVoiceConnection(
         if (res.ok) {
           const data = await res.json()
           restored = (data.history || []).map(
-            (h: { role: string; text: string }, i: number): Message => ({
+            (h: any, i: number): Message => ({
               id: `h-${i}`,
               role: h.role === "user" ? "user" : "assistant",
-              content: h.text,
+              content: h.text || h.content || "",
               timestamp: new Date(),
             }),
           )
@@ -558,31 +582,37 @@ export function useNativeVoiceConnection(
     }
 
     if (restored.length > 0) {
-      setMessages(restored) // lanjut session lama, tanpa sapaan ulang
-      // WAJIB: tanpa ini mikrofon tak pernah menyala di sesi yang dipulihkan, karena
-      // startListening() hanya terpanggil sebagai efek samping saat salam pembuka
-      // SELESAI diucapkan — dan salam itu dilewati di sini. Akibatnya wake-word
-      // "Hai Viona" tampak mati total bagi user yang membuka popup lagi.
-      startListening()
-      return
+      setMessages(restored) // lanjut session lama, tanpa menambahkan sapaan ke history
+    } else {
+      const welcomeMessage: Message = {
+        id: "welcome",
+        role: "assistant",
+        content: "Ada yang bisa saya bantu hari ini?",
+        timestamp: new Date(),
+      }
+      setMessages([welcomeMessage])
+      
+      if (autoGreeting) {
+        setTimeout(() => speak("Ada yang bisa saya bantu hari ini?"), 500)
+        
+        // Jaring pengaman: kalau sintesis/pemutaran salam gagal tanpa memicu callback
+        // selesai, pastikan state isBotSpeaking tidak tersangkut.
+        setTimeout(() => {
+          if (stateRef.current.isConnected && !stateRef.current.isBotSpeaking) {
+            // Jangan auto-unmute. Biarkan mute tetap true sesuai dengan mode manual.
+          }
+        }, 4500)
+      }
     }
 
-    const welcomeMessage: Message = {
-      id: "welcome",
-      role: "assistant",
-      content: "Ada yang bisa saya bantu hari ini?",
-      timestamp: new Date(),
-    }
-    setMessages([welcomeMessage])
-    setTimeout(() => speak(welcomeMessage.content), 500)
-    // Jaring pengaman: kalau sintesis/pemutaran salam gagal tanpa memicu callback
-    // selesai, loop dengar tetap hidup sehingga wake-word tidak ikut mati.
-    setTimeout(() => {
-      if (stateRef.current.isConnected && !stateRef.current.isMuted && !stateRef.current.isBotSpeaking) {
-        startListening()
-      }
-    }, 4000)
+    setIsMuted(startMuted)
+    stateRef.current.isMuted = startMuted
+    setTimeout(() => startListening(), 100)
   }, [speak, sessionId, startListening])
+  
+  const playGreeting = useCallback(() => {
+    speak("Ada yang bisa saya bantu hari ini?")
+  }, [speak])
 
   const disconnect = useCallback(() => {
     if (synthRef.current) synthRef.current.cancel()
@@ -609,13 +639,13 @@ export function useNativeVoiceConnection(
   const toggleMute = useCallback(() => {
     const newMuted = !isMuted
     setIsMuted(newMuted)
+    stateRef.current.isMuted = newMuted
     
-    if (newMuted) {
-      stopListening()
-    } else if (connectionState === "connected" && agentState !== "speaking") {
+    // Kita TIDAK menghentikan STT saat mute, karena Mute = Mode Wake Word.
+    if (!newMuted && connectionState === "connected" && agentState !== "speaking" && !recognitionRef.current) {
       startListening()
     }
-  }, [isMuted, connectionState, agentState, stopListening, startListening])
+  }, [isMuted, connectionState, agentState, startListening])
 
   return {
     connectionState,
@@ -632,6 +662,7 @@ export function useNativeVoiceConnection(
     sendText,
     toggleMute,
     stopSpeaking,
+    playGreeting,
     micStream: micStreamRef.current
   }
 }

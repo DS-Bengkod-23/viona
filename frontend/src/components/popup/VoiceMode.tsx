@@ -29,7 +29,7 @@ export function VoiceMode({ voiceConnection }: VoiceModeProps) {
       default:
         return conversationActive
           ? "Silakan lanjut bicara..."
-          : 'Ucapkan "Hai Viona" untuk mulai bicara'
+          : "Halo, ada yang bisa saya bantu?"
     }
   }, [state, conversationActive])
 
@@ -50,25 +50,18 @@ export function VoiceMode({ voiceConnection }: VoiceModeProps) {
         </p>
       </div>
 
-      {/* Sepenuhnya hands-free: tidak ada tombol bicara. Gerbangnya wake-word
-          ("Hai Viona"), lalu percakapan tetap terbuka beberapa detik untuk lanjutan. */}
-      <p className="mt-3 text-[11px] text-slate-400">
-        Selalu mendengarkan panggilan{" "}
-        <span className="font-medium text-violet-500">&quot;Hai Viona&quot;</span>
-      </p>
-
       {/* Kontrol sekunder: mute + stop (kontekstual) */}
       <div className="mt-4 flex items-center justify-center gap-3">
         <button
           onClick={toggleMute}
           className={`p-3 rounded-full transition-all shadow-sm ${
-            isMuted
+            isMuted || state === "speaking"
               ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200"
               : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 hover:bg-slate-200"
           }`}
-          title={isMuted ? "Nyalakan Mikrofon" : "Matikan Mikrofon"}
+          title={isMuted || state === "speaking" ? "Nyalakan Mikrofon" : "Matikan Mikrofon"}
         >
-          {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+          {isMuted || state === "speaking" ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
         </button>
 
         {state === "speaking" && (

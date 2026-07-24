@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useCallback, useEffect } from "react"
-import { Send, Sun, Moon, Minimize2 } from "lucide-react"
+import { Send, Sun, Moon, Minimize2, Square } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,394 +13,83 @@ import { StatusPanel } from "./status-panel"
 import { SessionTimer } from "./session-timer"
 import { FeedbackWidget } from "./feedback-widget"
 import { cn } from "@/lib/utils"
-import { normalizeForSpeech } from "@/lib/tts-text"
+import { useNativeVoiceConnection } from "@/hooks/useNativeVoiceConnection"
 
-// ── Speech endpointing (browser Web Speech API) ─────────────────────────────
-// The browser gives us words but no reliable "user finished" signal, so we
-// detect end-of-turn ourselves: after the last detected speech, wait
-// SILENCE_MS of quiet before submitting the turn.
-//   • Viona cuts you off mid-sentence?  -> raise SILENCE_MS
-//   • Feels sluggish to respond?        -> lower SILENCE_MS
-const SILENCE_MS = 800
-// Ignore ultra-short blips (a cough, "eh") so background noise never fires a turn.
-const MIN_CHARS = 2
-// Jumlah pesan terakhir yang dikirim sebagai riwayat percakapan ke backend.
-const HISTORY_TURNS = 6
-
-interface Message {
-  id: string
-  role: "user" | "assistant"
-  content: string
-  timestamp: Date
-  image?: string | null
+const getSessionId = () => {
+  if (typeof window !== "undefined") {
+    let id = localStorage.getItem("viona-session-id")
+    if (!id) {
+      id = "session-" + Math.random().toString(36).slice(2)
+      localStorage.setItem("viona-session-id", id)
+    }
+    return id
+  }
+  return ""
 }
 
 export function VoiceAssistant() {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [isConnected, setIsConnected] = useState(false)
-  const [isMuted, setIsMuted] = useState(false)
-  const [isRecording, setIsRecording] = useState(false)
-  const [isBotSpeaking, setIsBotSpeaking] = useState(false)
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [sessionId] = useState(getSessionId)
   const [textInput, setTextInput] = useState("")
   const [hasCompletedSession, setHasCompletedSession] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [interimText, setInterimText] = useState("")
-  const [sttError, setSttError] = useState("")
-
-  const vionaStatus: "idle" | "thinking" | "speaking" | "ready" =
-    isBotSpeaking ? "speaking" : isProcessing ? "thinking" : isConnected ? "ready" : "idle"
-
-  const userStatus: "idle" | "speaking" | "listening" =
-    isBotSpeaking ? "listening" : isConnected && isRecording && !isMuted ? "speaking" : "idle"
 
   const { resolvedTheme, setTheme } = useTheme()
-
   useEffect(() => setMounted(true), [])
 
-  // Keep refs in sync so recognition callbacks always read current values
-  useEffect(() => {
-    isBotSpeakingRef.current = isBotSpeaking
-    isConnectedRef.current   = isConnected
-    isMutedRef.current       = isMuted
-  }, [isBotSpeaking, isConnected, isMuted])
+  const voiceConnection = useNativeVoiceConnection("", "", false, "", sessionId)
+  const {
+    connectionState,
+    agentState,
+    messages,
+    interimText,
+    sttError,
+    isMuted,
+    connect,
+    disconnect,
+    sendText,
+    toggleMute,
+    stopSpeaking,
+    micStream
+  } = voiceConnection
 
-  const chatScrollRef  = useRef<HTMLDivElement>(null)
-  const synthRef = useRef<SpeechSynthesis | null>(null)
-  const recognitionRef = useRef<SpeechRecognition | null>(null)
-  const micStreamRef = useRef<MediaStream | null>(null)
+  const isConnected = connectionState === "connected"
+  const isBotSpeaking = agentState === "speaking"
+  const isProcessing = agentState === "thinking"
+  const isRecording = agentState === "listening"
 
-  // Turn accumulation + silence timer for our own end-of-turn detection
-  const finalTranscriptRef = useRef("")
-  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
-  // Latest processUserInput, reachable from recognition callbacks without stale closure
-  const processUserInputRef = useRef<(text: string) => void>(() => {})
+  const vionaStatus = isBotSpeaking ? "speaking" : isProcessing ? "thinking" : isConnected ? "ready" : "idle"
+  const userStatus = isBotSpeaking ? "listening" : isConnected && isRecording && !isMuted ? "speaking" : "idle"
 
-  // Ref mirrors for use inside recognition callbacks (avoids stale closure)
-  const isBotSpeakingRef = useRef(false)
-  const isConnectedRef   = useRef(false)
-  const isMutedRef       = useRef(false)
-  const isProcessingRef  = useRef(false)
-  // Mirror of `messages`, read inside processUserInput's closure to build chat
-  // history for the backend without depending on `messages` (avoids re-creating
-  // the callback and stale closures in recognition event handlers).
-  const messagesRef = useRef<Message[]>([])
+  const chatScrollRef = useRef<HTMLDivElement>(null)
 
-  // Initialize speech synthesis
-  useEffect(() => {
-    synthRef.current = window.speechSynthesis
-  }, [])
-
-  // Auto-scroll chat container only (not the whole page)
+  // Auto-scroll chat container
   useEffect(() => {
     const el = chatScrollRef.current
     if (el) el.scrollTop = el.scrollHeight
-    messagesRef.current = messages
   }, [messages])
 
-  // Start/stop recognition when connection changes
+  // Auto connect on mount
   useEffect(() => {
-    if (isConnected) {
-      startListening()
-    } else {
-      stopListening()
+    if (connectionState === "disconnected") {
+      connect({ startMuted: true, autoGreeting: true })
     }
-  }, [isConnected])
-
-  // Cancel a pending end-of-turn countdown
-  const clearSilenceTimer = useCallback(() => {
-    if (silenceTimerRef.current) {
-      clearTimeout(silenceTimerRef.current)
-      silenceTimerRef.current = null
-    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Stop listening
-  const stopListening = useCallback(() => {
-    clearSilenceTimer()
-    if (recognitionRef.current) {
-      recognitionRef.current.stop()
-      recognitionRef.current = null
-    }
-    finalTranscriptRef.current = ""
-    setInterimText("")
-    setIsRecording(false)
-  }, [clearSilenceTimer])
-
-  // Start continuous listening with our own end-of-turn detection
-  const startListening = useCallback(() => {
-    if (typeof window === "undefined") return
-    if (isBotSpeakingRef.current) return   // never listen while Viona is talking
-
-    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition
-    console.info("[STT] startListening — SpeechRecognition available:", !!SpeechRecognitionAPI)
-    if (!SpeechRecognitionAPI) {
-      console.warn("[STT] no SpeechRecognition API in this browser")
-      setSttError(
-        "Browser ini tidak mendukung pengenalan suara. Gunakan Google Chrome atau Microsoft Edge.",
-      )
-      return
-    }
-
-    if (recognitionRef.current) {
-      recognitionRef.current.stop()
-    }
-
-    const recognition = new SpeechRecognitionAPI()
-    recognition.lang = "id-ID"
-    recognition.interimResults = true   // live partials so we can show + time the turn
-    recognition.continuous = true       // keep the stream open; WE decide when a turn ends
-
-    finalTranscriptRef.current = ""
-
-    // Fires after SILENCE_MS of no new speech = the user finished their turn.
-    const scheduleEndOfTurn = () => {
-      clearSilenceTimer()
-      silenceTimerRef.current = setTimeout(() => {
-        const text = finalTranscriptRef.current.trim()
-        finalTranscriptRef.current = ""
-        setInterimText("")
-        if (text.length >= MIN_CHARS && !isBotSpeakingRef.current && !isProcessingRef.current) {
-          recognition.stop()   // end this session; onend won't restart while processing
-          processUserInputRef.current(text)
-        }
-      }, SILENCE_MS)
-    }
-
-    recognition.onstart = () => {
-      console.info("[STT] onstart — listening")
-      setIsRecording(true)
-      setSttError("")   // recognition actually started — clear any stale error
-    }
-
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      if (isBotSpeakingRef.current || isProcessingRef.current) return
-      const results = event.results as unknown as ArrayLike<{
-        0: { transcript: string }
-        isFinal: boolean
-      }>
-      const startIdx = (event as unknown as { resultIndex?: number }).resultIndex ?? 0
-      let interim = ""
-      for (let i = startIdx; i < results.length; i++) {
-        const res = results[i]
-        if (res.isFinal) finalTranscriptRef.current += res[0].transcript + " "
-        else interim += res[0].transcript
-      }
-      const live = (finalTranscriptRef.current + interim).trim()
-      if (live) console.debug("[STT] heard:", live)
-      setInterimText(live)
-      if (live) scheduleEndOfTurn()   // any speech resets the "finished" countdown
-    }
-
-    recognition.onend = () => {
-      setIsRecording(false)
-      // Chrome ends continuous sessions periodically; reopen unless we're mid-turn.
-      if (
-        isConnectedRef.current &&
-        !isMutedRef.current &&
-        !isBotSpeakingRef.current &&
-        !isProcessingRef.current
-      ) {
-        setTimeout(() => startListening(), 300)
-      }
-    }
-
-    recognition.onerror = (event: Event) => {
-      setIsRecording(false)
-      clearSilenceTimer()
-      const err = (event as unknown as { error?: string }).error ?? "unknown"
-      console.warn("[STT] onerror:", err)
-      // Fatal errors: surface a clear, actionable message instead of failing silently.
-      if (err === "network" || err === "service-not-allowed") {
-        setSttError(
-          "Layanan pengenalan suara diblokir oleh browser. Brave & Firefox mematikan Web Speech — buka demo di Google Chrome.",
-        )
-      } else if (err === "not-allowed") {
-        setSttError(
-          "Izin mikrofon ditolak. Klik ikon gembok di address bar → izinkan Microphone, lalu Connect ulang.",
-        )
-      } else if (err === "audio-capture") {
-        setSttError("Mikrofon tidak terdeteksi. Pastikan perangkat mic aktif dan dipilih.")
-      }
-      // 'no-speech' / 'aborted' are benign; just let it restart below.
-      if (
-        isConnectedRef.current &&
-        !isMutedRef.current &&
-        !isBotSpeakingRef.current &&
-        !isProcessingRef.current &&
-        err !== "network" &&
-        err !== "service-not-allowed" &&
-        err !== "not-allowed"
-      ) {
-        setTimeout(() => startListening(), 1000)
-      }
-    }
-
-    recognitionRef.current = recognition
-
-    try {
-      recognition.start()
-    } catch {
-      // Already running
-    }
-  }, [clearSilenceTimer])
-
-  // Speak text using TTS
-  const speak = useCallback((text: string) => {
-    if (!synthRef.current) return
-
-    // Stop mic BEFORE TTS plays so recognition cannot pick up Viona's voice
-    stopListening()
-    synthRef.current.cancel()
-
-    const utterance = new SpeechSynthesisUtterance(normalizeForSpeech(text))
-    utteranceRef.current = utterance // Prevent garbage collection
-    utterance.lang = "id-ID"
-    utterance.rate = 0.9
-    utterance.pitch = 1
-
-    utterance.onstart = () => setIsBotSpeaking(true)
-    utterance.onend = () => {
-      setIsBotSpeaking(false)
-      utteranceRef.current = null
-      if (isConnectedRef.current && !isMutedRef.current) {
-        startListening()
-      }
-    }
-    utterance.onerror = () => {
-      setIsBotSpeaking(false)
-      utteranceRef.current = null
-      if (isConnectedRef.current && !isMutedRef.current) {
-        startListening()
-      }
-    }
-
-    synthRef.current.speak(utterance)
-  }, [stopListening, startListening])
-
-  // Process user input and generate response
-  const processUserInput = useCallback(
-    async (userText: string) => {
-      // Guard against double-processing
-      if (isProcessingRef.current) return
-      isProcessingRef.current = true
-
-      stopListening()
-
-      // Giliran terakhir SEBELUM pesan user baru ditambahkan, supaya backend
-      // punya konteks percakapan untuk pertanyaan lanjutan.
-      const history = messagesRef.current.slice(-HISTORY_TURNS).map((m) => ({
-        role: m.role,
-        content: m.content,
-      }))
-
-      // Add user message
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        role: "user",
-        content: userText,
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, userMessage])
-
-      setIsProcessing(true)
-
-      let response = ""
-      let image: string | null = null
-      try {
-        const res = await fetch("/chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            message: userText,
-            history,
-          }),
-        })
-        if (res.ok) {
-          const data = await res.json()
-          response = data.response
-          image = data.image ?? null
-        } else {
-          throw new Error("Backend error status: " + res.status)
-        }
-      } catch (err) {
-        console.warn("Backend /chat failed:", err)
-        response = "Maaf kak, koneksi ke server sedang bermasalah. Coba lagi ya."
-      }
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: response,
-        timestamp: new Date(),
-        image,
-      }
-
-      setMessages((prev) => [...prev, assistantMessage])
-      setIsProcessing(false)
-      isProcessingRef.current = false
-
-      // Speak the response
-      speak(response)
-    },
-    [speak, stopListening]
-  )
-
-  // Keep the latest processUserInput reachable from recognition callbacks
-  useEffect(() => {
-    processUserInputRef.current = processUserInput
-  }, [processUserInput])
-
-  // Handle connect/disconnect
-  const handleConnectionToggle = async () => {
+  const handleConnectionToggle = () => {
     if (isConnected) {
-      if (synthRef.current) synthRef.current.cancel()
-      stopListening()
-      micStreamRef.current?.getTracks().forEach((t) => t.stop())
-      micStreamRef.current = null
       if (messages.length > 1) setHasCompletedSession(true)
-      setIsConnected(false)
-      setMessages([])
-      setIsBotSpeaking(false)
-      setIsProcessing(false)
+      disconnect()
     } else {
-      // Request mic BEFORE SpeechRecognition so AudioContext gets real data
-      try {
-        micStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-      } catch {
-        // mic denied — visualizer will stay idle, voice still works via SpeechRecognition
-      }
       setHasCompletedSession(false)
-      setIsConnected(true)
-      const welcomeMessage: Message = {
-        id: "welcome",
-        role: "assistant",
-        content: "Ada yang bisa saya bantu hari ini?",
-        timestamp: new Date(),
-      }
-      setMessages([welcomeMessage])
-      setTimeout(() => speak(welcomeMessage.content), 500)
+      connect({ startMuted: true, autoGreeting: true })
     }
   }
 
-  // Handle mute toggle
   const handleMuteToggle = () => {
-    const newMuted = !isMuted
-    setIsMuted(newMuted)
-    
-    if (newMuted) {
-      stopListening()
-    } else if (isConnected && !isBotSpeaking) {
-      startListening()
-    }
+    toggleMute()
   }
 
-  // Minimize back: this page is opened via window.open() from the popup
-  // widget's Maximize button, so closing it returns the user to the popup.
-  // If opened directly (no opener, e.g. bookmark), fall back to the LMS home.
   const handleMinimize = () => {
     if (window.opener) {
       window.close()
@@ -409,11 +98,10 @@ export function VoiceAssistant() {
     }
   }
 
-  // Handle text input submission
   const handleTextSubmit = (e: { preventDefault(): void }) => {
     e.preventDefault()
     if (textInput.trim() && isConnected) {
-      processUserInput(textInput.trim())
+      sendText(textInput)
       setTextInput("")
     }
   }
@@ -475,8 +163,18 @@ export function VoiceAssistant() {
         <div className="lg:w-1/4 w-full border-b lg:border-b-0 lg:border-r border-border p-4 flex flex-col gap-4 overflow-y-auto">
           {/* Bot Audio Card */}
           <Card className="flex-1">
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-medium">Bot Audio</CardTitle>
+              {isBotSpeaking && (
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  onClick={stopSpeaking} 
+                  className="h-6 px-2 text-xs"
+                >
+                  <Square className="w-3 h-3 mr-1 fill-current" /> Stop
+                </Button>
+              )}
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center">
               <AudioVisualizer vionaStatus={vionaStatus} isConnected={isConnected} />
@@ -494,10 +192,10 @@ export function VoiceAssistant() {
             <CardContent>
               <UserAudioInput
                 isRecording={isRecording}
-                isMuted={isMuted}
+                isMuted={isMuted || isBotSpeaking}
                 isConnected={isConnected}
                 onToggleMute={handleMuteToggle}
-                micStream={micStreamRef.current}
+                micStream={micStream}
               />
             </CardContent>
           </Card>
@@ -539,7 +237,6 @@ export function VoiceAssistant() {
                         role={message.role}
                         content={message.content}
                         timestamp={message.timestamp}
-                        image={message.image}
                       />
                     ))}
                     {interimText && !isProcessing && (

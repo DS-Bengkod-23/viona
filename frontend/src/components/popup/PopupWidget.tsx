@@ -31,6 +31,7 @@ export function PopupWidget() {
   const [isOpen, setIsOpen] = useState(false)
   const [mode, setMode] = useState<"voice" | "transcript">("voice")
   const [lmsContext, setLmsContext] = useState<string>("")
+  const [syllabus, setSyllabus] = useState<string>("")
   const [quotedText, setQuotedText] = useState<string>("")
   const [isQuizPage, setIsQuizPage] = useState(false)
   const [courseTitle, setCourseTitle] = useState("")
@@ -49,15 +50,27 @@ export function PopupWidget() {
     }
   }, [])
 
-  const voiceConnection = useNativeVoiceConnection(lmsContext, isQuizPage, courseTitle, sessionId)
+  const voiceConnection = useNativeVoiceConnection(lmsContext, syllabus, isQuizPage, courseTitle, sessionId)
   const { connectionState, connect, disconnect, activeBubble, activeImage } = voiceConnection
 
-  // Sambungkan setelah user menekan "Mulai" (restore session di connect()).
+  // Sambungkan otomatis saat pop up terbuka supaya wake word bisa langsung bekerja
+  // (Minta izin mikrofon di latar belakang).
   useEffect(() => {
-    if (isOpen && started && connectionState === "disconnected") {
-      connect()
+    if (isOpen && connectionState === "disconnected") {
+      // Mulai dengan mode Mute = Wake Word Mode
+      connect({ startMuted: true, autoGreeting: false })
     }
-  }, [isOpen, started, connectionState, connect])
+  }, [isOpen, connectionState, connect])
+
+  // Kalau Viona sudah merespons (misal via wake word) atau mic terbuka dari wake word, langsung hilangkan layar "Mulai"
+  useEffect(() => {
+    if (!voiceConnection.isMuted && !started) {
+      setStarted(true)
+    }
+    if (voiceConnection.agentState === "thinking" && !started) {
+      setStarted(true)
+    }
+  }, [voiceConnection.isMuted, voiceConnection.agentState, started])
 
   // Resize iframe induk (kalau embedded)
   useEffect(() => {
@@ -72,6 +85,7 @@ export function PopupWidget() {
     const handleMessage = (event: MessageEvent) => {
       if (event.data && event.data.type === "viona-context") {
         setLmsContext(event.data.text || "")
+        setSyllabus(event.data.syllabus || "")
         setIsQuizPage(!!event.data.isQuiz)
         if (event.data.courseTitle) setCourseTitle(event.data.courseTitle)
       } else if (event.data && event.data.type === "viona-quote") {
@@ -84,21 +98,26 @@ export function PopupWidget() {
     return () => window.removeEventListener("message", handleMessage)
   }, [])
 
-  // Klik "Mulai": minta izin mic lalu masuk. Denied → fallback Mode Teks.
+  // Klik "Mulai": hilangkan layar intro (sudah connect otomatis di atas)
   const handleStart = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      stream.getTracks().forEach((t) => t.stop())
-      setStarted(true)
-    } catch {
-      setMicDenied(true)
-      setMode("transcript")
-      setStarted(true)
+    if (connectionState === "disconnected") {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        stream.getTracks().forEach((t) => t.stop())
+        connect({ startMuted: true, autoGreeting: false })
+      } catch {
+        setMicDenied(true)
+        setMode("transcript")
+      }
     }
+    setStarted(true)
+    // Pengguna meminta agar sapaan selalu dimainkan setiap kali klik "Mulai"
+    voiceConnection.playGreeting()
   }
 
   const handleMaximize = () => {
-    window.open(window.location.origin + "/dashboard/widget?full=1", "_blank")
+    setIsOpen(false)
+    window.open(window.location.origin + "/dashboard", "_blank")
   }
 
   const handleClose = () => {
@@ -107,6 +126,7 @@ export function PopupWidget() {
       return
     }
     setIsOpen(false)
+    setStarted(false)
     disconnect()
   }
 
@@ -209,6 +229,11 @@ export function PopupWidget() {
       </div>
     </div>
   )
+
+  // Sembunyikan widget sepenuhnya di halaman quiz (kecuali mode full/maximize).
+  if (isQuizPage && !isFull) {
+    return null
+  }
 
   // Full-page (dari Maximize): tampil penuh tanpa floating button.
   if (isFull) {
