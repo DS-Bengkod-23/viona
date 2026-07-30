@@ -66,10 +66,13 @@ class SessionStore:
     async def exists(self, session_id: str) -> bool:
         return bool(await self._require().exists(self._key(session_id)))
 
-    async def log_interaction(self, session_id: str, role: str, text: str) -> None:
+    async def log_interaction(self, session_id: str, role: str, text: str, image: str | None = None) -> None:
         data = await self.get(session_id)
         history: list[dict] = data.get("history", [])
-        history.append({"role": role, "text": text})
+        entry = {"role": role, "text": text}
+        if image:
+            entry["image"] = image
+        history.append(entry)
         data["history"] = history[-50:]
         await self.set(session_id, data)
 

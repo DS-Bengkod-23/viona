@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react"
 import { Send, ChevronDown, ChevronUp, X } from "lucide-react"
 import { Message } from "@/hooks/useNativeVoiceConnection"
 
+
 interface TranscriptModeProps {
   voiceConnection: any
   quotedText?: string
@@ -106,6 +107,8 @@ export function TranscriptMode({ voiceConnection, quotedText = "", setQuotedText
 function ChatMessage({ message, isUser, timestamp }: { message: string, isUser: boolean, timestamp: string }) {
   const [expanded, setExpanded] = useState(false)
   const isLong = message.length > 150
+  
+
 
   return (
     <div className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>

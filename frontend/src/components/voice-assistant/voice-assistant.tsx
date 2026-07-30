@@ -237,6 +237,7 @@ export function VoiceAssistant() {
                         role={message.role}
                         content={message.content}
                         timestamp={message.timestamp}
+                        image={message.image}
                       />
                     ))}
                     {interimText && !isProcessing && (

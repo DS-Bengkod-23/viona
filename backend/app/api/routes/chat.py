@@ -348,7 +348,7 @@ def _instruction_suffix(is_quiz: bool) -> str:
     return suffix
 
 
-def _log_session(session_id: str | None, user_msg: str, reply: str) -> None:
+def _log_session(session_id: str | None, user_msg: str, reply: str, image: str | None = None) -> None:
     """Catat 1 giliran (user + assistant) ke Redis session store (fire-and-forget)."""
     if not session_id:
         return
@@ -357,7 +357,7 @@ def _log_session(session_id: str | None, user_msg: str, reply: str) -> None:
         try:
             store = await get_session_store()
             await store.log_interaction(session_id, "user", user_msg)
-            await store.log_interaction(session_id, "assistant", reply)
+            await store.log_interaction(session_id, "assistant", reply, image=image)
         except Exception as exc:  # noqa: BLE001 - logging session tak boleh gagalkan chat
             logger.warning("session log failed", error=str(exc))
 
@@ -373,7 +373,7 @@ async def chat_with_viona(body: ChatRequest) -> dict:
     static_match = _match_static_qa(body.message, body.history)
     if static_match:
         logger.info("chat static match", keyword_groups=static_match["keyword_groups"])
-        _log_session(body.session_id, body.message, static_match["answer"])
+        _log_session(body.session_id, body.message, static_match["answer"], image=static_match.get("image"))
         return {
             "response": static_match["answer"],
             "bubbles": static_match["bubbles"],

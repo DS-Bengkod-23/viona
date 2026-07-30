@@ -12,6 +12,7 @@ export interface Message {
   role: "user" | "assistant"
   content: string
   timestamp: Date
+  image?: string | null
 }
 
 export type ConnectionState = "disconnected" | "connected"
@@ -524,6 +525,7 @@ export function useNativeVoiceConnection(
       role: "assistant",
       content: response,
       timestamp: new Date(),
+      image: pendingImageRef.current,
     }
     setMessages(prev => [...prev, assistantMessage])
     // Dijadwalkan langsung begitu jawaban tiba — TIDAK menunggu event 'onend' dari
@@ -573,6 +575,7 @@ export function useNativeVoiceConnection(
               role: h.role === "user" ? "user" : "assistant",
               content: h.text || h.content || "",
               timestamp: new Date(),
+              image: h.image || null,
             }),
           )
         }
